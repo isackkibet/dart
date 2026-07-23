@@ -1,0 +1,44 @@
+{
+  "polls": [
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "question": "What do you want to see next?",
+      "options": [
+        { "id": "opt1", "label": "Dance Challenge", "voteCount": 12 },
+        { "id": "opt2", "label": "Q&A Segment", "voteCount": 8 },
+        { "id": "opt3", "label": "Cooking Demo", "voteCount": 5 }
+      ],
+      "durationSeconds": 60,
+      "allowMultipleVotes": false,
+      "status": "open",
+      "closedAt": null,
+      "createdBy": "REPLACE_WITH_CREATOR_UID",
+      "updatedBy": "REPLACE_WITH_CREATOR_UID"
+    },
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "question": "Rate today's live session!",
+      "options": [
+        { "id": "opt1", "label": "🔥 Amazing", "voteCount": 47 },
+        { "id": "opt2", "label": "👍 Good", "voteCount": 21 },
+        { "id": "opt3", "label": "😐 Okay", "voteCount": 6 },
+        { "id": "opt4", "label": "👎 Not great", "voteCount": 2 }
+      ],
+      "durationSeconds": 30,
+      "allowMultipleVotes": false,
+      "status": "closed",
+      "createdBy": "REPLACE_WITH_CREATOR_UID",
+      "updatedBy": "REPLACE_WITH_CREATOR_UID"
+    }
+  ],
+  "pollVotes": [
+    {
+      "pollId": "REPLACE_WITH_POLL_ID",
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "voterId": "REPLACE_WITH_VIEWER_UID",
+      "optionIds": ["opt1"]
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+import { db, FieldValue } from '../firebaseAdmin';
+export type PayoutRow={id:string;creatorId?:string;amount?:number;currency?:string;status?:string;riskScore?:number;mpesaStatus?:string};
+export async function getPendingPayouts():Promise<PayoutRow[]>{try{const s=await db.collection('walletPayouts').where('status','==','pending').limit(100).get();return s.docs.map(d=>({id:d.id,...d.data()} as PayoutRow))}catch{return[]}}
+export async function getWalletLedger(limit=50){try{const s=await db.collection('walletLedger').limit(limit).get();return s.docs.map(d=>({id:d.id,...d.data()}))}catch{return[]}}
+export async function updatePayoutStatus({payoutId,status,actorUserId,reason}:{payoutId:string;status:'approved'|'held'|'rejected';actorUserId:string;reason?:string}){const p=db.collection('walletPayouts').doc(payoutId), a=db.collection('financeAuditLogs').doc();await db.runTransaction(async tx=>{tx.update(p,{status,reviewedBy:actorUserId,reviewedAt:FieldValue.serverTimestamp(),reviewReason:reason||''});tx.set(a,{action:`PAYOUT_${status.toUpperCase()}`,payoutId,actorUserId,reason:reason||'',createdAt:FieldValue.serverTimestamp()})});return{ok:true}}

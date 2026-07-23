@@ -1,0 +1,743 @@
+<title>YohPal Platform — Master Implementation Report (Phases 11–23)</title>
+<style>
+  :root {
+    --gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);--gold-line:rgba(201,162,39,.28);
+    --ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;
+    --paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;
+    --pass:#1b5e20;--pass-bg:#e8f5e9;--pass-border:#a5d6a7;
+    --pend:#78350f;--pend-bg:#fef3c7;--pend-border:#fcd34d;
+    --fail:#b71c1c;--fail-bg:#fce4e4;--fail-border:#ef9a9a;
+    --info:#0d47a1;--info-bg:#e8eef7;--info-border:#90caf9;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+    --r:2px;--doc-max:960px;
+  }
+  @media(prefers-color-scheme:dark){:root{
+    --gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);--gold-line:rgba(212,172,48,.22);
+    --ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;
+    --paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;
+    --pass:#4caf50;--pass-bg:#1b2e1c;--pass-border:#388e3c;
+    --pend:#fbbf24;--pend-bg:#1f1600;--pend-border:#92400e;
+    --fail:#ef5350;--fail-bg:#2d1212;--fail-border:#c62828;
+    --info:#90caf9;--info-bg:#0d1e33;--info-border:#1565c0;
+  }}
+  :root[data-theme="light"]{--gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);--gold-line:rgba(201,162,39,.28);--ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;--paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;--pass:#1b5e20;--pass-bg:#e8f5e9;--pass-border:#a5d6a7;--pend:#78350f;--pend-bg:#fef3c7;--pend-border:#fcd34d;--fail:#b71c1c;--fail-bg:#fce4e4;--fail-border:#ef9a9a;--info:#0d47a1;--info-bg:#e8eef7;--info-border:#90caf9;}
+  :root[data-theme="dark"]{--gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);--gold-line:rgba(212,172,48,.22);--ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;--paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;--pass:#4caf50;--pass-bg:#1b2e1c;--pass-border:#388e3c;--pend:#fbbf24;--pend-bg:#1f1600;--pend-border:#92400e;--fail:#ef5350;--fail-bg:#2d1212;--fail-border:#c62828;--info:#90caf9;--info-bg:#0d1e33;--info-border:#1565c0;}
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif;font-size:13.5px;line-height:1.65;background:var(--paper);color:var(--ink);padding-bottom:5rem;}
+
+  .pbar{position:sticky;top:0;z-index:100;background:var(--paper-2);border-bottom:1px solid var(--paper-3);padding:.45rem 1.5rem;display:flex;align-items:center;gap:1rem;font-size:11px;color:var(--ink-3);}
+  .pbar .brand{font-weight:700;color:var(--gold-text);letter-spacing:.06em;font-size:12px;}
+  .pbar .badge{font-weight:700;font-size:10px;letter-spacing:.08em;padding:.2rem .65rem;border-radius:var(--r);background:var(--gold-dim);color:var(--gold-text);border:1px solid var(--gold);text-transform:uppercase;}
+  .pbar .spacer{flex:1;}
+  .pbar button{background:var(--gold);color:#fff;border:none;padding:.3rem 1rem;border-radius:var(--r);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;}
+  .pbar button:hover{background:var(--gold-2);}
+
+  .doc{max-width:var(--doc-max);margin:0 auto;padding:2.5rem 1.5rem 0;}
+
+  /* Masthead */
+  .mast{border-top:4px solid var(--gold);border-bottom:4px solid var(--gold);padding:1.25rem 0 1.1rem;margin-bottom:2rem;position:relative;}
+  .mast::after{content:'';position:absolute;bottom:6px;left:0;right:0;height:1px;background:var(--gold);opacity:.3;}
+  .mast .eye{font-size:9.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.35rem;}
+  .mast h1{font-family:Georgia,'Times New Roman',serif;font-size:1.85rem;font-weight:700;line-height:1.1;margin-bottom:.7rem;text-wrap:balance;}
+  .mast .sub{font-size:13px;color:var(--ink-3);margin-bottom:.9rem;}
+  .meta{display:grid;grid-template-columns:repeat(4,1fr);gap:.3rem .75rem;font-size:11.5px;color:var(--ink-3);}
+  .meta span{display:flex;gap:.3rem;align-items:center;}
+  .meta strong{color:var(--ink-2);}
+
+  /* KPI strip */
+  .kpi-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:0;border:1px solid var(--paper-3);border-radius:var(--r);overflow:hidden;margin-bottom:2rem;}
+  .kpi{padding:.75rem .5rem;text-align:center;border-right:1px solid var(--paper-3);}
+  .kpi:last-child{border-right:none;}
+  .kpi .kn{font-size:1.6rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;margin-bottom:.15rem;}
+  .kpi .kl{font-size:9px;text-transform:uppercase;letter-spacing:.07em;font-weight:700;color:var(--ink-3);}
+  .kpi.k-gold{background:var(--gold-dim);} .kpi.k-gold .kn{color:var(--gold-text);}
+  .kpi.k-pass{background:var(--pass-bg);} .kpi.k-pass .kn{color:var(--pass);}
+  .kpi.k-pend{background:var(--pend-bg);} .kpi.k-pend .kn{color:var(--pend);}
+  .kpi.k-info{background:var(--info-bg);} .kpi.k-info .kn{color:var(--info);}
+
+  /* Section */
+  .sec{margin-bottom:2.25rem;}
+  .sh{font-family:Georgia,'Times New Roman',serif;font-size:1rem;font-weight:700;padding-bottom:.4rem;border-bottom:1px solid var(--gold);margin-bottom:1rem;display:flex;align-items:center;gap:.55rem;}
+  .sn{background:var(--gold);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:system-ui,sans-serif;}
+
+  /* Chips */
+  .chip{display:inline-flex;align-items:center;padding:.12rem .4rem;border-radius:var(--r);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
+  .chip.pass{background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass-border);}
+  .chip.pend{background:var(--pend-bg);color:var(--pend);border:1px solid var(--pend-border);}
+  .chip.info{background:var(--info-bg);color:var(--info);border:1px solid var(--info-border);}
+  .chip.gold{background:var(--gold-dim);color:var(--gold-text);border:1px solid var(--gold-line);}
+  .chip.doc{background:var(--paper-2);color:var(--ink-3);border:1px solid var(--paper-3);}
+
+  /* Phase timeline */
+  .timeline{display:flex;flex-direction:column;gap:0;margin-bottom:1rem;}
+  .tl-row{display:grid;grid-template-columns:44px 1fr;gap:0;align-items:stretch;}
+  .tl-spine{display:flex;flex-direction:column;align-items:center;}
+  .tl-dot{width:28px;height:28px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;z-index:1;background:var(--paper);}
+  .tl-dot.impl{border-color:var(--pass);color:var(--pass);}
+  .tl-dot.doc{border-color:var(--info);color:var(--info);}
+  .tl-dot.gate{border-color:var(--pend);color:var(--pend);}
+  .tl-dot.gov{border-color:var(--gold);color:var(--gold-text);}
+  .tl-line{flex:1;width:2px;background:var(--paper-3);margin:0 auto;}
+  .tl-row:last-child .tl-line{display:none;}
+  .tl-card{margin:.1rem 0 .4rem .75rem;border:1px solid var(--paper-3);border-radius:var(--r);overflow:hidden;}
+  .tl-card .tc-head{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:.5rem;padding:.5rem .75rem;border-bottom:1px solid var(--paper-3);background:var(--paper-2);}
+  .tl-card .tc-head .tc-phase{font-size:10px;font-weight:700;color:var(--ink-3);letter-spacing:.04em;}
+  .tl-card .tc-head .tc-name{font-size:13px;font-weight:700;color:var(--ink);}
+  .tl-card .tc-body{padding:.5rem .75rem;display:grid;grid-template-columns:1fr auto;gap:.5rem;align-items:start;}
+  .tl-card .tc-desc{font-size:12px;color:var(--ink-3);line-height:1.55;}
+  .tl-card .tc-meta{display:flex;flex-direction:column;gap:.25rem;align-items:flex-end;flex-shrink:0;}
+  .tl-card .tc-commit{font-family:var(--mono);font-size:10px;color:var(--ink-3);}
+  .tl-card .tc-counts{font-size:10.5px;color:var(--ink-3);text-align:right;}
+  .tl-card .tc-counts strong{color:var(--pass);}
+
+  /* Implementation table */
+  .wrap{overflow-x:auto;margin-bottom:.85rem;}
+  .pt{width:100%;border-collapse:collapse;}
+  .pt th{background:var(--paper-2);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:.4rem .65rem;border:1px solid var(--paper-3);text-align:left;}
+  .pt td{padding:.45rem .65rem;border:1px solid var(--paper-3);font-size:12px;color:var(--ink-2);vertical-align:middle;}
+  .pt td.ph{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--gold-text);background:var(--gold-dim);white-space:nowrap;}
+  .pt td.name{font-weight:600;color:var(--ink);}
+  .pt td.commit{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);}
+  .pt td.num{text-align:center;font-variant-numeric:tabular-nums;font-weight:700;}
+  .pt td.num.has{color:var(--pass);}
+  .pt td.num.zero{color:var(--ink-3);}
+  .pt tr:nth-child(even) td:not(.ph){background:rgba(0,0,0,.02);}
+
+  /* Architecture stack */
+  .arch{display:flex;flex-direction:column;gap:0;margin-bottom:1rem;border:1px solid var(--paper-3);border-radius:var(--r);overflow:hidden;}
+  .arch-row{padding:.7rem 1rem;border-bottom:1px solid var(--paper-3);display:grid;grid-template-columns:160px 1fr auto;gap:.75rem;align-items:center;}
+  .arch-row:last-child{border-bottom:none;}
+  .arch-row .ar-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;}
+  .arch-row .ar-items{display:flex;flex-wrap:wrap;gap:.3rem;}
+  .arch-row .ar-item{font-size:11px;padding:.12rem .4rem;border-radius:var(--r);border:1px solid;}
+  .ar-os .ar-label{color:var(--gold-text);}
+  .ar-os{background:var(--gold-dim);}
+  .ar-os .ar-item{background:var(--gold-dim);border-color:var(--gold-line);color:var(--gold-text);font-weight:600;}
+  .ar-mc .ar-label{color:var(--info);}
+  .ar-mc{background:var(--info-bg);}
+  .ar-mc .ar-item{background:var(--info-bg);border-color:var(--info-border);color:var(--info);font-weight:600;}
+  .ar-platform .ar-label{color:var(--pass);}
+  .ar-platform{background:var(--pass-bg);}
+  .ar-platform .ar-item{background:var(--pass-bg);border-color:var(--pass-border);color:var(--pass);font-weight:600;}
+  .ar-migration .ar-label{color:var(--pend);}
+  .ar-migration{background:var(--pend-bg);}
+  .ar-migration .ar-item{background:var(--pend-bg);border-color:var(--pend-border);color:var(--pend);font-weight:600;}
+  .ar-modules .ar-label{color:var(--ink-3);}
+  .ar-modules{background:var(--paper-2);}
+  .ar-modules .ar-item{background:var(--paper);border-color:var(--paper-3);color:var(--ink-3);}
+  .arch-row .ar-phases{font-size:10px;color:var(--ink-3);white-space:nowrap;font-style:italic;}
+
+  /* Test breakdown */
+  .test-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.85rem;}
+  .tcard{border:1px solid var(--paper-3);border-radius:var(--r);padding:.6rem .7rem;background:var(--paper-2);text-align:center;}
+  .tcard .tv{font-size:1.5rem;font-weight:700;color:var(--pass);line-height:1;font-variant-numeric:tabular-nums;margin-bottom:.2rem;}
+  .tcard .tl{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.25rem;}
+  .tcard .ts{font-size:10.5px;color:var(--ink-3);}
+
+  /* Dart files table */
+  .df-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.85rem;}
+  .df-group{border:1px solid var(--paper-3);border-radius:var(--r);overflow:hidden;}
+  .df-group .dgh{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.35rem .6rem;border-bottom:1px solid var(--paper-3);background:var(--paper-2);color:var(--ink-3);}
+  .df-group ul{list-style:none;padding:.35rem .6rem;margin:0;}
+  .df-group ul li{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);padding:.15rem 0;border-bottom:1px solid var(--paper-3);}
+  .df-group ul li:last-child{border-bottom:none;}
+
+  /* Outstanding work */
+  .ow-list{list-style:none;padding:0;margin-bottom:.85rem;counter-reset:ow;}
+  .ow-list li{counter-increment:ow;display:grid;grid-template-columns:1.75rem 1fr auto;gap:.5rem;align-items:start;padding:.45rem 0;border-bottom:1px solid var(--paper-3);}
+  .ow-list li:last-child{border-bottom:none;}
+  .ow-list li::before{content:counter(ow);font-family:var(--mono);font-size:10px;font-weight:700;color:var(--pend);background:var(--pend-bg);border:1px solid var(--pend-border);border-radius:var(--r);width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:.1rem;}
+  .ow-list li .ow-title{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.4;}
+  .ow-list li .ow-sub{font-size:11px;color:var(--ink-3);margin-top:.1rem;}
+
+  /* Progress bars */
+  .prog{display:flex;flex-direction:column;gap:0;border:1px solid var(--paper-3);border-radius:var(--r);overflow:hidden;margin-bottom:.85rem;}
+  .prog-row{display:grid;grid-template-columns:200px 1fr 50px;align-items:center;gap:.75rem;padding:.45rem .75rem;border-bottom:1px solid var(--paper-3);}
+  .prog-row:last-child{border-bottom:none;}
+  .prog-row .pl{font-size:12px;color:var(--ink-2);font-weight:500;}
+  .prog-row .pb{height:6px;background:var(--paper-3);border-radius:3px;overflow:hidden;}
+  .prog-row .pf{height:100%;border-radius:3px;}
+  .pf-pass{background:var(--pass);}
+  .pf-pend{background:var(--pend);}
+  .pf-gold{background:var(--gold);}
+  .prog-row .pv{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-3);text-align:right;}
+
+  /* Governance callout */
+  .callout{padding:.85rem 1.1rem;border-radius:0 var(--r) var(--r) 0;margin-bottom:1.25rem;}
+  .callout.gold{background:var(--gold-dim);border-left:4px solid var(--gold);}
+  .callout.pend{background:var(--pend-bg);border-left:4px solid var(--pend);}
+  .callout.pass{background:var(--pass-bg);border-left:4px solid var(--pass);}
+  .callout h3{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.35rem;}
+  .callout.gold h3{color:var(--gold-text);}
+  .callout.pend h3{color:var(--pend);}
+  .callout.pass h3{color:var(--pass);}
+  .callout p{font-size:12.5px;color:var(--ink-2);line-height:1.75;}
+
+  .rule{border:none;border-top:2px solid var(--gold);margin:2rem 0 0;opacity:.4;}
+  .ts-row{display:flex;gap:.5rem;align-items:center;padding:.3rem 0;font-size:12px;color:var(--ink-2);border-bottom:1px solid var(--paper-3);}
+  .ts-row:last-child{border-bottom:none;}
+
+  @media(max-width:760px){
+    .meta{grid-template-columns:1fr 1fr;}
+    .kpi-strip{grid-template-columns:repeat(3,1fr);}
+    .arch-row{grid-template-columns:1fr;}
+    .arch-row .ar-phases{display:none;}
+    .df-grid{grid-template-columns:1fr;}
+    .test-grid{grid-template-columns:repeat(2,1fr);}
+    .prog-row{grid-template-columns:140px 1fr 40px;}
+  }
+  @media print{.pbar{display:none;}body{font-size:12px;}@page{margin:1.5cm;}.sec{break-inside:avoid;}.tl-card{break-inside:avoid;}}
+</style>
+
+<div class="pbar">
+  <span class="brand">YohPal Platform</span>
+  <span class="badge">Master Implementation Report</span>
+  <span class="spacer"></span>
+  <button onclick="window.print()">Download PDF</button>
+</div>
+
+<div class="doc">
+
+  <div class="mast">
+    <div class="eye">Platform Engineering — All Phases — Implementation Summary</div>
+    <h1>YohPal Platform — Master Implementation Report</h1>
+    <div class="sub">Phases 11 through 23 · Branch: flutter_app · Generated: 2026-07-09</div>
+    <div class="meta">
+      <span><strong>Branch:</strong> flutter_app</span>
+      <span><strong>Latest Commit:</strong> bbfae52</span>
+      <span><strong>Phases Completed:</strong> 11 – 23 (13 phases)</span>
+      <span><strong>Report Date:</strong> 2026-07-09</span>
+    </div>
+  </div>
+
+  <!-- KPI strip -->
+  <div class="kpi-strip">
+    <div class="kpi k-gold">
+      <div class="kn">13</div>
+      <div class="kl">Phases</div>
+    </div>
+    <div class="kpi k-pass">
+      <div class="kn">34</div>
+      <div class="kl">Dart Files</div>
+    </div>
+    <div class="kpi k-pass">
+      <div class="kn">45/45</div>
+      <div class="kl">Tests Passing</div>
+    </div>
+    <div class="kpi k-info">
+      <div class="kn">12</div>
+      <div class="kl">HTML Docs</div>
+    </div>
+    <div class="kpi k-info">
+      <div class="kn">10</div>
+      <div class="kl">Commits</div>
+    </div>
+    <div class="kpi k-pend">
+      <div class="kn">9</div>
+      <div class="kl">Items Pending</div>
+    </div>
+  </div>
+
+  <!-- 1. Phase Timeline -->
+  <div class="sec">
+    <div class="sh"><span class="sn">1</span>Phase-by-Phase Implementation Timeline</div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.85rem;font-size:11px;color:var(--ink-3);">
+      <span style="display:flex;align-items:center;gap:.3rem;"><span style="width:10px;height:10px;border-radius:50%;border:2px solid var(--pass);display:inline-block;"></span>Implementation (Dart + tests)</span>
+      <span style="display:flex;align-items:center;gap:.3rem;"><span style="width:10px;height:10px;border-radius:50%;border:2px solid var(--info);display:inline-block;"></span>Architecture / strategy</span>
+      <span style="display:flex;align-items:center;gap:.3rem;"><span style="width:10px;height:10px;border-radius:50%;border:2px solid var(--pend);display:inline-block;"></span>Evidence gate</span>
+      <span style="display:flex;align-items:center;gap:.3rem;"><span style="width:10px;height:10px;border-radius:50%;border:2px solid var(--gold);display:inline-block;"></span>Governance / permanent framework</span>
+    </div>
+
+    <div class="timeline">
+
+      <div class="tl-row">
+        <div class="tl-spine"><div class="tl-dot doc">11</div><div class="tl-line"></div></div>
+        <div class="tl-card">
+          <div class="tc-head"><span class="tc-phase">PHASE 11</span><span class="tc-name">Post-Launch Continuous Improvement</span><span class="chip doc">Strategy</span></div>
+          <div class="tc-body">
+            <div class="tc-desc">Defined the post-launch continuous improvement programme: metrics-driven iteration, incident response, SLA targets, and user feedback loops. The strategic foundation for all subsequent platform phases.</div>
+            <div class="tc-meta"><span class="tc-commit">commit 775ecc5</span><span class="tc-counts">HTML doc</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-spine"><div class="tl-dot doc">12</div><div class="tl-line"></div></div>
+        <div class="tl-card">
+          <div class="tc-head"><span class="tc-phase">PHASE 12</span><span class="tc-name">Platform Convergence</span><span class="chip doc">Architecture</span></div>
+          <div class="tc-body">
+            <div class="tc-desc">Defined the enterprise architecture convergence programme: replacing module-local services with shared platform contracts, establishing the two-layer architecture (Platform + Modules).</div>
+            <div class="tc-meta"><span class="tc-commit">commit 775ecc5</span><span class="tc-counts">HTML doc</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-spine"><div class="tl-dot doc">13</div><div class="tl-line"></div></div>
+        <div class="tl-card">
+          <div class="tc-head"><span class="tc-phase">PHASE 13</span><span class="tc-name">Shared Platform Foundation</span><span class="chip doc">Architecture</span></div>
+          <div class="tc-body">
+            <div class="tc-desc">Specified all 9 shared platform service contracts: Identity, Wallet, Notifications, Search, Brain, Analytics, Deep Links, Routing, Platform Provider. The architectural blueprint for the implementation phases.</div>
+            <div class="tc-meta"><span class="tc-commit">commit 775ecc5</span><span class="tc-counts">HTML doc</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-spine"><div class="tl-dot impl">14</div><div class="tl-line"></div></div>
+        <div class="tl-card">
+          <div class="tc-head"><span class="tc-phase">PHASE 14</span><span class="tc-name">Shared Service Implementation</span><span class="chip pass">Implementation</span></div>
+          <div class="tc-body">
+            <div class="tc-desc">Built all 18 platform Dart files: 7 abstract service contracts, 7 Firebase implementations, PlatformRegistry, PlatformProvider InheritedWidget. Deep link service: 8 unit tests passing. Financial compliance enforced: credit()/debit() throw UnsupportedError on client.</div>
+            <div class="tc-meta"><span class="tc-commit">commit 775ecc5</span><span class="tc-counts"><strong>18 files</strong> · <strong>8 tests</strong></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-spine"><div class="tl-dot gate">15</div><div class="tl-line"></div></div>
+        <div class="tl-card">
+          <div class="tc-head"><span class="tc-phase">PHASE 15</span><span class="tc-name">Platform Validation Report</span><span class="chip pend">Evidence Gate</span></div>
+          <div class="tc-body">
+            <div class="tc-desc">Evidence gate updated with verified build output from real flutter analyze and flutter test runs. Confirmed: flutter analyze clean, 8/8 tests passing, commit 775ecc5 on branch flutter_app. Remaining items (CI/CD, module migration) noted as pending.</div>
+            <div class="tc-meta"><span class="tc-commit">commit f9735ed</span><span class="tc-counts">HTML evidence gate</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-spine"><div class="tl-dot impl">16</div><div class="tl-line"></div></div>
+        <div class="tl-card">
+          <div class="tc-head"><span class="tc-phase">PHASE 16</span><span class="tc-name">Ecosystem Migration Execution</span><span class="chip pass">Implementation</span></div>
+          <div class="tc-body">
+            <div class="tc-desc">Built migration infrastructure: YohPalModuleMigrationAdapter abstract contract, YohPalEcosystemMigrationRegistry (allRequiredModulesRegistered gate for 6 modules), and YCIOS reference adapter as the reference implementation for module teams. 5 registry tests passing.</div>
+            <div class="tc-meta"><span class="tc-commit">commit cfc61ea</span><span class="tc-counts"><strong>3 files</strong> · <strong>5 tests</strong></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-spine"><div class="tl-dot gate">17</div><div class="tl-line"></div></div>
+        <div class="tl-card">
+          <div class="tc-head"><span class="tc-phase">PHASE 17</span><span class="tc-name">Ecosystem Migration Validation Report</span><span class="chip pend">Evidence Gate</span></div>
+          <div class="tc-body">
+            <div class="tc-desc">7-module × 7-service validation matrix. Governance audit finding documented: module migration adapters still pending for Live, Hustle, Jobs, Market, Wallet, Brain. YCIOS is the only module with a completed reference adapter.</div>
+            <div class="tc-meta"><span class="tc-commit">commit d7eb086</span><span class="tc-counts">HTML evidence gate</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-spine"><div class="tl-dot gov">18</div><div class="tl-line"></div></div>
+        <div class="tl-card">
+          <div class="tc-head"><span class="tc-phase">PHASE 18</span><span class="tc-name">Unified Ecosystem Release Governance</span><span class="chip gold">Governance</span></div>
+          <div class="tc-body">
+            <div class="tc-desc">9-gate release framework (Architecture, Build, Security, Data, Wallet/Finance, AI, UX, Documentation, Operations). 7×9 release matrix, three-level rollback (single module / shared platform / full ecosystem), approval workflow, Executive Release Approval Certificate template.</div>
+            <div class="tc-meta"><span class="tc-commit">commit cbd5237</span><span class="tc-counts">HTML governance</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-spine"><div class="tl-dot impl">19</div><div class="tl-line"></div></div>
+        <div class="tl-card">
+          <div class="tc-head"><span class="tc-phase">PHASE 19</span><span class="tc-name">Enterprise Mission Control &amp; Digital Twin</span><span class="chip pass">Implementation</span></div>
+          <div class="tc-body">
+            <div class="tc-desc">Built 5 Dart files: EnterpriseHealth model (HealthStatus enum), YohPalDigitalTwin (ecosystem aggregator: availability, activeUsers, incidents, criticalModules, ecosystemStatus), PredictiveRiskDetector (5 threshold-based risk detectors), MissionControlService abstract, FirestoreMissionControlService. 21 tests passing.</div>
+            <div class="tc-meta"><span class="tc-commit">commit 6cc7d27</span><span class="tc-counts"><strong>5 files</strong> · <strong>21 tests</strong></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-spine"><div class="tl-dot impl">20</div><div class="tl-line"></div></div>
+        <div class="tl-card">
+          <div class="tc-head"><span class="tc-phase">PHASE 20</span><span class="tc-name">YohPal Enterprise Operating System</span><span class="chip pass">Implementation</span></div>
+          <div class="tc-body">
+            <div class="tc-desc">Built 9 Dart files: YohPalEnterpriseEvent + toMap(), YohPalEventBus abstract + FirebaseEventBus (enterpriseEvents collection), AutomationPolicy, YohPalAutomationEngine abstract, ApprovalRequest, YohPalApprovalService abstract, YohPalOSDigitalTwin + YohPalModuleState, YohPalOS root abstract. 11 tests passing. Two bugs in spec corrected.</div>
+            <div class="tc-meta"><span class="tc-commit">commit 007b865</span><span class="tc-counts"><strong>9 files</strong> · <strong>11 tests</strong></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-spine"><div class="tl-dot gate">21</div><div class="tl-line"></div></div>
+        <div class="tl-card">
+          <div class="tc-head"><span class="tc-phase">PHASE 21</span><span class="tc-name">YohPal OS Validation Report</span><span class="chip pend">Evidence Gate</span></div>
+          <div class="tc-body">
+            <div class="tc-desc">Evidence gate document listing 9 items developers must return. Pre-fills confirmed items (branch, commits, 45/45 tests, clean analyze). Runtime validation pending: event bus proof, digital twin live state, automation policy registration, approval workflow, Mission Control dashboard screenshots.</div>
+            <div class="tc-meta"><span class="tc-commit">commit 594718a</span><span class="tc-counts">0/9 items verified</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-spine"><div class="tl-dot gov">22</div><div class="tl-line"></div></div>
+        <div class="tl-card">
+          <div class="tc-head"><span class="tc-phase">PHASE 22</span><span class="tc-name">Enterprise Certification &amp; Go-Live Authorization</span><span class="chip gold">Governance Gate</span></div>
+          <div class="tc-body">
+            <div class="tc-desc">Final certification gate. Certificate withheld — "PENDING VERIFICATION" watermark. All 10 Phase 21 evidence items pending. GO/NO-GO decision cards visually locked. 6-role executive sign-off table. Current status: Decision Deferred (Option C holds). Certificate number: pending.</div>
+            <div class="tc-meta"><span class="tc-commit">commit bbfae52</span><span class="tc-counts">Cert: Withheld</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-spine"><div class="tl-dot gov">23</div><div class="tl-line"></div></div>
+        <div class="tl-card">
+          <div class="tc-head"><span class="tc-phase">PHASE 23</span><span class="tc-name">Ecosystem Operations &amp; Lifecycle Governance</span><span class="chip gold">Permanent Framework</span></div>
+          <div class="tc-body">
+            <div class="tc-desc">Permanent governance framework: 5 boards (Architecture, Release, Security, AI, Platform Operations), annual 4-quarter calendar, certification renewal policy (6 gates), 6 governance principles, 4 deliverables. No further platform phases after Phase 23 — all future work via Release Review Board and normal product releases.</div>
+            <div class="tc-meta"><span class="tc-commit">commit bbfae52</span><span class="tc-counts">5 boards · 6 reviews/yr</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 2. Architecture layers -->
+  <div class="sec">
+    <div class="sh"><span class="sn">2</span>Platform Architecture Layers (as Built)</div>
+    <div class="arch">
+      <div class="arch-row ar-os">
+        <span class="ar-label">Enterprise OS</span>
+        <div class="ar-items">
+          <span class="ar-item">YohPalOS</span>
+          <span class="ar-item">YohPalEventBus</span>
+          <span class="ar-item">FirebaseEventBus</span>
+          <span class="ar-item">YohPalAutomationEngine</span>
+          <span class="ar-item">YohPalApprovalService</span>
+          <span class="ar-item">YohPalOSDigitalTwin</span>
+          <span class="ar-item">AutomationPolicy</span>
+          <span class="ar-item">ApprovalRequest</span>
+          <span class="ar-item">YohPalEnterpriseEvent</span>
+        </div>
+        <span class="ar-phases">Phase 20</span>
+      </div>
+      <div class="arch-row ar-mc">
+        <span class="ar-label">Mission Control</span>
+        <div class="ar-items">
+          <span class="ar-item">MissionControlService</span>
+          <span class="ar-item">FirestoreMissionControlService</span>
+          <span class="ar-item">YohPalDigitalTwin</span>
+          <span class="ar-item">EnterpriseHealth</span>
+          <span class="ar-item">PredictiveRiskDetector</span>
+          <span class="ar-item">PredictiveRisk</span>
+        </div>
+        <span class="ar-phases">Phase 19</span>
+      </div>
+      <div class="arch-row ar-migration">
+        <span class="ar-label">Migration Layer</span>
+        <div class="ar-items">
+          <span class="ar-item">YohPalModuleMigrationAdapter</span>
+          <span class="ar-item">YohPalEcosystemMigrationRegistry</span>
+          <span class="ar-item">YCIOSMigrationAdapter (ref)</span>
+        </div>
+        <span class="ar-phases">Phase 16</span>
+      </div>
+      <div class="arch-row ar-platform">
+        <span class="ar-label">Shared Platform</span>
+        <div class="ar-items">
+          <span class="ar-item">YohPalPlatformProvider</span>
+          <span class="ar-item">YohPalIdentity + Firebase</span>
+          <span class="ar-item">YohPalWalletService + Firebase</span>
+          <span class="ar-item">YohPalNotificationService + Firebase</span>
+          <span class="ar-item">YohPalSearchService + Firebase</span>
+          <span class="ar-item">YohPalBrainGateway + Firebase</span>
+          <span class="ar-item">YohPalAnalyticsService + Firebase</span>
+          <span class="ar-item">YohPalDeepLinkService + Default</span>
+          <span class="ar-item">YohPalRoutes</span>
+        </div>
+        <span class="ar-phases">Phase 14</span>
+      </div>
+      <div class="arch-row ar-modules">
+        <span class="ar-label">Modules</span>
+        <div class="ar-items">
+          <span class="ar-item">Live</span>
+          <span class="ar-item">Hustle</span>
+          <span class="ar-item">Jobs</span>
+          <span class="ar-item">Market</span>
+          <span class="ar-item">Wallet</span>
+          <span class="ar-item">Brain</span>
+          <span class="ar-item">YCIOS</span>
+        </div>
+        <span class="ar-phases">All consume platform</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Test breakdown -->
+  <div class="sec">
+    <div class="sh"><span class="sn">3</span>Test Evidence — 45 / 45 Passing</div>
+    <div class="test-grid">
+      <div class="tcard">
+        <div class="tv">8</div>
+        <div class="tl">Deep Links</div>
+        <div class="ts">parse, build, round-trip, edge cases</div>
+      </div>
+      <div class="tcard">
+        <div class="tv">5</div>
+        <div class="tl">Migration Registry</div>
+        <div class="ts">full set, missing module, name list, empty, extra</div>
+      </div>
+      <div class="tcard">
+        <div class="tv">21</div>
+        <div class="tl">Mission Control</div>
+        <div class="ts">EnterpriseHealth · Digital Twin · PredictiveRisk</div>
+      </div>
+      <div class="tcard">
+        <div class="tv">11</div>
+        <div class="tl">OS Models</div>
+        <div class="ts">Event · Policy · Approval · Digital Twin</div>
+      </div>
+    </div>
+    <div style="font-family:var(--mono);font-size:11px;background:var(--paper-2);border-left:3px solid var(--pass);padding:.6rem .85rem;border-radius:0 var(--r) var(--r) 0;color:var(--ink-2);overflow-x:auto;white-space:pre;">flutter test test/platform/ --reporter=compact
++45: All tests passed! (ran in 3.8s)</div>
+  </div>
+
+  <!-- 4. Dart file inventory -->
+  <div class="sec">
+    <div class="sh"><span class="sn">4</span>Dart File Inventory — 34 Files in lib/platform/</div>
+    <div class="df-grid">
+      <div class="df-group">
+        <div class="dgh">Shared Platform Services (Phase 14) — 18 files</div>
+        <ul>
+          <li>identity/yohpal_identity.dart</li>
+          <li>identity/yohpal_identity_service.dart</li>
+          <li>identity/firebase_identity_service.dart</li>
+          <li>wallet/yohpal_wallet_service.dart</li>
+          <li>wallet/firebase_wallet_service.dart</li>
+          <li>notifications/yohpal_notification_service.dart</li>
+          <li>notifications/firebase_notification_service.dart</li>
+          <li>search/yohpal_search_service.dart</li>
+          <li>search/firebase_search_service.dart</li>
+          <li>brain/yohpal_brain_gateway.dart</li>
+          <li>brain/firebase_brain_gateway.dart</li>
+          <li>analytics/yohpal_analytics_service.dart</li>
+          <li>analytics/firebase_analytics_service.dart</li>
+          <li>deep_links/yohpal_deep_link_service.dart</li>
+          <li>deep_links/default_deep_link_service.dart</li>
+          <li>routing/yohpal_routes.dart</li>
+          <li>platform_registry.dart</li>
+          <li>platform_provider.dart</li>
+        </ul>
+      </div>
+      <div class="df-group">
+        <div class="dgh">Migration Layer (Phase 16) — 2 files</div>
+        <ul>
+          <li>migration/yohpal_module_migration_adapter.dart</li>
+          <li>migration/yohpal_ecosystem_migration_registry.dart</li>
+        </ul>
+      </div>
+      <div class="df-group">
+        <div class="dgh">Mission Control (Phase 19) — 5 files</div>
+        <ul>
+          <li>mission_control/health/enterprise_health.dart</li>
+          <li>mission_control/digital_twin/yohpal_digital_twin.dart</li>
+          <li>mission_control/predictive/predictive_risk.dart</li>
+          <li>mission_control/operations/mission_control_service.dart</li>
+          <li>mission_control/operations/firestore_mission_control_service.dart</li>
+        </ul>
+      </div>
+      <div class="df-group">
+        <div class="dgh">Enterprise OS (Phase 20) — 9 files</div>
+        <ul>
+          <li>os/events/yohpal_enterprise_event.dart</li>
+          <li>os/events/yohpal_event_bus.dart</li>
+          <li>os/events/firebase_event_bus.dart</li>
+          <li>os/automation/automation_policy.dart</li>
+          <li>os/automation/yohpal_automation_engine.dart</li>
+          <li>os/approvals/approval_request.dart</li>
+          <li>os/approvals/yohpal_approval_service.dart</li>
+          <li>os/digital_twin/yohpal_os_digital_twin.dart</li>
+          <li>os/yohpal_os.dart</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Overall progress -->
+  <div class="sec">
+    <div class="sh"><span class="sn">5</span>Overall Progress by Domain</div>
+    <div class="prog">
+      <div class="prog-row">
+        <span class="pl">Platform contracts (abstracts)</span>
+        <div class="pb"><div class="pf pf-pass" style="width:100%"></div></div>
+        <span class="pv">100%</span>
+      </div>
+      <div class="prog-row">
+        <span class="pl">Firebase implementations</span>
+        <div class="pb"><div class="pf pf-pass" style="width:100%"></div></div>
+        <span class="pv">100%</span>
+      </div>
+      <div class="prog-row">
+        <span class="pl">Unit tests (45/45)</span>
+        <div class="pb"><div class="pf pf-pass" style="width:100%"></div></div>
+        <span class="pv">100%</span>
+      </div>
+      <div class="prog-row">
+        <span class="pl">Governance documentation (12 docs)</span>
+        <div class="pb"><div class="pf pf-pass" style="width:100%"></div></div>
+        <span class="pv">100%</span>
+      </div>
+      <div class="prog-row">
+        <span class="pl">Module migration adapters (1 of 7)</span>
+        <div class="pb"><div class="pf pf-pend" style="width:14%"></div></div>
+        <span class="pv">14%</span>
+      </div>
+      <div class="prog-row">
+        <span class="pl">Runtime OS validation (0 of 9 items)</span>
+        <div class="pb"><div class="pf pf-pend" style="width:0%"></div></div>
+        <span class="pv">0%</span>
+      </div>
+      <div class="prog-row">
+        <span class="pl">Enterprise certification (Phase 22)</span>
+        <div class="pb"><div class="pf pf-pend" style="width:0%"></div></div>
+        <span class="pv">Deferred</span>
+      </div>
+      <div class="prog-row">
+        <span class="pl">CI/CD pipeline on branch</span>
+        <div class="pb"><div class="pf pf-pend" style="width:0%"></div></div>
+        <span class="pv">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Outstanding work -->
+  <div class="sec">
+    <div class="sh"><span class="sn">6</span>Outstanding Work — 9 Items Required Before Certification</div>
+    <ul class="ow-list">
+      <li>
+        <div>
+          <div class="ow-title">Module migration adapters — 6 of 7 modules still pending</div>
+          <div class="ow-sub">Live, Hustle, Jobs, Market, Wallet, Brain all need a YohPalModuleMigrationAdapter implementation. YCIOS is the only completed reference. Without these, allRequiredModulesRegistered returns false.</div>
+        </div>
+        <span class="chip pend">High</span>
+      </li>
+      <li>
+        <div>
+          <div class="ow-title">CI/CD pipeline — no automated test run on push</div>
+          <div class="ow-sub">flutter test and flutter analyze run locally only. A CI pipeline (GitHub Actions or equivalent) must run the full suite automatically on every push to flutter_app before certification can proceed.</div>
+        </div>
+        <span class="chip pend">High</span>
+      </li>
+      <li>
+        <div>
+          <div class="ow-title">Concrete YohPalOS implementation</div>
+          <div class="ow-sub">YohPalOS is an abstract class. No FirebaseYohPalOS or equivalent concrete class exists yet. The OS cannot be wired into the app without it.</div>
+        </div>
+        <span class="chip pend">High</span>
+      </li>
+      <li>
+        <div>
+          <div class="ow-title">Event bus live proof — Firestore enterpriseEvents populated</div>
+          <div class="ow-sub">Required for Phase 21 evidence gate. Each module must publish at least one YohPalEnterpriseEvent to the enterpriseEvents collection in production.</div>
+        </div>
+        <span class="chip pend">High</span>
+      </li>
+      <li>
+        <div>
+          <div class="ow-title">Mission Control dashboard — all 7 modules visible live</div>
+          <div class="ow-sub">Required for Phase 21. Screenshots must show real-time health status for Live, Hustle, Jobs, Market, Wallet, Brain, YCIOS via the YohPalDigitalTwin stream.</div>
+        </div>
+        <span class="chip pend">High</span>
+      </li>
+      <li>
+        <div>
+          <div class="ow-title">Automation policy registration at startup</div>
+          <div class="ow-sub">The 7 automation policies defined in Phase 20 must be registered via YohPalAutomationEngine.registerPolicy() at app startup. No concrete engine implementation exists yet.</div>
+        </div>
+        <span class="chip pend">Medium</span>
+      </li>
+      <li>
+        <div>
+          <div class="ow-title">Approval workflow proof — at least one ApprovalRequest in Firestore</div>
+          <div class="ow-sub">Required for Phase 21. A complete approve() or reject() flow must be demonstrated for a high-impact action (rollback, wallet freeze, or equivalent).</div>
+        </div>
+        <span class="chip pend">Medium</span>
+      </li>
+      <li>
+        <div>
+          <div class="ow-title">flutter analyze — full project scope (lib/)</div>
+          <div class="ow-sub">analyze has only been run against lib/platform/ sub-directories. A full project-wide run is required for Phase 21 evidence and Phase 22 certification.</div>
+        </div>
+        <span class="chip pend">Medium</span>
+      </li>
+      <li>
+        <div>
+          <div class="ow-title">Phase 22 evidence package — 10 items, signed document</div>
+          <div class="ow-sub">All 10 Phase 21 evidence items must be submitted, independently reviewed by the Governance Board, and the Phase 22 certification document signed by all 6 roles before the Enterprise Platform Certificate can be issued.</div>
+        </div>
+        <span class="chip pend">Medium</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 7. Confirmed evidence summary -->
+  <div class="sec">
+    <div class="sh"><span class="sn">7</span>What Is Confirmed — Verified Evidence</div>
+    <div class="callout pass">
+      <h3>Confirmed and Committed</h3>
+      <p>The following items are objectively confirmed by committed code and local build output. They do not require further developer action to claim — they are already on record.</p>
+    </div>
+    <div style="border:1px solid var(--paper-3);border-radius:var(--r);overflow:hidden;">
+      <div class="ts-row" style="padding:.4rem .75rem;background:var(--paper-2);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);">Item · Value</div>
+      <div style="padding:.35rem .75rem;">
+        <div class="ts-row"><strong style="min-width:200px;font-size:12px;">Git branch</strong> <span style="font-family:var(--mono);font-size:11px;color:var(--pass);">flutter_app</span></div>
+        <div class="ts-row"><strong style="min-width:200px;font-size:12px;">Phase 20 commit</strong> <span style="font-family:var(--mono);font-size:11px;color:var(--pass);">007b865</span></div>
+        <div class="ts-row"><strong style="min-width:200px;font-size:12px;">Phase 19 commit</strong> <span style="font-family:var(--mono);font-size:11px;color:var(--pass);">6cc7d27</span></div>
+        <div class="ts-row"><strong style="min-width:200px;font-size:12px;">Phase 16 commit</strong> <span style="font-family:var(--mono);font-size:11px;color:var(--pass);">cfc61ea</span></div>
+        <div class="ts-row"><strong style="min-width:200px;font-size:12px;">Platform layer commit</strong> <span style="font-family:var(--mono);font-size:11px;color:var(--pass);">775ecc5</span></div>
+        <div class="ts-row"><strong style="min-width:200px;font-size:12px;">flutter analyze lib/platform/os/</strong> <span style="font-size:12px;color:var(--pass);font-weight:600;">No issues found</span></div>
+        <div class="ts-row"><strong style="min-width:200px;font-size:12px;">flutter analyze lib/platform/mission_control/</strong> <span style="font-size:12px;color:var(--pass);font-weight:600;">No issues found</span></div>
+        <div class="ts-row"><strong style="min-width:200px;font-size:12px;">flutter test test/platform/ (all)</strong> <span style="font-size:12px;color:var(--pass);font-weight:600;">45 / 45 passing</span></div>
+        <div class="ts-row"><strong style="min-width:200px;font-size:12px;">Dart files in lib/platform/</strong> <span style="font-size:12px;color:var(--pass);font-weight:600;">34 files</span></div>
+        <div class="ts-row"><strong style="min-width:200px;font-size:12px;">HTML governance documents</strong> <span style="font-size:12px;color:var(--pass);font-weight:600;">12 documents</span></div>
+        <div class="ts-row"><strong style="min-width:200px;font-size:12px;">Financial compliance (UnsupportedError)</strong> <span style="font-size:12px;color:var(--pass);font-weight:600;">Enforced in FirebaseWalletService</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Financial compliance note -->
+  <div class="sec">
+    <div class="sh"><span class="sn">8</span>Permanent Constraints</div>
+    <div class="callout gold">
+      <h3>Financial Compliance — Non-Expiring</h3>
+      <p>All client-side wallet write operations (<code style="font-family:var(--mono);font-size:11px;">credit()</code> and <code style="font-family:var(--mono);font-size:11px;">debit()</code>) throw <code style="font-family:var(--mono);font-size:11px;">UnsupportedError</code> in <code style="font-family:var(--mono);font-size:11px;">FirebaseWalletService</code>. Writes are web-only via Cloud Functions. This is a permanent architectural constraint that does not change with any future phase, certification, or governance decision.</p>
+    </div>
+    <div class="callout pend">
+      <h3>Firestore &amp; Storage Rules — Never Deploy via Claude</h3>
+      <p>Firestore and Storage rules are never deployed by this tooling. The user manages and deploys rules directly. Full <code style="font-family:var(--mono);font-size:11px;">firebase deploy --only functions</code> is blocked (would delete 35 live production functions). Only targeted single-function deploys are permitted.</p>
+    </div>
+  </div>
+
+  <!-- 9. Document index -->
+  <div class="sec">
+    <div class="sh"><span class="sn">9</span>Governance Document Index</div>
+    <div class="wrap">
+      <table class="pt">
+        <thead><tr><th>Phase</th><th>Document</th><th>Type</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="ph">11</td><td class="name">PHASE_11_CONTINUOUS_IMPROVEMENT.html</td><td>Strategy</td><td><span class="chip doc">Complete</span></td></tr>
+          <tr><td class="ph">12</td><td class="name">PHASE_12_PLATFORM_CONVERGENCE.html</td><td>Architecture</td><td><span class="chip doc">Complete</span></td></tr>
+          <tr><td class="ph">13</td><td class="name">PHASE_13_SHARED_PLATFORM_FOUNDATION.html</td><td>Architecture</td><td><span class="chip doc">Complete</span></td></tr>
+          <tr><td class="ph">14</td><td class="name">V14_EVIDENCE_RECEIPT.html</td><td>Evidence</td><td><span class="chip pass">Committed</span></td></tr>
+          <tr><td class="ph">15</td><td class="name">PHASE_15_VALIDATION_REPORT.html</td><td>Evidence Gate</td><td><span class="chip pass">Real evidence</span></td></tr>
+          <tr><td class="ph">16</td><td class="name">PHASE_16_ECOSYSTEM_MIGRATION.html</td><td>Implementation</td><td><span class="chip pass">Committed</span></td></tr>
+          <tr><td class="ph">17</td><td class="name">PHASE_17_ECOSYSTEM_VALIDATION_REPORT.html</td><td>Evidence Gate</td><td><span class="chip pend">Partial</span></td></tr>
+          <tr><td class="ph">18</td><td class="name">PHASE_18_RELEASE_GOVERNANCE.html</td><td>Governance</td><td><span class="chip gold">Adopted</span></td></tr>
+          <tr><td class="ph">19</td><td class="name">PHASE_19_MISSION_CONTROL.html</td><td>Implementation</td><td><span class="chip pass">Committed</span></td></tr>
+          <tr><td class="ph">20</td><td class="name">PHASE_20_YOHPAL_OS.html</td><td>Implementation</td><td><span class="chip pass">Committed</span></td></tr>
+          <tr><td class="ph">21</td><td class="name">PHASE_21_OS_VALIDATION_REPORT.html</td><td>Evidence Gate</td><td><span class="chip pend">0/9 verified</span></td></tr>
+          <tr><td class="ph">22</td><td class="name">PHASE_22_ENTERPRISE_CERTIFICATION.html</td><td>Certification Gate</td><td><span class="chip pend">Deferred</span></td></tr>
+          <tr><td class="ph">23</td><td class="name">PHASE_23_ECOSYSTEM_GOVERNANCE.html</td><td>Permanent Framework</td><td><span class="chip gold">Ready to adopt</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr class="rule">
+</div>

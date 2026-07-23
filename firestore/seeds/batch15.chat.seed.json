@@ -1,0 +1,62 @@
+{
+  "chatMessages": [
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "senderId": "user_001",
+      "senderName": "TechFan2024",
+      "senderAvatarUrl": null,
+      "text": "Let's go!! 🔥🔥",
+      "type": "text",
+      "isPinned": false,
+      "isDeleted": false
+    },
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "senderId": "user_002",
+      "senderName": "MusicLover",
+      "senderAvatarUrl": null,
+      "text": "This is amazing content, keep it up!",
+      "type": "text",
+      "isPinned": true,
+      "isDeleted": false
+    },
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "senderId": "system",
+      "senderName": "System",
+      "senderAvatarUrl": null,
+      "text": "Stream started. Welcome everyone! 👋",
+      "type": "system",
+      "isPinned": false,
+      "isDeleted": false
+    },
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "senderId": "user_003",
+      "senderName": "GiftSender",
+      "senderAvatarUrl": null,
+      "text": "Sent a Super Gift! 🎁",
+      "type": "gift",
+      "isPinned": false,
+      "isDeleted": false
+    },
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "senderId": "user_004",
+      "senderName": "Troublemaker",
+      "senderAvatarUrl": null,
+      "text": "[message deleted]",
+      "type": "text",
+      "isPinned": false,
+      "isDeleted": true
+    }
+  ],
+  "chatMutes": [
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "mutedUserId": "user_004",
+      "mutedBy": "REPLACE_WITH_CREATOR_UID",
+      "durationSeconds": 86400
+    }
+  ]
+}

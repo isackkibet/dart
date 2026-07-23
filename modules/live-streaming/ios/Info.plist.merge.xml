@@ -1,0 +1,16 @@
+<!-- Required for camera preview and video broadcast -->
+<key>NSCameraUsageDescription</key>
+<string>YohPal Live needs camera access so you can broadcast live video.</string>
+
+<!-- Required for microphone capture and live audio -->
+<key>NSMicrophoneUsageDescription</key>
+<string>YohPal Live needs microphone access so viewers can hear your live stream.</string>
+
+<!-- Local network discovery/access note for local prototype testing -->
+<key>NSLocalNetworkUsageDescription</key>
+<string>YohPal Live needs local network access to connect to the local streaming server during development testing.</string>
+
+<!-- Bonjour services are optional for this prototype.
+     Keep empty unless the real app later uses Bonjour discovery. -->
+<key>NSBonjourServices</key>
+<array/>

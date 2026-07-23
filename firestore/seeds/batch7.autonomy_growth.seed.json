@@ -1,0 +1,47 @@
+{
+  "autonomyPolicies": [
+    {
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "domain": "growth",
+      "name": "Growth Autopilot Assist",
+      "description": "AI may recommend creator growth actions, but creator approval is required.",
+      "mode": "assisted",
+      "enabled": true,
+      "maxActionsPerHour": 3,
+      "requiresApproval": true,
+      "createdBy": "REPLACE_WITH_CREATOR_UID",
+      "updatedBy": "REPLACE_WITH_CREATOR_UID"
+    }
+  ],
+  "autonomyDecisions": [
+    {
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "domain": "growth",
+      "recommendation": "Launch a TikTok teaser campaign now",
+      "reason": "Traffic from TikTok is likely to increase YohPal joins during the next 15 minutes.",
+      "confidence": 0.78,
+      "status": "proposed",
+      "actionType": "create_campaign",
+      "payload": {
+        "sourcePlatform": "tiktok",
+        "streamMode": "teaser"
+      },
+      "createdBy": "REPLACE_WITH_CREATOR_UID",
+      "updatedBy": "REPLACE_WITH_CREATOR_UID"
+    }
+  ],
+  "growthRecommendations": [
+    {
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "title": "Create platform-specific attribution links",
+      "description": "Generate separate links for TikTok, YouTube, Instagram, Facebook, and X to measure which source converts best.",
+      "priority": "high",
+      "category": "traffic",
+      "expectedImpact": "better attribution",
+      "status": "open",
+      "createdBy": "REPLACE_WITH_CREATOR_UID"
+    }
+  ]
+}

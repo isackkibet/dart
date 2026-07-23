@@ -1,0 +1,487 @@
+<title>YohPal Platform Phase 16 — Ecosystem Migration Execution</title>
+<style>
+  :root {
+    --gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);
+    --ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;
+    --paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;
+    --pass:#1b5e20;--pass-bg:#e8f5e9;
+    --pend:#78350f;--pend-bg:#fef3c7;
+    --fail:#b71c1c;--fail-bg:#fce4e4;
+    --info:#0d47a1;--info-bg:#e8eef7;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+    --radius:2px;--doc-max:880px;
+  }
+  @media(prefers-color-scheme:dark){:root{
+    --gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);
+    --ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;
+    --paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;
+    --pass:#4caf50;--pass-bg:#1b2e1c;
+    --pend:#fbbf24;--pend-bg:#1f1600;
+    --fail:#ef5350;--fail-bg:#2d1212;
+    --info:#90caf9;--info-bg:#0d1e33;
+  }}
+  :root[data-theme="light"]{--gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);--ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;--paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;--pass:#1b5e20;--pass-bg:#e8f5e9;--pend:#78350f;--pend-bg:#fef3c7;--fail:#b71c1c;--fail-bg:#fce4e4;--info:#0d47a1;--info-bg:#e8eef7;}
+  :root[data-theme="dark"]{--gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);--ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;--paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;--pass:#4caf50;--pass-bg:#1b2e1c;--pend:#fbbf24;--pend-bg:#1f1600;--fail:#ef5350;--fail-bg:#2d1212;--info:#90caf9;--info-bg:#0d1e33;}
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif;font-size:13.5px;line-height:1.65;background:var(--paper);color:var(--ink);padding-bottom:5rem;}
+
+  .print-bar{position:sticky;top:0;z-index:100;background:var(--paper-2);border-bottom:1px solid var(--paper-3);padding:.45rem 1.5rem;display:flex;align-items:center;gap:1rem;font-size:11px;color:var(--ink-3);}
+  .print-bar .brand{font-weight:700;color:var(--gold-text);letter-spacing:.06em;font-size:12px;}
+  .print-bar .spacer{flex:1;}
+  .print-bar .verdict{font-weight:700;font-size:10px;letter-spacing:.08em;padding:.2rem .65rem;border-radius:var(--radius);background:var(--pend-bg);color:var(--pend);border:1px solid var(--pend);text-transform:uppercase;}
+  .dl-btn{background:var(--gold);color:#fff;border:none;padding:.3rem 1rem;border-radius:var(--radius);font-size:11px;font-weight:700;letter-spacing:.06em;cursor:pointer;text-transform:uppercase;}
+  .dl-btn:hover{background:var(--gold-2);}
+
+  .doc{max-width:var(--doc-max);margin:0 auto;padding:2.5rem 1.5rem 0;}
+
+  .masthead{border-top:3px solid var(--gold);border-bottom:3px solid var(--gold);padding:1.1rem 0 1rem;margin-bottom:1.75rem;position:relative;}
+  .masthead::after{content:'';display:block;height:1px;background:var(--gold);position:absolute;bottom:5px;left:0;right:0;opacity:.35;}
+  .masthead .eyebrow{font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.3rem;}
+  .masthead h1{font-family:Georgia,'Times New Roman',serif;font-size:1.6rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.65rem;text-wrap:balance;}
+  .meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.25rem .75rem;font-size:11.5px;color:var(--ink-3);}
+  .meta-grid .m{display:flex;gap:.3rem;}
+  .meta-grid strong{color:var(--ink-2);}
+
+  .section{margin-bottom:1.75rem;}
+  .sh{font-family:Georgia,'Times New Roman',serif;font-size:.95rem;font-weight:700;color:var(--ink);padding-bottom:.35rem;border-bottom:1px solid var(--gold);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem;}
+  .sh .sn{background:var(--gold);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:system-ui,sans-serif;}
+
+  /* Gate bar */
+  .gate-bar{display:flex;gap:0;border:1px solid var(--paper-3);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem;}
+  .gate-cell{flex:1;padding:.6rem .5rem;text-align:center;border-right:1px solid var(--paper-3);}
+  .gate-cell:last-child{border-right:none;}
+  .gate-cell .gn{font-size:1.5rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;margin-bottom:.15rem;}
+  .gate-cell .gl{font-size:9px;text-transform:uppercase;letter-spacing:.07em;font-weight:700;color:var(--ink-3);}
+  .gate-cell.gc-pass{background:var(--pass-bg);} .gate-cell.gc-pass .gn{color:var(--pass);}
+  .gate-cell.gc-pend{background:var(--pend-bg);} .gate-cell.gc-pend .gn{color:var(--pend);}
+  .gate-cell.gc-info{background:var(--info-bg);} .gate-cell.gc-info .gn{color:var(--info);}
+
+  /* Tables */
+  .ev{width:100%;border-collapse:collapse;margin-bottom:.75rem;overflow-x:auto;}
+  .ev th{background:var(--paper-2);font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:.4rem .6rem;text-align:left;border:1px solid var(--paper-3);white-space:nowrap;}
+  .ev td{padding:.45rem .6rem;border:1px solid var(--paper-3);vertical-align:middle;font-size:12px;color:var(--ink-2);}
+  .ev td:first-child{color:var(--ink);font-weight:600;background:var(--paper-2);white-space:nowrap;}
+  .ev td.center{text-align:center;}
+  .ev td.mono{font-family:var(--mono);font-size:11px;color:var(--ink-3);}
+  .ev-wrap{overflow-x:auto;margin-bottom:.75rem;}
+
+  /* Chips */
+  .chip{display:inline-flex;align-items:center;padding:.12rem .45rem;border-radius:var(--radius);font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;}
+  .chip.pass{background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass);}
+  .chip.pend{background:var(--pend-bg);color:var(--pend);border:1px solid var(--pend);}
+  .chip.fail{background:var(--fail-bg);color:var(--fail);border:1px solid var(--fail);}
+  .chip.info{background:var(--info-bg);color:var(--info);border:1px solid var(--info);}
+
+  /* Code blocks */
+  .code-block{font-family:var(--mono);font-size:11px;background:var(--paper-2);border-left:3px solid var(--gold);padding:.65rem .9rem;border-radius:0 var(--radius) var(--radius) 0;color:var(--ink-2);line-height:1.6;overflow-x:auto;white-space:pre;margin-bottom:.75rem;}
+  .code-block.green{border-left-color:var(--pass);}
+  .code-block.amber{border-left-color:var(--pend);}
+  .code-block.blue{border-left-color:var(--info);}
+
+  /* Callout boxes */
+  .callout{padding:.85rem 1rem;margin-bottom:1.1rem;border-radius:0 var(--radius) var(--radius) 0;}
+  .callout.info{background:var(--info-bg);border-left:4px solid var(--info);}
+  .callout.warn{background:var(--pend-bg);border-left:4px solid var(--pend);}
+  .callout h3{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.35rem;}
+  .callout.info h3{color:var(--info);}
+  .callout.warn h3{color:var(--pend);}
+  .callout p,.callout li{font-size:12.5px;color:var(--ink-2);line-height:1.7;}
+  .callout ul{padding-left:1.1rem;margin-top:.25rem;}
+
+  /* Migration matrix */
+  .matrix-wrap{overflow-x:auto;margin-bottom:.75rem;}
+  .matrix{width:100%;border-collapse:collapse;font-size:11.5px;}
+  .matrix th{background:var(--paper-2);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:.4rem .5rem;border:1px solid var(--paper-3);text-align:center;white-space:nowrap;}
+  .matrix th.left{text-align:left;}
+  .matrix td{padding:.4rem .5rem;border:1px solid var(--paper-3);text-align:center;vertical-align:middle;}
+  .matrix td.module{font-weight:700;color:var(--ink);background:var(--paper-2);text-align:left;white-space:nowrap;}
+
+  /* Rule list */
+  .rule-list{list-style:none;padding:0;margin-bottom:.75rem;}
+  .rule-list li{font-size:12.5px;color:var(--ink-2);padding:.35rem 0;border-bottom:1px solid var(--paper-3);display:flex;gap:.6rem;align-items:baseline;}
+  .rule-list li:last-child{border-bottom:none;}
+  .rule-list li::before{content:'→';color:var(--gold);font-weight:700;flex-shrink:0;}
+
+  /* Phase 17 teaser */
+  .next-phase{border:2px solid var(--gold);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;background:var(--gold-dim);}
+  .next-phase .np-eyebrow{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.3rem;}
+  .next-phase h2{font-family:Georgia,'Times New Roman',serif;font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.85rem;}
+  .scope-list{list-style:none;padding:0;margin-bottom:.85rem;}
+  .scope-list li{font-size:12.5px;color:var(--ink-2);padding:.3rem 0;border-bottom:1px solid var(--paper-3);display:flex;gap:.6rem;}
+  .scope-list li:last-child{border-bottom:none;}
+  .scope-list li::before{content:'→';color:var(--gold);font-weight:700;flex-shrink:0;}
+  .outcome-box{background:var(--pass-bg);border:1px solid var(--pass);border-left:4px solid var(--pass);border-radius:0 var(--radius) var(--radius) 0;padding:.75rem 1rem;}
+  .outcome-box p{font-size:12.5px;color:var(--ink-2);line-height:1.7;}
+
+  .footer-rule{border:none;border-top:2px solid var(--gold);margin:2rem 0 0;opacity:.5;}
+
+  @media(max-width:640px){.meta-grid{grid-template-columns:1fr 1fr;}.gate-bar{flex-wrap:wrap;}.gate-cell{min-width:calc(50% - 1px);}}
+  @media print{.print-bar{display:none;}body{font-size:12px;padding-bottom:0;}.doc{padding:1rem .75rem 0;}.masthead h1{font-size:1.3rem;}.section{break-inside:avoid;}@page{margin:1.5cm;}}
+</style>
+
+<div class="print-bar">
+  <span class="brand">YohPal Platform</span>
+  <span class="verdict">Phase 16 — Module Migration Pending</span>
+  <span class="spacer"></span>
+  <button class="dl-btn" onclick="window.print()">Download PDF</button>
+</div>
+
+<div class="doc">
+
+  <div class="masthead">
+    <div class="eyebrow">Platform Engineering — Ecosystem Convergence</div>
+    <h1>YohPal Platform Phase 16 — Ecosystem Migration Execution</h1>
+    <div class="meta-grid">
+      <div class="m"><strong>Version:</strong> 1.0</div>
+      <div class="m"><strong>Date:</strong> 2026-07-09</div>
+      <div class="m"><strong>Gate Status:</strong> Infrastructure Ready · Migration Pending</div>
+      <div class="m"><strong>Branch:</strong> flutter_app</div>
+      <div class="m"><strong>Commit:</strong> 775ecc5</div>
+      <div class="m"><strong>Prerequisite:</strong> Phase 15 Partially Validated</div>
+    </div>
+  </div>
+
+  <!-- Gate bar -->
+  <div class="gate-bar">
+    <div class="gate-cell gc-pass">
+      <div class="gn">6</div>
+      <div class="gl">Modules Targeted</div>
+    </div>
+    <div class="gate-cell gc-pass">
+      <div class="gn">✓</div>
+      <div class="gl">Adapter Contract Built</div>
+    </div>
+    <div class="gate-cell gc-pass">
+      <div class="gn">5 / 5</div>
+      <div class="gl">Registry Tests Pass</div>
+    </div>
+    <div class="gate-cell gc-pend">
+      <div class="gn">0 / 6</div>
+      <div class="gl">Modules Migrated</div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <h3>Phase Entry Condition</h3>
+    <p>Phase 16 proceeds only after Phase 15 shared-service validation is approved. Platform Layer contracts, Firebase implementations, and the migration registry infrastructure are committed and tested. Module-level migration (Hustle, Jobs, Market, Wallet, Brain, YCIOS) is the remaining work.</p>
+  </div>
+
+  <!-- 1. Migration Targets -->
+  <div class="section">
+    <div class="sh"><span class="sn">1</span>Migration Targets</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.85rem;">Each module must stop maintaining its own identity, wallet, AI, search, notification, and analytics logic and consume the shared <code style="font-family:var(--mono);font-size:11px;background:var(--paper-2);padding:.05rem .3rem;border-radius:2px;">YohPalPlatformProvider</code> instead.</p>
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th class="left">Module</th>
+            <th>Identity</th>
+            <th>Wallet</th>
+            <th>Notifs</th>
+            <th>Search</th>
+            <th>Brain</th>
+            <th>Analytics</th>
+            <th>Deep Links</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="module">Hustle</td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="module">Jobs</td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="module">Market</td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="module">Wallet</td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="module">Brain</td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="module">YCIOS</td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 2. Migration Infrastructure -->
+  <div class="section">
+    <div class="sh"><span class="sn">2</span>Migration Infrastructure — Built &amp; Tested</div>
+    <div class="ev-wrap">
+      <table class="ev">
+        <thead><tr><th>File</th><th>Purpose</th><th class="center">Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="mono">lib/platform/migration/yohpal_module_migration_adapter.dart</td>
+            <td>Abstract contract every module adapter must implement</td>
+            <td class="center"><span class="chip pass">Built</span></td>
+          </tr>
+          <tr>
+            <td class="mono">lib/platform/migration/yohpal_ecosystem_migration_registry.dart</td>
+            <td>Registry that holds all module adapters; validates completeness</td>
+            <td class="center"><span class="chip pass">Built</span></td>
+          </tr>
+          <tr>
+            <td class="mono">lib/features/ycios/platform/ycios_migration_adapter.dart</td>
+            <td>Reference implementation — validates all 5 services for YCIOS</td>
+            <td class="center"><span class="chip pass">Built</span></td>
+          </tr>
+          <tr>
+            <td class="mono">test/platform/ecosystem_migration_registry_test.dart</td>
+            <td>5 tests: full set, missing module, name list, empty, extra modules</td>
+            <td class="center"><span class="chip pass">5 / 5</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.4rem;">flutter analyze — migration files</div>
+    <div class="code-block green">$ flutter analyze lib/platform/migration/ lib/features/ycios/platform/
+Analyzing 2 items...
+No issues found! (ran in 2.7s)</div>
+
+    <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.4rem;">flutter test — registry tests</div>
+    <div class="code-block green">$ flutter test test/platform/ecosystem_migration_registry_test.dart --reporter=compact
++1: YohPalEcosystemMigrationRegistry allRequiredModulesRegistered is true when all 6 modules present
++2: YohPalEcosystemMigrationRegistry allRequiredModulesRegistered is false when a module is missing
++3: YohPalEcosystemMigrationRegistry migratedModules returns correct list of names
++4: YohPalEcosystemMigrationRegistry empty registry is not fully registered
++5: YohPalEcosystemMigrationRegistry extra modules beyond the required set still pass
+All tests passed!</div>
+  </div>
+
+  <!-- 3. Adapter Contract -->
+  <div class="section">
+    <div class="sh"><span class="sn">3</span>Migration Adapter Contract</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.65rem;">Every module creates one class implementing this contract. The five validation methods prove that the module correctly consumes each shared service rather than its own duplicate.</p>
+    <div class="code-block">abstract class YohPalModuleMigrationAdapter {
+  String get moduleName;
+
+  Future&lt;void&gt; validateSharedIdentity(YohPalPlatformProvider platform);
+  Future&lt;void&gt; validateSharedWallet(YohPalPlatformProvider platform);
+  Future&lt;void&gt; validateSharedBrain(YohPalPlatformProvider platform);
+  Future&lt;void&gt; validateSharedAnalytics(YohPalPlatformProvider platform);
+  Future&lt;void&gt; validateSharedDeepLinks(YohPalPlatformProvider platform);
+}</div>
+  </div>
+
+  <!-- 4. YCIOS Reference Adapter -->
+  <div class="section">
+    <div class="sh"><span class="sn">4</span>YCIOS Reference Adapter</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.65rem;">The YCIOS adapter is the template all other modules should follow. Each validation method exercises a real shared service call — not a mock.</p>
+    <div class="code-block">class YciosMigrationAdapter implements YohPalModuleMigrationAdapter {
+  @override String get moduleName =&gt; 'ycios';
+
+  @override
+  Future&lt;void&gt; validateSharedIdentity(platform) async {
+    await platform.identity.getCurrentIdentity();
+  }
+
+  @override
+  Future&lt;void&gt; validateSharedWallet(platform) async {
+    final identity = await platform.identity.getCurrentIdentity();
+    if (identity != null) await platform.wallet.getBalance(identity.uid);
+  }
+
+  @override
+  Future&lt;void&gt; validateSharedBrain(platform) async {
+    await platform.brain.execute(
+      agent: 'ycios', task: 'health_check',
+      input: {'source': 'phase16'}, module: moduleName,
+    );
+  }
+
+  @override
+  Future&lt;void&gt; validateSharedAnalytics(platform) async {
+    await platform.analytics.track(
+      event: 'module_migration_validated', module: moduleName,
+    );
+  }
+
+  @override
+  Future&lt;void&gt; validateSharedDeepLinks(platform) async {
+    final link = platform.deepLinks.build(
+      module: 'ycios', entity: 'project', id: 'test',
+    );
+    final parsed = platform.deepLinks.parse(link);
+    if (parsed?.module != 'ycios') throw StateError('Deep link validation failed.');
+  }
+}</div>
+  </div>
+
+  <!-- 5. Module Access Pattern -->
+  <div class="section">
+    <div class="sh"><span class="sn">5</span>Required Module Access Pattern</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.65rem;">Every screen and service in a migrated module accesses shared infrastructure through the provider — never through a locally constructed duplicate.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem;">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--fail);margin-bottom:.35rem;">✕ Before (duplicate services)</div>
+        <div class="code-block" style="border-left-color:var(--fail);font-size:10.5px;">final auth = HustleAuthService();
+final wallet = HustleWalletService();
+final ai = HustleAIClient();
+final search = MarketSearchService();
+final analytics = LiveAnalyticsService();</div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--pass);margin-bottom:.35rem;">✓ After (shared platform)</div>
+        <div class="code-block green" style="font-size:10.5px;">final p = YohPalPlatformProvider.of(context);
+final identity = await p.identity.getCurrentIdentity();
+final balance = await p.wallet.getBalance(uid);
+await p.brain.execute(agent: 'hustle', ...);
+await p.analytics.screenView(screen: 'home', module: 'hustle');</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Module Integration Rule -->
+  <div class="section">
+    <div class="sh"><span class="sn">6</span>Module Integration Rules</div>
+    <ul class="rule-list">
+      <li>One <code style="font-family:var(--mono);font-size:11px;">YohPalIdentityService</code> — no per-module auth classes</li>
+      <li>One <code style="font-family:var(--mono);font-size:11px;">YohPalWalletService</code> — no HustleWallet, JobsWallet, MarketWallet</li>
+      <li>One <code style="font-family:var(--mono);font-size:11px;">YohPalBrainGateway</code> — all AI calls routed through it; no direct AI SDK usage in modules</li>
+      <li>One <code style="font-family:var(--mono);font-size:11px;">YohPalSearchService</code> — cross-module unified search</li>
+      <li>One <code style="font-family:var(--mono);font-size:11px;">YohPalNotificationService</code> — no per-module push logic</li>
+      <li>One <code style="font-family:var(--mono);font-size:11px;">YohPalAnalyticsService</code> — all events go to <code style="font-family:var(--mono);font-size:11px;">platformAnalyticsEvents</code></li>
+      <li>One <code style="font-family:var(--mono);font-size:11px;">YohPalDeepLinkService</code> — <code style="font-family:var(--mono);font-size:11px;">yohpal://</code> scheme for all cross-module navigation</li>
+      <li>Each migrated module registers a <code style="font-family:var(--mono);font-size:11px;">YohPalModuleMigrationAdapter</code> in the <code style="font-family:var(--mono);font-size:11px;">YohPalEcosystemMigrationRegistry</code></li>
+    </ul>
+  </div>
+
+  <!-- 7. Completion Report Template -->
+  <div class="section">
+    <div class="sh"><span class="sn">7</span>Ecosystem Migration Completion Report</div>
+    <div class="callout warn">
+      <h3>Evidence Gate</h3>
+      <p>This report must be completed by developers after each module migration. Phase 17 approval requires all six modules confirmed and the completion report attached. No module should be marked complete without <code style="font-family:var(--mono);font-size:11px;">flutter analyze</code> output and integration test results.</p>
+    </div>
+    <div class="ev-wrap">
+      <table class="ev">
+        <thead><tr><th>Area</th><th>Required Evidence</th><th class="center">Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Git branch</td>
+            <td>Developer to provide</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Commit hash</td>
+            <td>Developer to provide per module</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Modules migrated</td>
+            <td>Hustle, Jobs, Market, Wallet, Brain, YCIOS</td>
+            <td class="center"><span class="chip pend">0 / 6</span></td>
+          </tr>
+          <tr>
+            <td>Duplicate services removed</td>
+            <td>List of removed classes per module</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>flutter analyze</td>
+            <td>No issues on migrated modules</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>flutter test</td>
+            <td>All platform + integration tests pass</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Ecosystem Migration Completion Report</td>
+            <td>docs/YOHPAL_ECOSYSTEM_MIGRATION_COMPLETION_REPORT.md</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 8. Developer Commands -->
+  <div class="section">
+    <div class="sh"><span class="sn">8</span>Developer Validation Commands</div>
+    <div class="code-block blue"># Analyze the full mobile app
+flutter analyze
+
+# Run all platform + migration tests
+flutter test test/platform/
+
+# If modules are in separate packages
+flutter test apps/yohpal_live
+flutter test apps/yohpal_hustle
+flutter test apps/yohpal_jobs
+flutter test apps/yohpal_market</div>
+  </div>
+
+  <!-- 9. Success Criteria -->
+  <div class="section">
+    <div class="sh"><span class="sn">9</span>Success Criteria</div>
+    <div class="ev-wrap">
+      <table class="ev">
+        <thead><tr><th>Module</th><th>Criterion</th><th class="center">Status</th></tr></thead>
+        <tbody>
+          <tr><td>Hustle</td><td>Uses shared identity, wallet, brain, analytics, deep links — no duplicate services</td><td class="center"><span class="chip pend">Pending</span></td></tr>
+          <tr><td>Jobs</td><td>Uses shared identity, wallet, brain, analytics, deep links — no duplicate services</td><td class="center"><span class="chip pend">Pending</span></td></tr>
+          <tr><td>Market</td><td>Uses shared identity, wallet, brain, analytics, deep links — no duplicate services</td><td class="center"><span class="chip pend">Pending</span></td></tr>
+          <tr><td>Wallet</td><td>Uses shared identity, analytics — all writes remain backend-only</td><td class="center"><span class="chip pend">Pending</span></td></tr>
+          <tr><td>Brain</td><td>Accessed only through BrainGateway — no direct AI SDK calls from modules</td><td class="center"><span class="chip pend">Pending</span></td></tr>
+          <tr><td>YCIOS</td><td>Uses shared identity, wallet, brain, analytics, deep links — adapter committed</td><td class="center"><span class="chip pend">Pending</span></td></tr>
+          <tr><td>All modules</td><td>Integration tests pass — <code style="font-family:var(--mono);font-size:11px;">allRequiredModulesRegistered == true</code></td><td class="center"><span class="chip pend">Pending</span></td></tr>
+          <tr><td>All modules</td><td>Ecosystem Migration Completion Report produced and attached</td><td class="center"><span class="chip pend">Pending</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Phase 17 teaser -->
+  <div class="next-phase">
+    <div class="np-eyebrow">Next Smart Move</div>
+    <h2>YohPal Platform Phase 17 — Ecosystem Migration Validation Report</h2>
+    <ul class="scope-list">
+      <li>Developers return: git branch, commit hash, list of migrated modules</li>
+      <li>Evidence: duplicate services removed per module</li>
+      <li>flutter analyze output — no issues across all migrated modules</li>
+      <li>flutter test output — all platform + integration tests passing</li>
+      <li>Ecosystem Migration Completion Report attached</li>
+      <li>Final readiness score: Validated / Validated after fixes / Not validated</li>
+    </ul>
+    <div class="outcome-box">
+      <p><strong>Outcome:</strong> Management receives proof that all YohPal modules now consume one shared platform layer. YohPal transitions from a collection of related applications into a unified ecosystem with shared identity, wallet, intelligence, and analytics.</p>
+    </div>
+  </div>
+
+  <hr class="footer-rule">
+
+</div>

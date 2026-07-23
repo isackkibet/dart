@@ -1,0 +1,56 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() && request.auth.token.admin == true;
+    }
+
+    function isCreator() {
+      return signedIn() && (
+        request.auth.token.creator == true ||
+        request.auth.token.admin == true
+      );
+    }
+
+    match /live-sessions/{sessionId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if isCreator();
+    }
+
+    match /clips/{creatorId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if isCreator() || isAdmin();
+    }
+
+    match /videos-raw/{userId}/{fileName} {
+      allow read: if signedIn() && request.auth.uid == userId;
+      allow write: if signedIn() && request.auth.uid == userId
+        && request.resource.size < 500 * 1024 * 1024
+        && request.resource.contentType == 'video/mp4';
+    }
+
+    match /video-thumbnails/{userId}/{fileName} {
+      // Thumbnails are shown to any viewer in the feed, not just the owner —
+      // public read, owner-only write. Also covers the server-side backfill
+      // path (video-thumbnails/{videoId}/thumbnail.jpg), which writes via
+      // the Admin SDK and so bypasses this rule regardless.
+      allow read: if true;
+      allow write: if signedIn() && request.auth.uid == userId
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    match /admin/{fileName} {
+      allow read, write: if isAdmin();
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

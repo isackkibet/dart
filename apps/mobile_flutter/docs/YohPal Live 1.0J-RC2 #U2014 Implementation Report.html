@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YohPal Live 1.0J-RC2 — Full Implementation Report</title>
+<style>
+/* ─── Tokens ─────────────────────────────────────────────────────────────── */
+:root {
+  --bg:           #F7F4EF;
+  --surface:      #FFFFFF;
+  --border:       #E2DDD5;
+  --text:         #1A1710;
+  --text-2:       #5A5549;
+  --text-3:       #8A8278;
+  --gold:         #B8922A;
+  --gold-dk:      #8C6A15;
+  --gold-bg:      #FDF6E3;
+  --gold-border:  #E8D08A;
+  --pass:         #1A6B3A;
+  --pass-bg:      #EBF7F0;
+  --pass-border:  #A8DFC0;
+  --warn:         #7A4800;
+  --warn-bg:      #FFF4E0;
+  --warn-border:  #F0C878;
+  --gap:          #7A1A1A;
+  --gap-bg:       #FDF0EF;
+  --gap-border:   #F0B8B5;
+  --info:         #1A3A6B;
+  --info-bg:      #EBF2FD;
+  --info-border:  #A8C8F0;
+  --code-bg:      #F0EDE8;
+  --shadow:       rgba(0,0,0,0.06);
+  --radius:       7px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#0E0D0B; --surface:#18160F; --border:#2A2820;
+    --text:#EDE8DF; --text-2:#A09880; --text-3:#605A50;
+    --gold:#D4A840; --gold-dk:#F0C858; --gold-bg:#1E1800; --gold-border:#5A4210;
+    --pass:#4ABA76; --pass-bg:#0A1F12; --pass-border:#1A5030;
+    --warn:#F0A830; --warn-bg:#1A1000; --warn-border:#5A3800;
+    --gap:#F08080;  --gap-bg:#1A0808;  --gap-border:#5A1818;
+    --info:#70A8F0; --info-bg:#080E1A; --info-border:#182848;
+    --code-bg:#1E1C14; --shadow:rgba(0,0,0,0.3);
+  }
+}
+:root[data-theme="light"] {
+  --bg:#F7F4EF;--surface:#FFFFFF;--border:#E2DDD5;--text:#1A1710;--text-2:#5A5549;--text-3:#8A8278;
+  --gold:#B8922A;--gold-dk:#8C6A15;--gold-bg:#FDF6E3;--gold-border:#E8D08A;
+  --pass:#1A6B3A;--pass-bg:#EBF7F0;--pass-border:#A8DFC0;
+  --warn:#7A4800;--warn-bg:#FFF4E0;--warn-border:#F0C878;
+  --gap:#7A1A1A;--gap-bg:#FDF0EF;--gap-border:#F0B8B5;
+  --info:#1A3A6B;--info-bg:#EBF2FD;--info-border:#A8C8F0;
+  --code-bg:#F0EDE8;--shadow:rgba(0,0,0,0.06);
+}
+:root[data-theme="dark"] {
+  --bg:#0E0D0B;--surface:#18160F;--border:#2A2820;--text:#EDE8DF;--text-2:#A09880;--text-3:#605A50;
+  --gold:#D4A840;--gold-dk:#F0C858;--gold-bg:#1E1800;--gold-border:#5A4210;
+  --pass:#4ABA76;--pass-bg:#0A1F12;--pass-border:#1A5030;
+  --warn:#F0A830;--warn-bg:#1A1000;--warn-border:#5A3800;
+  --gap:#F08080;--gap-bg:#1A0808;--gap-border:#5A1818;
+  --info:#70A8F0;--info-bg:#080E1A;--info-border:#182848;
+  --code-bg:#1E1C14;--shadow:rgba(0,0,0,0.3);
+}
+
+/* ─── Reset ──────────────────────────────────────────────────────────────── */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+/* ─── Page wrapper ───────────────────────────────────────────────────────── */
+.page { max-width: 960px; margin: 0 auto; padding: 0 24px 80px; }
+
+/* ─── Download bar ───────────────────────────────────────────────────────── */
+.dl-bar {
+  background: var(--gold-bg);
+  border-bottom: 1px solid var(--gold-border);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.dl-bar-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold-dk);
+}
+.dl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--gold);
+  color: #FFF;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.dl-btn:hover { opacity: 0.88; }
+
+/* ─── Report header ──────────────────────────────────────────────────────── */
+.report-header {
+  border-bottom: 2px solid var(--gold);
+  padding: 36px 0 24px;
+  margin-bottom: 32px;
+}
+.eyebrow {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.report-title {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.18;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.report-sub { font-size: 13px; color: var(--text-2); margin-bottom: 14px; }
+.meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--text-2);
+  margin-top: 4px;
+}
+.meta-row span { display:flex; align-items:center; gap:5px; }
+
+/* ─── Stat cards ─────────────────────────────────────────────────────────── */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+  margin-bottom: 36px;
+}
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: 0 1px 4px var(--shadow);
+}
+.stat .n {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.stat .l {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+}
+
+/* ─── Part divider ───────────────────────────────────────────────────────── */
+.part-divider {
+  margin: 52px 0 28px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.part-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  white-space: nowrap;
+}
+.part-line { flex: 1; height: 1px; background: var(--gold); opacity: 0.35; }
+.part-title { font-size: 16px; font-weight: 700; color: var(--text); white-space: nowrap; }
+
+/* ─── TOC ────────────────────────────────────────────────────────────────── */
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  margin-bottom: 40px;
+  box-shadow: 0 1px 3px var(--shadow);
+  page-break-inside: avoid;
+}
+.toc-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.toc-group { margin-bottom: 10px; }
+.toc-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 4px;
+}
+.toc ol { padding-left: 20px; }
+.toc li { font-size: 12.5px; color: var(--text-2); padding: 2px 0; break-inside: avoid; }
+.toc a { color: var(--text-2); text-decoration: none; }
+.toc a:hover { color: var(--gold); }
+
+/* ─── Sections ───────────────────────────────────────────────────────────── */
+.section { margin-bottom: 48px; page-break-inside: avoid; }
+.section-hd {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--border);
+}
+.sec-num {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  min-width: 26px;
+}
+.sec-title { font-size: 17px; font-weight: 700; color: var(--text); flex: 1; }
+
+/* ─── Badges ─────────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.bp { background:var(--pass-bg); color:var(--pass); border:1px solid var(--pass-border); }
+.bw { background:var(--warn-bg); color:var(--warn); border:1px solid var(--warn-border); }
+.bg { background:var(--gap-bg);  color:var(--gap);  border:1px solid var(--gap-border);  }
+.bi { background:var(--info-bg); color:var(--info); border:1px solid var(--info-border); }
+.bo { background:var(--gold-bg); color:var(--gold); border:1px solid var(--gold-border); }
+
+/* ─── Detail cards ───────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 15px 18px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px var(--shadow);
+  page-break-inside: avoid;
+}
+.card-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.card p, .card li { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+.card ul { padding-left: 18px; margin-top: 6px; }
+.card li { margin-bottom: 3px; }
+
+/* ─── Alert boxes ────────────────────────────────────────────────────────── */
+.alert {
+  border-radius: var(--radius);
+  padding: 12px 15px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  page-break-inside: avoid;
+}
+.aw { background:var(--warn-bg); border:1px solid var(--warn-border); color:var(--warn); }
+.ag { background:var(--gap-bg);  border:1px solid var(--gap-border);  color:var(--gap);  }
+.ai { background:var(--info-bg); border:1px solid var(--info-border); color:var(--info); }
+.ap { background:var(--pass-bg); border:1px solid var(--pass-border); color:var(--pass); }
+.alert strong { font-weight: 700; }
+
+/* ─── Tables ─────────────────────────────────────────────────────────────── */
+.tbl-wrap { overflow-x: auto; margin-bottom: 14px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  white-space: nowrap;
+}
+td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--text-2);
+}
+tr:last-child td { border-bottom: none; }
+td code, th code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11.5px; }
+
+/* ─── Code ───────────────────────────────────────────────────────────────── */
+code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  background: var(--code-bg);
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: var(--text);
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin: 10px 0 14px;
+  overflow-x: auto;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+/* ─── Flow diagram ───────────────────────────────────────────────────────── */
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+  row-gap: 8px;
+  margin: 12px 0;
+}
+.flow-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.flow-box.gold { border-color: var(--gold); color: var(--gold); font-weight: 700; }
+.flow-arr { color: var(--text-3); font-size: 14px; padding: 0 6px; }
+
+/* ─── Two-col grid ───────────────────────────────────────────────────────── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+@media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ─── Pill list ──────────────────────────────────────────────────────────── */
+.pills { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px; }
+.pill {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 3px 10px;
+  font-size: 11.5px;
+  color: var(--text-2);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/* ─── Print ──────────────────────────────────────────────────────────────── */
+@media print {
+  .dl-bar { display: none !important; }
+  body { background: #fff; color: #000; font-size: 11px; }
+  .page { max-width: 100%; padding: 0 12mm; }
+  @page { size: A4; margin: 18mm 14mm; }
+  .section { page-break-inside: avoid; }
+  .part-divider { page-break-before: always; }
+  pre, .card, .tbl-wrap { page-break-inside: avoid; }
+  a { color: inherit; text-decoration: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Download bar ──────────────────────────────────────────────────────── -->
+<div class="dl-bar">
+  <span class="dl-bar-label">YohPal Live 1.0J-RC2 — Full Implementation Report</span>
+  <button class="dl-btn" onclick="window.print()">⬇ Download PDF</button>
+</div>
+
+<div class="page">
+
+<!-- ── Header ────────────────────────────────────────────────────────────── -->
+<div class="report-header">
+  <div class="eyebrow">YohPal Live · Internal Engineering Report</div>
+  <div class="report-title">Release 1.0J — Full Implementation Report<br>Base Release through RC2 Physical Device &amp; Cross-Device Certification</div>
+  <div class="report-sub">Covers all Phases 1–7 base-release implementations, the 49-gap RC2 audit, all RC2 directive closures, and the Physical Device &amp; Cross-Device Certification Pack.</div>
+  <div class="meta-row">
+    <span>📅 Report date: 2026-07-16</span>
+    <span>📦 Release: 1.0J-RC2</span>
+    <span>🏗️ Branch: flutter_app</span>
+    <span>📱 Platforms: Android · iOS</span>
+  </div>
+</div>
+
+<!-- ── Stats ──────────────────────────────────────────────────────────────── -->
+<div class="stats">
+  <div class="stat"><div class="n">30</div><div class="l">Sections</div></div>
+  <div class="stat"><div class="n">49</div><div class="l">RC2 Gaps Closed</div></div>
+  <div class="stat"><div class="n">21</div><div class="l">Engagement Actions</div></div>
+  <div class="stat"><div class="n">4</div><div class="l">Preload Tiers</div></div>
+  <div class="stat"><div class="n">16</div><div class="l">Library Categories</div></div>
+  <div class="stat"><div class="n">7</div><div class="l">Age Ratings</div></div>
+  <div class="stat"><div class="n">24</div><div class="l">Cert Gates</div></div>
+  <div class="stat"><div class="n">21</div><div class="l">Evidence Dirs</div></div>
+</div>
+
+<!-- ── TOC ────────────────────────────────────────────────────────────────── -->
+<div class="toc">
+  <div class="toc-title">Contents</div>
+
+  <div class="toc-group">
+    <div class="toc-group-label">Prologue</div>
+    <ol start="0">
+      <li><a href="#s0">Release Arc: 1.0J Baseline → RC2</a></li>
+    </ol>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-label">Part I — 1.0J Base Release</div>
+    <ol start="1">
+      <li><a href="#s1">Navigation &amp; App Shell</a></li>
+      <li><a href="#s2">Immersive Video Feed Screen</a></li>
+      <li><a href="#s3">Zero-Wait Playback System</a></li>
+      <li><a href="#s4">Zero-Wait Video Player Widget</a></li>
+      <li><a href="#s5">Engagement Rail (21 actions)</a></li>
+      <li><a href="#s6">Ad Integration</a></li>
+      <li><a href="#s7">Creator Profile System</a></li>
+      <li><a href="#s8">Comments System</a></li>
+      <li><a href="#s9">Context Intelligence</a></li>
+      <li><a href="#s10">Playback Diagnostics</a></li>
+      <li><a href="#s11">Video Safety Service</a></li>
+      <li><a href="#s12">Live Discovery &amp; Search</a></li>
+      <li><a href="#s13">Chat System</a></li>
+    </ol>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-label">Part II — RC2 Directive Items</div>
+    <ol start="14">
+      <li><a href="#s14">Creator Identity Block</a></li>
+      <li><a href="#s15">Creator Library Categories</a></li>
+      <li><a href="#s16">Creator Video Grid (Sliver)</a></li>
+      <li><a href="#s17">No-Repeat Feed — Flutter Client</a></li>
+      <li><a href="#s18">Feed Category Parity (iOS + Android)</a></li>
+    </ol>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-label">Part III — RC2 Backend</div>
+    <ol start="19">
+      <li><a href="#s19">Feed Eligibility Engine</a></li>
+      <li><a href="#s20">No-Repeat Backend &amp; Exposure Sync</a></li>
+      <li><a href="#s21">Creator Library Backend</a></li>
+      <li><a href="#s22">Shared Pagination Utilities</a></li>
+      <li><a href="#s23">Creator Aggregate Reconciliation</a></li>
+    </ol>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-label">Part IV — Safety &amp; Compliance</div>
+    <ol start="24">
+      <li><a href="#s24">Video Age Rating System</a></li>
+      <li><a href="#s25">Minor Safety &amp; Publication Gates</a></li>
+      <li><a href="#s26">Guardian Consent Lifecycle</a></li>
+      <li><a href="#s27">Upload Pipeline</a></li>
+    </ol>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-label">Part V — QA, Release &amp; Certification</div>
+    <ol start="28">
+      <li><a href="#s28">QA Release Identity</a></li>
+      <li><a href="#s29">Release Validation Scripts</a></li>
+      <li><a href="#s30">RC2 Physical Device &amp; Cross-Device Certification Pack</a></li>
+    </ol>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-label">Epilogue</div>
+    <ol start="31">
+      <li><a href="#s31">Known Gaps &amp; Pending Work</a></li>
+    </ol>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- PROLOGUE                                                                 -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+
+<div class="part-divider">
+  <span class="part-label">Prologue</span>
+  <div class="part-line"></div>
+  <span class="part-title">Release Arc</span>
+</div>
+
+<div class="section" id="s0">
+  <div class="section-hd">
+    <span class="sec-num">00</span>
+    <span class="sec-title">Release Arc: YOHPAL LIVE 1.0J Baseline → RC2</span>
+    <span class="badge bp">Context</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">1.0J Baseline — Phases 1–7 Complete</div>
+    <p>YOHPAL LIVE 1.0J represented the completion of Blueprint Phases 1–7 (overall ~98%). The core feature set — immersive feed, zero-wait playback, engagement rail, creator profiles, ads, chat, comments, live discovery, context intelligence, and the full safety/minor-protection stack — was all in production. The app shipped on both Android and iOS with a 5-tab navigation shell.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">The 49-Gap RC2 Audit</div>
+    <p>Prior to declaring the 1.0J release candidate, an internal code audit identified <strong>49 implementation gaps</strong> against the full release specification. These gaps fell into five areas:</p>
+    <ul>
+      <li><strong>Creator Identity Block</strong> — missing <code>onOpenProfile</code> callback contract, missing 4 required ValueKeys, incorrect semantic labelling</li>
+      <li><strong>Creator Library Categories</strong> — only 12 of 16 categories implemented; no owner-visibility rules; no access control on backend</li>
+      <li><strong>Creator Video Grid</strong> — not a sliver widget; no <code>hasMore</code>/<code>onLoadMore</code> pagination; missing state variants and ValueKeys</li>
+      <li><strong>No-Repeat Feed</strong> — no client-side exposure tracking; no <code>VideoExposureRepository</code>; <code>FeedController</code> did not send exclusion sets; backend had no <code>canReturnVideo</code> gate</li>
+      <li><strong>Feed Category Parity</strong> — <code>FeedCategory</code> contained a dead <code>trending</code> value; <code>FeedCategorySelector</code> was iOS-only (not shared to Android build); trending branch was unreachable dead code</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">RC2 Scope</div>
+    <p>RC2 closed all 49 gaps across five directive areas (Parts II–III), added the full Physical Device &amp; Cross-Device Certification Pack (Part V), and validated all existing 1.0J base release implementations against the spec. This document covers both the 1.0J baseline and the RC2 additions in full.</p>
+  </div>
+
+  <div class="alert ai">
+    <strong>Scope boundary:</strong> Financial compliance (web-only writes, write-locked Firestore rules), YCIOS architecture, and Phase 8 (Controlled Pilot) planning are outside the scope of this report. Firestore and Storage rules are never deployed from this repository — the user manages and deploys rules directly.
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- PART I — 1.0J BASE RELEASE                                              -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+
+<div class="part-divider">
+  <span class="part-label">Part I</span>
+  <div class="part-line"></div>
+  <span class="part-title">YOHPAL LIVE 1.0J Base Release</span>
+</div>
+
+<!-- §01 Navigation -->
+<div class="section" id="s1">
+  <div class="section-hd">
+    <span class="sec-num">01</span>
+    <span class="sec-title">Navigation &amp; App Shell</span>
+    <span class="badge bp">Shipped</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>YohPalMainShell</code> — 5-tab navigation</div>
+    <p>The root shell is a <code>StatefulWidget</code> backed by an <code>IndexedStack</code> that preserves widget state across tab switches. A Material 3 <code>NavigationBar</code> with a gold indicator chip (<code>YohPalBrandColors.gold</code> at 25% opacity) drives tab selection.</p>
+    <ul>
+      <li><strong>Tab 0 — Discover</strong> (<code>DiscoverHubScreen</code>) — wraps <code>VideoFeedScreen</code>; primary content surface</li>
+      <li><strong>Tab 1 — Create</strong> (<code>CreateHubScreen</code>) — video upload and drafts</li>
+      <li><strong>Tab 2 — Community</strong> (<code>CommunityHubScreen</code>) — chat and social feed</li>
+      <li><strong>Tab 3 — Rewards</strong> (<code>RewardsHubScreen</code>) — gifting economy and earnings</li>
+      <li><strong>Tab 4 — Profile</strong> (<code>ProfileHubScreen</code>) — viewer's own creator profile</li>
+    </ul>
+  </div>
+
+  <div class="alert ai">
+    <strong>RC2 Bug (BUG-001):</strong> <code>DiscoverHubScreen</code> wraps <code>VideoFeedScreen</code> in a <code>Stack</code> and adds its own Search + Live TV <code>IconButton</code>s. After RC2 added a new top bar to <code>VideoFeedScreen</code> containing those same buttons, both sets render simultaneously — producing two Search and two Live TV buttons on the Discover tab. Fix: remove the overlay <code>IconButton</code>s from <code>DiscoverHubScreen</code>.
+  </div>
+</div>
+
+<!-- §02 Video Feed Screen -->
+<div class="section" id="s2">
+  <div class="section-hd">
+    <span class="sec-num">02</span>
+    <span class="sec-title">Immersive Video Feed Screen</span>
+    <span class="badge bp">Shipped</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Architecture overview</div>
+    <p><code>VideoFeedScreen</code> is a full-screen <code>Scaffold</code> with <code>backgroundColor: Colors.black</code>. The body is a <code>Column</code> with a top bar (Search + <code>FeedCategorySelector</code> + Live TV) above an <code>Expanded</code> <code>PageView.builder</code> that scrolls vertically through an infinite list of video items.</p>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Feed data flow</div>
+      <ul>
+        <li><code>VideoFeedController</code> owns the raw video list and pagination (<code>loadMore()</code> triggers at index N−5)</li>
+        <li><code>AdsRepository.watchActiveCampaigns()</code> streams active ad campaigns; <code>AdsController.adForIndex()</code> injects ads at configured positions</li>
+        <li>View timer fires after 3 s on a video; calls <code>VideoInteractionController.recordViewOnce()</code></li>
+        <li><code>PageView.onPageChanged</code> drives: preload (<code>ZeroWaitPlaybackController</code>), context update (<code>ContextIntelligenceController</code>), and diagnostics (<code>PlaybackDiagnosticsRepository</code>)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Gestures &amp; controls</div>
+      <ul>
+        <li><strong>Double-tap</strong> → like via <code>onDoubleTapLike</code></li>
+        <li><strong>Swipe right</strong> → <code>Navigator.pushNamed('/creator-profile')</code> — requires horizontal velocity dominance and &gt;200 px/s</li>
+        <li><strong>Tap</strong> → toggle controls visibility; auto-hide after 4 s</li>
+        <li><strong>Controls</strong> show swipe hint, <code>VideoOverlayWidget</code>, and <code>VideoEngagementRailWidget</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">System UI configuration</div>
+    <p>On <code>initState</code>, <code>SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge)</code> and transparent status/nav bars make the feed truly full-bleed. On <code>dispose</code>, system UI is restored to <code>SystemUiMode.manual</code> with all overlays.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Feed switching</div>
+    <p><code>_switchFeed(String type)</code> calls <code>VideoFeedController.startSuggestedFeed()</code> or <code>startFollowingFeed(uid)</code> depending on the selected <code>FeedCategory</code>. A dead <code>else</code> branch still calls <code>startTrendingFeed()</code> — this is unreachable since <code>FeedCategory</code> has only 2 values (RC2 fix). <span class="badge bg">Dead Code</span></p>
+  </div>
+</div>
+
+<!-- §03 Zero-Wait Playback -->
+<div class="section" id="s3">
+  <div class="section-hd">
+    <span class="sec-num">03</span>
+    <span class="sec-title">Zero-Wait Playback System</span>
+    <span class="badge bp">Shipped — 1.0H</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>ZeroWaitPlaybackController</code> — 4-tier preload architecture</div>
+    <p>Uses <strong>media_kit</strong> (libmpv backend) which provides software AVC/HEVC fallback for devices with broken hardware decoders (e.g. Unisoc <code>c2.unisoc.avc.decoder</code>). Each video is represented by an <code>_MKBundle</code> pairing a <code>Player</code> with a <code>VideoController</code>.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Tier</th><th>Count</th><th>What's buffered</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Active</strong></td><td>1</td><td>Currently playing Player</td></tr>
+          <tr><td><strong>Hot</strong></td><td>2–8 (CPU + network adaptive)</td><td>Fully buffered Players around current index</td></tr>
+          <tr><td><strong>Warm</strong></td><td>5–50 (network adaptive)</td><td>Preview/start URLs pre-downloaded to disk cache via <code>VideoMediaCache</code></td></tr>
+          <tr><td><strong>Ready</strong></td><td>Remaining</td><td>Video records provided by <code>VideoFeedController</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Network-adaptive sizing</div>
+      <p><code>SmartNetworkProfiler</code> emits a <code>NetworkClass</code> stream. On each class change, hot-controller limit and warm-media count are recalculated:</p>
+      <ul>
+        <li><strong>WiFi / 5G</strong>: hot = CPU max (4–8), warm = 40–50</li>
+        <li><strong>4G</strong>: hot = 4–6, warm = 30</li>
+        <li><strong>3G</strong>: hot = 3–4, warm = 15</li>
+        <li><strong>Constrained</strong>: hot = 2, warm = 5</li>
+        <li><strong>None</strong>: hot = 2, warm = 0</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Memory pressure &amp; lifecycle</div>
+      <ul>
+        <li><code>handleMemoryPressure()</code> via <code>WidgetsBindingObserver.didHaveMemoryPressure()</code> — disposes all but the playing video and next preload</li>
+        <li><code>_disposeFarAway()</code> culls controllers beyond <code>keepDistance</code> from current index automatically on each page change</li>
+        <li>Implements <code>SessionScopedState.clearSession()</code> — full teardown on auth sign-out</li>
+        <li><code>AdaptiveVideoUrlResolver.resolve()</code> selects HLS HD on WiFi, HLS standard on cellular</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- §04 Zero-Wait Player Widget -->
+<div class="section" id="s4">
+  <div class="section-hd">
+    <span class="sec-num">04</span>
+    <span class="sec-title">Zero-Wait Video Player Widget</span>
+    <span class="badge bp">Shipped</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>ZeroWaitVideoPlayer</code></div>
+    <p>A <code>StatefulWidget</code> that bridges <code>ZeroWaitPlaybackController</code> to the rendering surface. On construction it calls <code>_warm()</code> to either retrieve the pre-warmed <code>VideoController</code> from the controller or initiate warm-up.</p>
+    <ul>
+      <li><code>_posSub</code> — stream subscription on <code>Player.stream.position</code>; fires <code>onFirstFrame</code> callback on first non-zero position (first frame rendered)</li>
+      <li><code>_errorSub</code> — stream subscription on <code>Player.stream.error</code>; fires <code>onPlaybackError</code></li>
+      <li><code>_startupTimer</code> — safety net timer; fires <code>onPlaybackError</code> if first frame has not appeared within a threshold</li>
+      <li><code>isActive</code> prop — widget calls <code>play()</code> when active, <code>pause()</code> when not; handles PageView reuse across indices via <code>didUpdateWidget</code></li>
+      <li><code>onDoubleTapLike</code>, <code>onTap</code>, pause-icon overlay on tap, thumbnail shown until first frame</li>
+    </ul>
+  </div>
+</div>
+
+<!-- §05 Engagement Rail -->
+<div class="section" id="s5">
+  <div class="section-hd">
+    <span class="sec-num">05</span>
+    <span class="sec-title">Engagement Rail — 21 Actions</span>
+    <span class="badge bp">Shipped</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>VideoEngagementRailWidget</code> — positioned right rail</div>
+    <p>A <code>Positioned</code> widget at <code>right: 8, top: 110, bottom: 90</code> containing a vertical <code>Column</code> of 5 primary actions plus a "More" button that opens a 4-column modal grid of 16 secondary actions (17 total = 21 minus the 4 primary non-follow).</p>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Action</th><th>Type</th><th>Behaviour</th></tr></thead>
+      <tbody>
+        <tr><td>Follow / Following</td><td>Primary</td><td><code>FollowRepository.watchIsFollowing()</code> stream; purple badge when following; hidden for own videos</td></tr>
+        <tr><td>Like</td><td>Primary</td><td><code>EngagementController.toggleLike()</code>; count from live <code>EngagementCounts</code></td></tr>
+        <tr><td>Views</td><td>Primary</td><td>Display only; count from <code>EngagementCounts.views</code></td></tr>
+        <tr><td>Comments</td><td>Primary</td><td>Opens <code>CommentsBottomSheet</code></td></tr>
+        <tr><td>Chat</td><td>Secondary</td><td>Creates DM via <code>ChatController.createDirectConversation()</code>; pushes <code>ChatRoomScreen</code></td></tr>
+        <tr><td>Ask AI / Translate / Summarise</td><td>Secondary</td><td>Opens <code>AiVideoCompanionSheet</code></td></tr>
+        <tr><td>Save (Favourite)</td><td>Secondary</td><td><code>EngagementController.toggleSave()</code>; bookmark icon toggles</td></tr>
+        <tr><td>Share</td><td>Secondary</td><td><code>SharePlus.share()</code>; records <code>VideoInteractionController.recordShare()</code></td></tr>
+        <tr><td>Shop</td><td>Secondary</td><td>Navigates to <code>/timeline-overlay-detail</code></td></tr>
+        <tr><td>Coupon</td><td>Secondary</td><td>Navigates to <code>/coupon-wallet</code></td></tr>
+        <tr><td>Gift</td><td>Secondary</td><td>Navigates to <code>/creator-gift</code> with creator UID</td></tr>
+        <tr><td>Duet</td><td>Secondary</td><td>Navigates to <code>/collaboration-create</code> with duet mode</td></tr>
+        <tr><td>Private Like</td><td>Secondary</td><td><code>VideoEngagementRailController.privateLike()</code>; snackbar confirmation</td></tr>
+        <tr><td>Private Comment</td><td>Secondary</td><td>Dialog with text field; <code>VideoEngagementRailController.privateComment()</code></td></tr>
+        <tr><td>Earn (Rewarded Ad)</td><td>Secondary</td><td>Navigates to <code>/ads-arena</code></td></tr>
+        <tr><td>Watch Later</td><td>Secondary</td><td>Navigates to <code>/watch-later</code></td></tr>
+        <tr><td>Report</td><td>Secondary</td><td><code>VideoSafetyService.reportVideo()</code></td></tr>
+        <tr><td>Not Interested</td><td>Secondary</td><td><code>VideoSafetyService.markNotInterested()</code></td></tr>
+        <tr><td>Block</td><td>Secondary</td><td><code>VideoSafetyService.blockCreator()</code></td></tr>
+        <tr><td>Download</td><td>Secondary</td><td>Placeholder snackbar ("coming soon")</td></tr>
+        <tr><td>More</td><td>Rail footer</td><td>Opens 4-column <code>GridView</code> modal with all secondary actions</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Live count formatting</div>
+    <p><code>_fmt(int count)</code> formats engagement numbers: <code>1.2K</code> at ≥1 000, <code>3.4M</code> at ≥1 000 000, <code>5.6B</code> at ≥1 000 000 000. Counts are read from a live <code>EngagementController</code> that streams Firestore updates for the current video.</p>
+  </div>
+</div>
+
+<!-- §06 Ads -->
+<div class="section" id="s6">
+  <div class="section-hd">
+    <span class="sec-num">06</span>
+    <span class="sec-title">Ad Integration</span>
+    <span class="badge bp">Shipped</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">In-feed ad injection</div>
+    <p>The video feed's <code>PageView.builder</code> first checks <code>AdsController.adForIndex(index)</code>. When an ad slot is active at that index, <code>InFeedAdWidget(ad: ad)</code> is rendered in place of the video. <code>AdsRepository.watchActiveCampaigns()</code> is a Firestore stream injected via <code>Provider</code>; <code>AdsController.setCampaigns()</code> is called via <code>Future.microtask()</code> to avoid calling <code>setState</code> during build.</p>
+  </div>
+</div>
+
+<!-- §07 Creator Profile System -->
+<div class="section" id="s7">
+  <div class="section-hd">
+    <span class="sec-num">07</span>
+    <span class="sec-title">Creator Profile System</span>
+    <span class="badge bp">Shipped + RC2 Updated</span>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title"><code>CreatorProfileScreen</code></div>
+      <p>Rebuilt as a <code>StatefulWidget</code> with <code>CustomScrollView</code> and sliver children to host the sliver <code>CreatorVideoGrid</code>. Streams <code>CreatorProfileModel</code> from <code>CreatorProfileRepository.watchCreatorProfile()</code>. Owner check (<code>currentUser.uid == creatorUid</code>) shows Edit and Logout actions in the AppBar. Uses <code>FollowRepository.watchIsFollowing()</code> for real-time follow state.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><code>CreatorStatsCard</code></div>
+      <p>A <code>StatelessWidget</code> <code>Card</code> displaying 8 metrics: followers, following, video count, total views, likes, comments, shares, gifts. Also shows <code>eligibilityScore</code> (creator monetisation eligibility) and <code>isVerified</code> badge. Joined date shown as human-readable label.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>CreatorVideoFeedScreen</code></div>
+    <p>A dedicated feed screen that plays the creator's videos in a vertical <code>PageView</code>, using the same <code>ZeroWaitVideoPlayer</code> and <code>VideoEngagementRailWidget</code> as the main feed. Entered when a video thumbnail is tapped in the creator grid.</p>
+  </div>
+</div>
+
+<!-- §08 Comments -->
+<div class="section" id="s8">
+  <div class="section-hd">
+    <span class="sec-num">08</span>
+    <span class="sec-title">Comments System</span>
+    <span class="badge bp">Shipped</span>
+  </div>
+  <div class="card">
+    <div class="card-title"><code>CommentsBottomSheet</code></div>
+    <p>A scrollable bottom sheet opened via <code>showModalBottomSheet(isScrollControlled: true, backgroundColor: Colors.transparent)</code>. Displays a paginated list of comments for the given <code>videoId</code>, with a text input for posting. Tapping "Comments" in the engagement rail invokes this sheet from <code>VideoFeedScreen._onComments()</code>.</p>
+  </div>
+</div>
+
+<!-- §09 Context Intelligence -->
+<div class="section" id="s9">
+  <div class="section-hd">
+    <span class="sec-num">09</span>
+    <span class="sec-title">Context Intelligence</span>
+    <span class="badge bp">Shipped</span>
+  </div>
+  <div class="card">
+    <div class="card-title"><code>ContextIntelligenceController</code> + <code>ContextSnapshotModel</code></div>
+    <p>On every page change in <code>VideoFeedScreen</code>, a <code>ContextSnapshotModel</code> is built from the current video's data and pushed to <code>ContextIntelligenceController.updateContext()</code>. The snapshot captures: <code>userId</code>, <code>currentScreen</code>, <code>videoId</code>, <code>creatorId</code>, <code>isFollowingCreator</code>, <code>hasCommerceTags</code>, <code>hasActiveCoupon</code>, <code>hasPoll</code>, <code>isLiveAvailable</code>, <code>canMessageCreator</code>. This drives AI-assisted action suggestions. The <code>ContextActionStrip</code> widget is currently commented out pending UX review.</p>
+  </div>
+</div>
+
+<!-- §10 Playback Diagnostics -->
+<div class="section" id="s10">
+  <div class="section-hd">
+    <span class="sec-num">10</span>
+    <span class="sec-title">Playback Diagnostics</span>
+    <span class="badge bp">Shipped</span>
+  </div>
+  <div class="card">
+    <div class="card-title"><code>PlaybackDiagnosticsRepository</code> + <code>PlaybackDiagnosticModel</code></div>
+    <p>Every first-frame event records a <code>PlaybackDiagnosticModel</code> to Firestore via <code>PlaybackDiagnosticsRepository.record()</code>. Fields: <code>videoId</code>, <code>userId</code>, <code>timeToFirstFrameMs</code>, <code>preloadHit</code> (was the video already in <code>ZeroWaitPlaybackController</code>), <code>sourceUrlType</code> (hls vs mp4), <code>networkType</code> (wifi vs cellular). On playback error, a diagnostic is recorded with <code>timeToFirstFrameMs: 9999</code> and <code>playbackError: 'startup_timeout'</code>.</p>
+  </div>
+</div>
+
+<!-- §11 Video Safety Service -->
+<div class="section" id="s11">
+  <div class="section-hd">
+    <span class="sec-num">11</span>
+    <span class="sec-title">Video Safety Service</span>
+    <span class="badge bp">Shipped</span>
+  </div>
+  <div class="card">
+    <div class="card-title"><code>VideoSafetyService</code></div>
+    <p>Three user-facing safety actions called from <code>VideoFeedScreen</code>:</p>
+    <ul>
+      <li><code>reportVideo(userId, videoId, creatorId, reason)</code> — writes a report document to Firestore; shows "Report submitted" snackbar</li>
+      <li><code>markNotInterested(userId, creatorId, videoId)</code> — writes a signal to suppress similar content; shows "We'll show fewer videos like this" snackbar</li>
+      <li><code>blockCreator(userId, creatorId)</code> — writes a block record; shows "@username blocked" snackbar</li>
+    </ul>
+  </div>
+</div>
+
+<!-- §12 Live Discovery & Search -->
+<div class="section" id="s12">
+  <div class="section-hd">
+    <span class="sec-num">12</span>
+    <span class="sec-title">Live Discovery &amp; Search</span>
+    <span class="badge bp">Shipped</span>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title"><code>LiveDiscoveryScreen</code></div>
+      <p>Accessed via the Live TV icon button in the feed top bar. Shows active live streams the viewer can join. Route: <code>LiveDiscoveryScreen.routeName</code>.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><code>SearchScreen</code></div>
+      <p>Accessed via the Search icon button in the feed top bar. Full search surface for videos and creators. Route: <code>SearchScreen.routeName</code>. Also accessible from the second (now duplicate) button in <code>DiscoverHubScreen</code> — see BUG-001.</p>
+    </div>
+  </div>
+</div>
+
+<!-- §13 Chat -->
+<div class="section" id="s13">
+  <div class="section-hd">
+    <span class="sec-num">13</span>
+    <span class="sec-title">Chat System</span>
+    <span class="badge bp">Shipped</span>
+  </div>
+  <div class="card">
+    <div class="card-title"><code>ChatController</code> + <code>ChatRoomScreen</code></div>
+    <p>Direct messaging between viewers and creators. From the engagement rail, tapping Chat calls <code>ChatController.createDirectConversation()</code> which returns a <code>conversationId</code>, then pushes <code>ChatRoomScreen</code> via named route. Requires authenticated user.</p>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- PART II — RC2 DIRECTIVE ITEMS                                           -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+
+<div class="part-divider">
+  <span class="part-label">Part II</span>
+  <div class="part-line"></div>
+  <span class="part-title">RC2 Directive — Flutter Client</span>
+</div>
+
+<!-- §14 Creator Identity Block -->
+<div class="section" id="s14">
+  <div class="section-hd">
+    <span class="sec-num">14</span>
+    <span class="sec-title">Creator Identity Block</span>
+    <span class="badge bp">RC2 Closed</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>CreatorIdentityBlock</code> — contract changes</div>
+    <p>The <code>onTap: VoidCallback</code> prop was renamed to <code>onOpenProfile: VoidCallback</code> to make the callback's intent explicit in the widget contract. All callers (<code>VideoOverlayWidget</code>, <code>VideoCaptionBlock</code>) were updated accordingly.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">4 Required ValueKeys</div>
+    <div class="pills">
+      <span class="pill">ValueKey('creator-identity-block')</span>
+      <span class="pill">ValueKey('creator-display-name')</span>
+      <span class="pill">ValueKey('creator-verification-badge')</span>
+      <span class="pill">ValueKey('creator-username')</span>
+    </div>
+    <p>These keys allow RC2 certification tests to locate specific sub-elements of the identity block by key rather than by text content, making tests locale-independent.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Additional fixes</div>
+    <ul>
+      <li><code>borderRadius: BorderRadius.circular(8)</code>, <code>Padding(vertical: 4)</code>, <code>fontSize: 15</code> aligned to spec</li>
+      <li><code>if (username.isNotEmpty)</code> guard prevents empty @username row from rendering</li>
+      <li><code>Semantics(button: true, label: 'Open profile for [displayName]')</code> for VoiceOver / TalkBack</li>
+    </ul>
+  </div>
+</div>
+
+<!-- §15 Creator Library Categories -->
+<div class="section" id="s15">
+  <div class="section-hd">
+    <span class="sec-num">15</span>
+    <span class="sec-title">Creator Library Categories</span>
+    <span class="badge bp">RC2 Closed</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">16 categories — full enum</div>
+    <div class="pills">
+      <span class="pill">publicVideos</span>
+      <span class="pill">reels</span>
+      <span class="pill">shorts</span>
+      <span class="pill">featured</span>
+      <span class="pill">pinned</span>
+      <span class="pill">popular</span>
+      <span class="pill">series</span>
+      <span class="pill">liveReplays</span>
+      <span class="pill">drafts</span>
+      <span class="pill">privateVideos</span>
+      <span class="pill">scheduled</span>
+      <span class="pill">pendingReview</span>
+      <span class="pill">rejected</span>
+      <span class="pill">saved</span>
+      <span class="pill">liked</span>
+      <span class="pill">viewHistory</span>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Visibility rules — <code>CreatorLibraryCategoryRules</code></div>
+      <p>Extension on <code>CreatorLibraryCategory</code>. The <code>ownerOnly</code> getter returns <code>true</code> for 11 categories: drafts, privateVideos, scheduled, pendingReview, rejected, saved, liked, shared, viewHistory, blocked, archived. The remaining 5 are public: publicVideos, reels, shorts, featured (with content), liveReplays (with public replays).</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><code>availableCreatorCategories({required bool isOwner})</code></div>
+      <p>Top-level function that returns all 16 categories when <code>isOwner: true</code>, and only the 5 public categories when <code>isOwner: false</code>. Used by <code>CreatorLibraryTabs</code> to hide owner-only tabs from visitor views.</p>
+    </div>
+  </div>
+</div>
+
+<!-- §16 Creator Video Grid -->
+<div class="section" id="s16">
+  <div class="section-hd">
+    <span class="sec-num">16</span>
+    <span class="sec-title">Creator Video Grid (Sliver)</span>
+    <span class="badge bp">RC2 Closed</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>CreatorVideoGrid</code> — sliver widget with pagination</div>
+    <p>Rewritten from a non-sliver widget to return sliver types, enabling direct composition inside a <code>CustomScrollView</code>. Props added: <code>hasMore: bool</code>, <code>onLoadMore: VoidCallback</code>. Pagination trigger fires at <code>index >= videos.length - 6</code>.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">4 State variants with ValueKeys</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>State</th><th>ValueKey</th><th>Widget</th></tr></thead>
+        <tbody>
+          <tr><td>Loading</td><td><code>creator-video-grid-loading</code></td><td><code>SliverToBoxAdapter</code> with <code>CircularProgressIndicator</code></td></tr>
+          <tr><td>Error</td><td><code>creator-video-grid-retry</code></td><td><code>SliverToBoxAdapter</code> with retry button</td></tr>
+          <tr><td>Empty</td><td><code>creator-video-grid-empty</code></td><td><code>SliverToBoxAdapter</code> with category-specific message</td></tr>
+          <tr><td>Content</td><td><code>creator-video-grid</code></td><td><code>SliverGrid</code> with thumbnail items</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Thumbnail items use <code>InkWell</code> (not <code>GestureDetector</code>), include <code>Image.network</code> error builder, and navigate to <code>CreatorVideoFeedScreen</code> on tap. <code>CreatorProfilePageResult</code> domain type carries <code>videos</code>, <code>hasMore</code>, and optional <code>nextCursor</code>.</p>
+  </div>
+</div>
+
+<!-- §17 No-Repeat Feed Flutter -->
+<div class="section" id="s17">
+  <div class="section-hd">
+    <span class="sec-num">17</span>
+    <span class="sec-title">No-Repeat Feed — Flutter Client</span>
+    <span class="badge bp">RC2 Closed</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Domain layer — <code>VideoExposure</code></div>
+    <p>Tracks a single viewing event. Key fields:</p>
+    <ul>
+      <li><code>videoId</code>, <code>firstShownAt</code>, <code>lastShownAt</code>, <code>maximumProgress</code> (0.0–1.0)</li>
+      <li><code>source: VideoExposureSource</code> — 10 values: recommended, following, search, creatorProfile, shared, saved, liked, history, ownVideo, swipeBack</li>
+      <li><code>automaticFeedEligible: bool</code></li>
+      <li><code>completedAt: DateTime?</code></li>
+      <li><code>substantiallyViewed</code> getter: <code>completedAt != null || maximumProgress >= 0.80</code></li>
+    </ul>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title"><code>VideoExposureRepository</code> interface</div>
+      <ul>
+        <li><code>recordExposure(VideoExposure)</code></li>
+        <li><code>loadAutomaticFeedExclusions({required FeedCategory})</code> → <code>Future&lt;Set&lt;String&gt;&gt;</code></li>
+        <li><code>synchronize()</code> → <code>Future&lt;ExposureSyncReceipt&gt;</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><code>LocalViewedVideoStore</code></div>
+      <p>Implements <code>VideoExposureRepository</code> using SharedPreferences. Exposures are persisted locally and survive app restarts. The <code>loadAutomaticFeedExclusions</code> method returns all video IDs that are <code>substantiallyViewed</code> and not from an intentional-replay source.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>FeedController</code> — exclusion-aware pagination</div>
+    <p>Before each <code>loadMore()</code> page request, <code>FeedController</code> calls <code>VideoExposureRepository.loadAutomaticFeedExclusions(category:)</code> and includes the result as <code>excludedVideoIds</code> in the <code>FeedRequest</code> sent to the backend. A client-side dedup set (<code>existingIds</code>) is a secondary safeguard — the server's <code>canReturnVideo</code> gate is authoritative.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>FeedRequest</code> → <code>toJson()</code></div>
+    <pre>{ "category": "recommended", "limit": 20, "cursor": null, "excludedVideoIds": ["abc123", "def456"] }</pre>
+  </div>
+</div>
+
+<!-- §18 Feed Category Parity -->
+<div class="section" id="s18">
+  <div class="section-hd">
+    <span class="sec-num">18</span>
+    <span class="sec-title">Feed Category Parity — iOS + Android</span>
+    <span class="badge bp">RC2 Closed</span>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title"><code>FeedCategory</code> enum — 2 values only</div>
+      <ul>
+        <li><code>recommended</code> — algorithmic feed</li>
+        <li><code>following</code> — people the viewer follows</li>
+      </ul>
+      <p><code>trending</code> was removed. The dead <code>else { ctrl.startTrendingFeed(); }</code> branch in <code>VideoFeedScreen._switchFeed()</code> is now unreachable and flagged for removal.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><code>FeedCategorySelector</code> — shared widget</div>
+      <p>A single widget used on both iOS and Android (no platform-specific forks). Iterates <code>FeedCategory.values</code> to render category chips. Required structure:</p>
+      <ul>
+        <li>Wrapped in <code>SafeArea</code></li>
+        <li><code>Semantics(container: true)</code> for VoiceOver / TalkBack</li>
+        <li><code>ValueKey('feed-category-recommended')</code> and <code>ValueKey('feed-category-following')</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>FeedCategoryController</code> — initial value</div>
+    <p>Added <code>initial</code> constructor parameter: <code>FeedCategoryController({FeedCategory initial = FeedCategory.recommended})</code>. Allows screens to start on a specific category without a post-construction call to <code>select()</code>.</p>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- PART III — RC2 BACKEND                                                  -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+
+<div class="part-divider">
+  <span class="part-label">Part III</span>
+  <div class="part-line"></div>
+  <span class="part-title">RC2 Backend — Cloud Functions</span>
+</div>
+
+<div class="alert ai">
+  <strong>Deployment constraint:</strong> Only targeted single-function deploys are permitted (e.g. <code>firebase deploy --only functions:processVideoUpload</code>). A full <code>firebase deploy --only functions</code> is BLOCKED — it would delete 35 live production functions not present in local source.
+</div>
+
+<!-- §19 Feed Eligibility Engine -->
+<div class="section" id="s19">
+  <div class="section-hd">
+    <span class="sec-num">19</span>
+    <span class="sec-title">Feed Eligibility Engine</span>
+    <span class="badge bp">RC2 New</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>canReturnVideo()</code> — eligibility logic</div>
+    <pre>function canReturnVideo({ viewerId, creatorId, source, exposure? }): boolean {
+  if (viewerId === creatorId) return true;                    // own video always eligible
+  if (intentionalReplaySources.has(source)) return true;     // search, creator_profile, etc.
+  if (!exposure) return true;                                 // never seen = eligible
+  if (exposure.completedAt || exposure.maximumProgressPercent >= 80) return false;
+  return exposure.automaticFeedEligible;
+}</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">8 intentional-replay sources</div>
+    <div class="pills">
+      <span class="pill">search</span>
+      <span class="pill">creator_profile</span>
+      <span class="pill">shared</span>
+      <span class="pill">saved</span>
+      <span class="pill">liked</span>
+      <span class="pill">history</span>
+      <span class="pill">own_video</span>
+      <span class="pill">swipe_back</span>
+    </div>
+    <p>Videos accessed via these sources are never suppressed by the no-repeat filter, because the viewer is explicitly choosing to see them.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Source union alignment</div>
+    <p>In <code>viewer-video-exposure.ts</code>, the source value <code>"profile"</code> was renamed to <code>"creator_profile"</code> to match the Flutter client's <code>VideoExposureSource.creatorProfile</code>. The old <code>canAutomaticallyRecommendVideo</code> function was removed entirely and replaced by the canonical <code>canReturnVideo</code> in <code>feed-eligibility.ts</code>.</p>
+  </div>
+</div>
+
+<!-- §20 No-Repeat Backend -->
+<div class="section" id="s20">
+  <div class="section-hd">
+    <span class="sec-num">20</span>
+    <span class="sec-title">No-Repeat Backend &amp; Exposure Sync</span>
+    <span class="badge bp">RC2 New</span>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title"><code>exposure-repository.ts</code></div>
+      <p>Firestore CRUD for <code>viewerExposure/{viewerId}/videos/{videoId}</code>. Writes exposure records with <code>maximumProgressPercent</code>, <code>completedAt</code>, <code>automaticFeedEligible</code>, and <code>source</code>. Used by <code>get-feed.ts</code> Callable to load server-side exposures and merge with client-sent exclusion lists.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><code>exposure-sync-receipt.ts</code></div>
+      <p>The <code>ExposureSyncReceipt</code> interface is the cross-device sync proof artifact. Fields: <code>syncedAt: Timestamp</code>, <code>deviceId: string</code>, <code>exposureCount: number</code>, <code>mergeConflicts: number</code>. Returned by <code>VideoExposureRepository.synchronize()</code>. Required for RC2 cross-device certification gate (RC2-NR-XDEV-001).</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>get-feed.ts</code> Callable</div>
+    <p>Merges client-sent <code>excludedVideoIds</code> with server-side <code>exposure-repository</code> records. Applies <code>canReturnVideo</code> gate to each candidate video. Returns <code>FeedResponse</code> with items and next cursor. Handles cursor-based pagination via <code>decodeCursor</code>.</p>
+  </div>
+</div>
+
+<!-- §21 Creator Library Backend -->
+<div class="section" id="s21">
+  <div class="section-hd">
+    <span class="sec-num">21</span>
+    <span class="sec-title">Creator Library Backend</span>
+    <span class="badge bp">RC2 New</span>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title"><code>assertCreatorLibraryAccess()</code></div>
+      <pre>const ownerOnly = new Set([
+  "drafts","privateVideos","scheduled",
+  "pendingReview","rejected","saved",
+  "liked","shared","viewHistory",
+  "blocked","archived"
+]);
+if (ownerOnly.has(category) && requesterId !== creatorId)
+  throw new Error("PERMISSION_DENIED");</pre>
+    </div>
+    <div class="card">
+      <div class="card-title"><code>get-creator-library.ts</code> Callable</div>
+      <p>Runs <code>assertCreatorLibraryAccess</code> first, then queries Firestore for the requested category with visibility filtering, applies cursor-based pagination, and returns a typed <code>CreatorLibraryResponse</code>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- §22 Shared Pagination -->
+<div class="section" id="s22">
+  <div class="section-hd">
+    <span class="sec-num">22</span>
+    <span class="sec-title">Shared Pagination Utilities</span>
+    <span class="badge bp">RC2 New</span>
+  </div>
+  <div class="card">
+    <div class="card-title"><code>pagination.ts</code> — <code>encodeCursor</code> / <code>decodeCursor</code></div>
+    <p>Cursor is a base64-encoded Firestore Timestamp in milliseconds. <code>encodeCursor(Timestamp) → string</code>, <code>decodeCursor(string) → Timestamp</code>. Used by both <code>get-feed.ts</code> and <code>get-creator-library.ts</code> to provide stable, opaque page tokens to clients.</p>
+  </div>
+</div>
+
+<!-- §23 Creator Aggregate Reconciliation -->
+<div class="section" id="s23">
+  <div class="section-hd">
+    <span class="sec-num">23</span>
+    <span class="sec-title">Creator Aggregate Reconciliation</span>
+    <span class="badge bp">RC2 New</span>
+  </div>
+  <div class="card">
+    <div class="card-title"><code>creator-aggregate.ts</code></div>
+    <p><code>CreatorAggregateComparison</code> holds expected vs actual values for followers, following, videoCount, totalViews, totalLikes, totalComments, totalShares, totalGifts. <code>aggregateMatches(comparison, tolerance = 0.05)</code> returns <code>true</code> if all fields are within 5% of expected. Used by the RC2 certification gate RC2-AGG-001 (creator aggregates reconciliation).</p>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- PART IV — SAFETY & COMPLIANCE                                           -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+
+<div class="part-divider">
+  <span class="part-label">Part IV</span>
+  <div class="part-line"></div>
+  <span class="part-title">Safety &amp; Compliance</span>
+</div>
+
+<!-- §24 Age Rating -->
+<div class="section" id="s24">
+  <div class="section-hd">
+    <span class="sec-num">24</span>
+    <span class="sec-title">Video Age Rating System</span>
+    <span class="badge bp">Shipped</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>VideoAgeRating</code> enum — 7 values</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Value</th><th>Minimum Recommended Age</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>earlyChildhood</code></td><td>0</td><td>Age 0+ — curated for young children</td></tr>
+          <tr><td><code>children</code></td><td>6</td><td>Age 6+ — family-friendly</td></tr>
+          <tr><td><code>preTeen</code></td><td>10</td><td>Age 10+</td></tr>
+          <tr><td><code>teen</code></td><td>13</td><td>Age 13+</td></tr>
+          <tr><td><code>general</code></td><td>0</td><td>General audience — default when unset</td></tr>
+          <tr><td><code>mature</code></td><td>16</td><td>Age 16+ — mature themes</td></tr>
+          <tr><td><code>adultsOnly</code></td><td>18</td><td>Age 18+ — adults only</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Defined canonically in <code>features/feed/domain/video_age_rating.dart</code>. The <code>minimumRecommendedAge</code> getter exposes the integer threshold for age-gate logic.</p>
+  </div>
+
+  <div class="alert ag">
+    <strong>Duplication gap:</strong> An identical <code>VideoAgeRating</code> enum is defined in <code>features/minor_safety/domain/minor_content_classification.dart</code> (older copy). <code>AgeRatingSelector</code> imports from the older copy. These must be consolidated: remove the <code>minor_safety</code> copy and redirect all importers to <code>features/feed/domain/video_age_rating.dart</code>. <span class="badge bg">Pending</span>
+  </div>
+
+  <div class="alert ag">
+    <strong>Feed-side age filtering gap:</strong> Neither <code>VideoFeedRepository</code> queries nor the <code>get-feed.ts</code> Callable currently filter by viewer age vs video <code>ageRating</code>. Age classification operates only as a publication gate (via <code>MinorPublicationController</code>) — mature and adultsOnly videos can appear in feeds for under-age viewers. Feed-side filtering is pending. <span class="badge bg">Pending</span>
+  </div>
+</div>
+
+<!-- §25 Minor Safety -->
+<div class="section" id="s25">
+  <div class="section-hd">
+    <span class="sec-num">25</span>
+    <span class="sec-title">Minor Safety &amp; Publication Gates</span>
+    <span class="badge bp">Shipped</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>MinorPublicationController.evaluateGate()</code></div>
+    <p>Returns a list of blocker strings (empty = allowed to publish). Checks:</p>
+    <ul>
+      <li>Creator's verified age against the video's <code>minimumRecommendedAge</code></li>
+      <li>Whether guardian consent is required and present</li>
+      <li>Whether the classification is complete</li>
+      <li>Platform-specific minor publication rules</li>
+    </ul>
+    <p>Used in the upload/publish flow to gate final submission.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>MinorContentClassification</code></div>
+    <p>Contains: <code>ageRating: VideoAgeRating</code>, <code>contentWarnings: List&lt;String&gt;</code>, <code>classifiedAt: DateTime</code>, <code>classifiedBy: String</code>. The <code>publicationAllowed</code> getter returns <code>true</code> when all warnings have been acknowledged and age rating is set.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>AgeRatingSelector</code></div>
+    <p>A <code>ChoiceChip</code>-based UI component showing all 7 ratings. Used in the video upload flow to let creators self-classify content. Currently imports <code>VideoAgeRating</code> from the older <code>minor_safety</code> copy (see duplication gap above).</p>
+  </div>
+</div>
+
+<!-- §26 Guardian Consent -->
+<div class="section" id="s26">
+  <div class="section-hd">
+    <span class="sec-num">26</span>
+    <span class="sec-title">Guardian Consent Lifecycle</span>
+    <span class="badge bp">Shipped</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>GuardianConsent</code></div>
+    <p>Models guardian approval for a minor creator. 6 consent scopes: <code>publish</code>, <code>liveStream</code>, <code>commercialContent</code>, <code>adultThemeViewing</code>, <code>directMessages</code>, <code>publicProfile</code>. Each scope has an independent expiry (<code>expiresAt: DateTime</code>). Consent is stored in Firestore under the minor's account and checked by <code>MinorPublicationController.evaluateGate()</code> before publication is allowed.</p>
+  </div>
+</div>
+
+<!-- §27 Upload Pipeline -->
+<div class="section" id="s27">
+  <div class="section-hd">
+    <span class="sec-num">27</span>
+    <span class="sec-title">Upload Pipeline</span>
+    <span class="badge bp">Partial</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>processVideoUpload.ts</code> — Storage trigger</div>
+    <p>A Firebase Storage trigger that fires when a video is uploaded. Handles: transcoding job dispatch, Firestore metadata write (title, ownerId, status), HLS URL population after transcoding completes. The trigger sets <code>status: 'processing'</code> on upload and <code>status: 'live'</code> after successful transcoding.</p>
+  </div>
+
+  <div class="alert ag">
+    <strong>Missing fields gap:</strong> <code>processVideoUpload.ts</code> does NOT write <code>ageRating</code> or <code>classificationCompleted</code> to the video Firestore document. If the Flutter app does not set these fields before or at upload time, videos appear with no age classification and <code>ageRating</code> will be <code>undefined</code> (effectively treated as <code>general</code> by the VideoModel). Fix: add <code>ageRating: 'general'</code> and <code>classificationCompleted: false</code> as defaults in the upload trigger write. <span class="badge bg">Pending</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>VideoModel.fromMap()</code> — URL resolution priority chain</div>
+    <p>When resolving the playback URL from a Firestore video document, <code>VideoModel.fromMap()</code> tries fields in this order:</p>
+    <div class="flow">
+      <div class="flow-box gold">hlsLowUrl</div>
+      <div class="flow-arr">→</div>
+      <div class="flow-box">hlsStandardUrl</div>
+      <div class="flow-arr">→</div>
+      <div class="flow-box">hlsUrl</div>
+      <div class="flow-arr">→</div>
+      <div class="flow-box">videoUrl</div>
+      <div class="flow-arr">→</div>
+      <div class="flow-box">hlsPath</div>
+      <div class="flow-arr">→</div>
+      <div class="flow-box">originalUrl</div>
+    </div>
+    <p>This ensures that even partially processed videos or legacy records with different field names play back correctly.</p>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- PART V — QA, RELEASE & CERTIFICATION                                   -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+
+<div class="part-divider">
+  <span class="part-label">Part V</span>
+  <div class="part-line"></div>
+  <span class="part-title">QA, Release &amp; Certification</span>
+</div>
+
+<!-- §28 QA Release Identity -->
+<div class="section" id="s28">
+  <div class="section-hd">
+    <span class="sec-num">28</span>
+    <span class="sec-title">QA Release Identity</span>
+    <span class="badge bp">RC2 New</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><code>qa_release_identity.dart</code></div>
+    <p>Reads compile-time constants from <code>--dart-define</code> flags. Fields:</p>
+    <ul>
+      <li><code>buildSha</code> — the git commit SHA stamped at build time</li>
+      <li><code>buildTimestamp</code> — ISO-8601 build time</li>
+      <li><code>buildEnv</code> — <code>qa</code> / <code>staging</code> / <code>production</code></li>
+      <li><code>buildNumber</code></li>
+    </ul>
+    <p><code>validateRc2()</code> enforces the SHA format via regex <code>^[0-9a-f]{40}$</code> and throws a <code>StateError</code> if the build was not stamped. This method is called from the <code>CrashlyticsVerificationService</code> so that RC2 builds with missing SHAs fail visibly in QA telemetry rather than silently shipping an unverified candidate.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Crashlytics breadcrumbs</div>
+    <p><code>CrashlyticsVerificationService</code> sets 4 custom keys on startup:</p>
+    <ul>
+      <li><code>build_sha</code> — from <code>QaReleaseIdentity.buildSha</code></li>
+      <li><code>build_env</code> — from <code>QaReleaseIdentity.buildEnv</code></li>
+      <li><code>build_timestamp</code></li>
+      <li><code>build_number</code></li>
+    </ul>
+    <p>These keys appear on every Crashlytics crash report, making it trivially easy to identify which build a crash came from during the physical device certification run.</p>
+  </div>
+</div>
+
+<!-- §29 Release Validation Scripts -->
+<div class="section" id="s29">
+  <div class="section-hd">
+    <span class="sec-num">29</span>
+    <span class="sec-title">Release Validation Scripts</span>
+    <span class="badge bp">RC2 New</span>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Script</th><th>Purpose</th><th>Key behaviour</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>scripts/validate_yohpal_live_1_0j_rc2.sh</code></td>
+          <td>62-check code completeness validator</td>
+          <td>Uses <code>PASS=$((PASS+1))</code> (not <code>((PASS++))</code>) to avoid <code>set -e</code> exit-on-zero arithmetic. Checks file existence, grep patterns, and JSON schema fields.</td>
+        </tr>
+        <tr>
+          <td><code>scripts/freeze_yohpal_live_1_0j_rc2.sh</code></td>
+          <td>RC2 release freeze</td>
+          <td>Runs the validator, then stamps the current git SHA into <code>20-governance/freeze.json</code>. Fails if validation score is below threshold.</td>
+        </tr>
+        <tr>
+          <td><code>scripts/certification/verify_1_0j_rc2_candidate.sh</code></td>
+          <td>Release candidate gate</td>
+          <td>Checks: release branch name, git SHA format, clean working tree, and presence of annotated tag. All 4 must pass for GO status.</td>
+        </tr>
+        <tr>
+          <td><code>scripts/certification/check_feed_duplicates.py</code></td>
+          <td>No-repeat feed CSV audit</td>
+          <td>Parses a CSV of 100 feed events; asserts ≥100 rows and zero duplicate <code>videoId</code> values. Run against the physical device certification CSV exports.</td>
+        </tr>
+        <tr>
+          <td><code>scripts/certification/validate_1_0j_rc2_evidence.sh</code></td>
+          <td>Evidence directory validator</td>
+          <td>Checks all 21 evidence subdirectory structures exist and contain required files/CSVs.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §30 RC2 Certification Pack -->
+<div class="section" id="s30">
+  <div class="section-hd">
+    <span class="sec-num">30</span>
+    <span class="sec-title">RC2 Physical Device &amp; Cross-Device Certification Pack</span>
+    <span class="badge bp">RC2 New</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Required physical devices</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Device</th><th>OS</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>Primary Android (e.g. Samsung Galaxy)</td><td>Android 12+</td><td>Primary Android certification run</td></tr>
+          <tr><td>Secondary Android (e.g. Pixel)</td><td>Android 11+</td><td>Cross-device sync source (Device A)</td></tr>
+          <tr><td>Primary iPhone (e.g. iPhone 13+)</td><td>iOS 16+</td><td>Primary iOS certification run</td></tr>
+          <tr><td>Secondary iPhone (e.g. iPhone SE)</td><td>iOS 15+</td><td>Cross-device sync target (Device B)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">24 Certification Gates</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Gate ID</th><th>Name</th><th>Pass Criterion</th></tr></thead>
+        <tbody>
+          <tr><td><code>RC2-CAND-001</code></td><td>Immutable candidate</td><td>Annotated tag, clean tree, SHA stamped in QaReleaseIdentity</td></tr>
+          <tr><td><code>RC2-ID-001</code></td><td>Creator identity block</td><td>All 4 ValueKeys present; <code>onOpenProfile</code> fires; Semantics label correct</td></tr>
+          <tr><td><code>RC2-ID-002</code></td><td>Creator identity — empty username guard</td><td>@username row absent when username is empty string</td></tr>
+          <tr><td><code>RC2-GRID-001</code></td><td>Creator profile grid — render</td><td>Grid renders with correct thumbnail images; all 4 state ValueKeys present</td></tr>
+          <tr><td><code>RC2-GRID-002</code></td><td>Creator profile grid — pagination</td><td>Scrolling to last 6 items triggers <code>onLoadMore</code></td></tr>
+          <tr><td><code>RC2-CAT-001</code></td><td>Category privacy — visitor</td><td>Visitor sees exactly 5 public categories; owner-only tabs hidden</td></tr>
+          <tr><td><code>RC2-CAT-002</code></td><td>Category privacy — owner</td><td>Owner sees all 16 categories</td></tr>
+          <tr><td><code>RC2-CAT-003</code></td><td>Category access — backend denial</td><td>Visitor request to <code>drafts</code> → PERMISSION_DENIED error</td></tr>
+          <tr><td><code>RC2-NR-REC-001</code></td><td>Recommended 100-video no-repeat</td><td>100 videos scrolled; zero duplicate videoIds in CSV; <code>check_feed_duplicates.py</code> passes</td></tr>
+          <tr><td><code>RC2-NR-FOL-001</code></td><td>Following 100-video no-repeat</td><td>Same test on Following feed; zero duplicates</td></tr>
+          <tr><td><code>RC2-NR-PERSIST-001</code></td><td>Restart persistence</td><td>After app restart, previously seen videos do not reappear in first 30 items</td></tr>
+          <tr><td><code>RC2-NR-XDEV-001</code></td><td>Cross-device sync</td><td>Videos seen on Device A do not appear on Device B after sync (<code>ExposureSyncReceipt</code> returned)</td></tr>
+          <tr><td><code>RC2-NR-REPLAY-001</code></td><td>Intentional replay — creator profile</td><td>Video seen in feed reappears when browsing creator's profile</td></tr>
+          <tr><td><code>RC2-NR-REPLAY-002</code></td><td>Intentional replay — search</td><td>Seen video found in search results</td></tr>
+          <tr><td><code>RC2-IOS-FEED-001</code></td><td>iOS feed-category parity</td><td>Both Recommended and Following tabs visible on iOS; Trending absent</td></tr>
+          <tr><td><code>RC2-AND-FEED-001</code></td><td>Android feed-category parity</td><td>Both tabs visible on Android; same ValueKeys present</td></tr>
+          <tr><td><code>RC2-FEED-REGRESSION-001</code></td><td>Immersive-feed regression</td><td>Core feed functions (play, like, share, comments, follow) unaffected by RC2 changes</td></tr>
+          <tr><td><code>RC2-AGG-001</code></td><td>Creator aggregates</td><td><code>aggregateMatches()</code> passes within 5% tolerance on live data</td></tr>
+          <tr><td><code>RC2-AGG-002</code></td><td>Engagement reconciliation</td><td>Like/save counts in Firestore match counts in <code>EngagementCounts</code> after 10 interactions</td></tr>
+          <tr><td><code>RC2-MINOR-001</code></td><td>Minor safety — publication gate</td><td><code>MinorPublicationController.evaluateGate()</code> blocks <code>adultsOnly</code> content for verified minors</td></tr>
+          <tr><td><code>RC2-A11Y-001</code></td><td>Accessibility — VoiceOver / TalkBack</td><td>Creator identity Semantics label read correctly; feed-category Semantics container found</td></tr>
+          <tr><td><code>RC2-CRASH-001</code></td><td>Crashlytics breadcrumbs</td><td>All 4 custom keys (<code>build_sha</code>, <code>build_env</code>, <code>build_timestamp</code>, <code>build_number</code>) appear in Firebase Crashlytics</td></tr>
+          <tr><td><code>RC2-SEC-001</code></td><td>Security</td><td>No hardcoded secrets; API keys from environment; no cleartext HTTP</td></tr>
+          <tr><td><code>RC2-DEFECT-001</code></td><td>Defect register</td><td><code>20-defects/defects.csv</code> present; all P0/P1 defects have owner and resolution date</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Evidence directory structure — 21 subdirs</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Dir</th><th>Contents</th></tr></thead>
+        <tbody>
+          <tr><td><code>01-repository</code></td><td>Git log, annotated tag, SHA proof</td></tr>
+          <tr><td><code>02-creator-identity</code></td><td>Screenshots with 4 ValueKeys highlighted; VoiceOver/TalkBack recordings</td></tr>
+          <tr><td><code>03-creator-grid</code></td><td>Pagination trigger screenshots; state-variant screenshots</td></tr>
+          <tr><td><code>04-category-privacy</code></td><td>Visitor view (5 tabs) and owner view (16 tabs) side-by-side</td></tr>
+          <tr><td><code>05-backend-access-control</code></td><td>PERMISSION_DENIED logs for visitor → drafts requests</td></tr>
+          <tr><td><code>06-recommended-100</code></td><td><code>feed-sequence.csv</code> with 100+ rows; <code>check_feed_duplicates.py</code> output</td></tr>
+          <tr><td><code>07-following-100</code></td><td>Same for Following feed</td></tr>
+          <tr><td><code>08-restart-persistence</code></td><td>Before/after restart comparison; SharedPreferences dump</td></tr>
+          <tr><td><code>09-cross-device-sync</code></td><td>Device A log → sync → Device B feed; <code>ExposureSyncReceipt</code> JSON</td></tr>
+          <tr><td><code>10-intentional-replay</code></td><td>Creator profile and search replay recordings</td></tr>
+          <tr><td><code>11-ios-parity</code></td><td>iOS screenshots: Recommended + Following visible, Trending absent</td></tr>
+          <tr><td><code>12-android-parity</code></td><td>Android screenshots: same parity verified</td></tr>
+          <tr><td><code>13-feed-regression</code></td><td>Like/comment/share/follow smoke-test recordings</td></tr>
+          <tr><td><code>14-creator-aggregates</code></td><td><code>aggregateMatches()</code> output logs; tolerance report</td></tr>
+          <tr><td><code>15-engagement-reconciliation</code></td><td>10-interaction before/after count comparison</td></tr>
+          <tr><td><code>16-minor-safety</code></td><td>Gate blocker logs for minor + adultsOnly; consent flow recording</td></tr>
+          <tr><td><code>17-accessibility</code></td><td>VoiceOver/TalkBack audit recordings; Semantics dump</td></tr>
+          <tr><td><code>18-crashlytics</code></td><td>Firebase Crashlytics screenshot showing all 4 custom keys</td></tr>
+          <tr><td><code>19-security</code></td><td>Secret scan output; HTTP policy check</td></tr>
+          <tr><td><code>20-defects</code></td><td><code>defects.csv</code> — all known defects with priority, owner, resolution</td></tr>
+          <tr><td><code>21-governance</code></td><td><code>release-review-board-resolution.md</code> — board sign-off template</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Release Review Board — binding decision</div>
+    <p>The governance document at <code>21-governance/release-review-board-resolution.md</code> requires sign-off from 6 boards (Architecture, Release, Security, AI Governance, Platform Operations, Executive Sponsor) and a binding decision of exactly one:</p>
+    <ul>
+      <li><strong>GO</strong> — all 24 gates pass; proceed to approved rollout tier</li>
+      <li><strong>CONDITIONAL GO</strong> — gates pass with time-boxed remediation conditions; each condition requires owner, deadline, metric, monitoring method, rollback trigger</li>
+      <li><strong>NO-GO</strong> — one or more critical gates failed; return to development</li>
+    </ul>
+    <p>Approved rollout tiers: Internal QA only → Allow-listed users → Controlled percentage rollout → Wider rollout.</p>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- EPILOGUE — KNOWN GAPS                                                   -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+
+<div class="part-divider">
+  <span class="part-label">Epilogue</span>
+  <div class="part-line"></div>
+  <span class="part-title">Known Gaps &amp; Pending Work</span>
+</div>
+
+<div class="section" id="s31">
+  <div class="section-hd">
+    <span class="sec-num">31</span>
+    <span class="sec-title">Known Gaps &amp; Pending Work</span>
+    <span class="badge bw">Action Required</span>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Area</th><th>Gap</th><th>Fix</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>BUG-001</td>
+          <td>Navigation / UI</td>
+          <td><strong>Duplicate search + live TV buttons</strong> on Discover tab — <code>DiscoverHubScreen</code> Stack overlay plus <code>VideoFeedScreen</code> top bar both render Search and Live TV <code>IconButton</code>s simultaneously</td>
+          <td>Remove the overlay <code>IconButton</code>s from <code>DiscoverHubScreen</code></td>
+          <td><span class="badge bg">P1 — RC2 blocker</span></td>
+        </tr>
+        <tr>
+          <td>BUG-002</td>
+          <td>Feed / Dead Code</td>
+          <td><strong>Dead trending branch</strong> — <code>VideoFeedScreen._switchFeed()</code> else branch calls <code>ctrl.startTrendingFeed()</code> which is unreachable since <code>FeedCategory</code> has only 2 values</td>
+          <td>Delete the <code>else</code> branch and the unused <code>VideoFeedRepository.trendingFeed()</code> method</td>
+          <td><span class="badge bw">P2 — cleanup</span></td>
+        </tr>
+        <tr>
+          <td>BUG-003</td>
+          <td>Age Rating</td>
+          <td><strong>Duplicate <code>VideoAgeRating</code> enum</strong> — defined in both <code>features/feed/domain/video_age_rating.dart</code> (canonical RC2) and <code>features/minor_safety/domain/minor_content_classification.dart</code> (older copy). <code>AgeRatingSelector</code> imports the old copy.</td>
+          <td>Remove the <code>minor_safety</code> copy; redirect all importers to the canonical location</td>
+          <td><span class="badge bw">P2 — cleanup</span></td>
+        </tr>
+        <tr>
+          <td>GAP-001</td>
+          <td>Safety / Feed</td>
+          <td><strong>No feed-side age filtering</strong> — mature and adultsOnly videos are not filtered for under-age viewers in <code>VideoFeedRepository</code> or <code>get-feed.ts</code></td>
+          <td>Add viewer-age-aware filtering in feed queries and/or the <code>get-feed.ts</code> Callable</td>
+          <td><span class="badge bg">P1 — before wider rollout</span></td>
+        </tr>
+        <tr>
+          <td>GAP-002</td>
+          <td>Upload Pipeline</td>
+          <td><strong>Missing <code>ageRating</code> field in upload trigger</strong> — <code>processVideoUpload.ts</code> does not set <code>ageRating</code> or <code>classificationCompleted</code>, leaving videos with no classification</td>
+          <td>Add <code>ageRating: 'general'</code> and <code>classificationCompleted: false</code> defaults in the trigger's Firestore write</td>
+          <td><span class="badge bw">P2</span></td>
+        </tr>
+        <tr>
+          <td>GAP-003</td>
+          <td>Theme System</td>
+          <td><strong>Login/signup screens hardcoded</strong> — not themed with the gold/black brand system. Phase 10 theme coverage is ~48%; login/signup are the highest-priority gap.</td>
+          <td>Apply <code>YohPalBrandColors</code> token system to auth screens</td>
+          <td><span class="badge bw">P2 — Phase 10</span></td>
+        </tr>
+        <tr>
+          <td>GAP-004</td>
+          <td>Backend</td>
+          <td><strong>Pending Cloud Functions</strong> — gift→earnings pipeline, wallet aggregator, ad billing, and M-Pesa integration are not yet implemented</td>
+          <td>Implement in a separate sprint before Phase 8 (Controlled Pilot)</td>
+          <td><span class="badge bw">P2 — Phase 8 pre-req</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alert aw">
+    <strong>BUG-001 (duplicate buttons) and GAP-001 (feed-side age filtering) should be resolved before the RC2 release candidate is submitted to the Release Review Board.</strong> The remaining items are cleanup or Phase 8 pre-requisites.
+  </div>
+</div>
+
+</div><!-- /.page -->
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const saved = localStorage.getItem('yp-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+});
+</script>
+
+</body>
+</html>

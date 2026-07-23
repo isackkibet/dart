@@ -1,0 +1,49 @@
+--- PAGE 1 ---
+Daniel Macharia <danielmacharia43@gmail.com>
+YOHPAL LIVE STREAMING PHASE LS-4 — Controlled Streaming QA Report
+Daniel Macharia <danielmacharia43@gmail.com> Mon, 6 Jul at 19:37
+To: <daniel@ics.ac.ke>
+I cannot truthfully execute LS-4 because I do not have access to the developers’ Git repo, WebRTC runtime, feature flags, Android/iPhone
+devices, SFU logs, or 30-minute streaming test evidence.
+Based on the latest Live Streaming Gap Report, the module was still not ready for integration/testing because the Flutter client had
+unresolved blockers, even though the server layer was complete.
+YOHPAL LIVE STREAMING PHASE LS-4 — Controlled Streaming QA
+Report
+1. Required Evidence
+Item Evidence Status
+LS-2 signed validation report Developer to attach Pending
+LS-3 integration commit hash Developer to provide Pending
+Feature flag proof Screenshot/config/log Pending
+Creator Go Live proof Screenshot/video/log Pending
+Viewer receives media proof Screenshot/video/log Pending
+Chat proof Screenshot/log Pending
+Gift gate proof Gift hidden/visible based on flag Pending
+Android streaming proof Device screenshot/log Pending
+iPhone streaming proof Device screenshot/log Pending
+30-minute stream stability proof Test log/report Pending
+2. QA Gates
+Gate Expected Result Status
+
+--- PAGE 2 ---
+Feature flag disabled Live module hidden in production Pending
+Feature flag enabled Live module visible for QA Pending
+Creator starts live Broadcaster publishes media Pending
+Viewer joins live Viewer receives remote track Pending
+Chat works Messages display correctly Pending
+Gift gate works Gift feature obeys flag Pending
+Creator ends stream Stream closes cleanly Pending
+Android test passes Stable streaming Pending
+iPhone test passes Stable streaming Pending
+30-minute stream passes No crash, no freeze, no media loss Pending
+3. Executive Recommendation
+Current status:
+Not ready for controlled internal QA until LS-2 and LS-3 evidence is attached.
+Live Streaming must remain behind a disabled production feature flag until all QA gates pass.
+4. Final Decision
+Choose after evidence is returned:
+Ready for Controlled Internal QA
+Ready after minor fixes
+Not ready
+Next Smart Move
+Send this LS-4 report to the developers and require the missing evidence. If all LS-4 gates pass, proceed to
+LS-5 — Live Streaming Pilot Activation behind a controlled feature flag.

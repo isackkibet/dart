@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+  <!-- Local development only.
+       Allows trusting user-installed CA certificates for the self-signed nginx cert. -->
+  <debug-overrides>
+    <trust-anchors>
+      <certificates src="user" />
+      <certificates src="system" />
+    </trust-anchors>
+  </debug-overrides>
+
+  <!-- Keep cleartext blocked. The local stack should use HTTPS/WSS. -->
+  <base-config cleartextTrafficPermitted="false">
+    <trust-anchors>
+      <certificates src="system" />
+    </trust-anchors>
+  </base-config>
+</network-security-config>

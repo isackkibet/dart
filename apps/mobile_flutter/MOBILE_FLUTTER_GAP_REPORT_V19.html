@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>YohPal Mobile Flutter — Gap Report v19</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13px;line-height:1.55;color:#0f172a;background:#fff;padding:28px 32px}
+@media print{body{padding:0}.no-print{display:none}table{page-break-inside:avoid}}
+
+.report-title{font-size:24px;font-weight:800;margin-bottom:4px}
+.report-title span{color:#b91c1c}
+.report-meta{font-size:12px;color:#374151;margin-bottom:4px}
+.report-meta strong{color:#15803d}
+.report-date{font-size:12px;color:#374151;text-align:right;line-height:1.8}
+.header-row{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #e5e7eb;padding-bottom:12px;margin-bottom:18px}
+.btn-row{display:flex;gap:6px;margin-top:4px;justify-content:flex-end}
+button.print-btn{background:#0f172a;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:11px}
+button.dl-btn{background:#b91c1c;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:11px}
+
+.metric-row1{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.m1-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px}
+.m1-lbl{font-size:10.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.m1-val{font-size:18px;font-weight:900}
+.m1-val.red{color:#b91c1c}.m1-val.amber{color:#d97706}.m1-val.green{color:#15803d}
+.m1-sub{font-size:11px;color:#6b7280;margin-top:2px}
+
+.metric-row2{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+.m2-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px}
+.m2-big{font-size:32px;font-weight:900;line-height:1;margin-bottom:4px}
+.m2-lbl{font-size:10.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px}
+.m2-sub{font-size:10.5px;color:#9ca3af;margin-top:3px}
+.red{color:#b91c1c}.amber{color:#d97706}.green{color:#15803d}.blue{color:#1d4ed8}.purple{color:#7c3aed}
+
+.sec-head{border-left:4px solid #15803d;padding:8px 12px;font-size:14px;font-weight:800;margin:22px 0 10px;background:#f0fdf4;border-radius:0 4px 4px 0}
+.sec-head.red{border-color:#b91c1c;background:#fef2f2}
+.sec-head.orange{border-color:#ea580c;background:#fff7ed}
+.sec-head.blue{border-color:#1d4ed8;background:#eff6ff}
+.sec-head.slate{border-color:#475569;background:#f8fafc}
+.sec-head.purple{border-color:#7c3aed;background:#faf5ff}
+
+code{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:3px;padding:1px 5px;font-size:11.5px;font-family:'SF Mono',Menlo,Monaco,Consolas,monospace}
+
+.finding-card{border:1px solid #e5e7eb;border-radius:8px;margin-bottom:14px;overflow:hidden}
+.finding-header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #e5e7eb}
+.finding-header.critical{background:#fef2f2;border-color:#fca5a5}
+.finding-header.high{background:#fff7ed;border-color:#fed7aa}
+.finding-header.design{background:#f0fdf4;border-color:#86efac}
+.finding-num{font-size:18px;font-weight:900;color:#6b7280;min-width:24px}
+.finding-title{font-size:13.5px;font-weight:800;flex:1}
+.finding-body{padding:14px}
+.finding-body p{font-size:12.5px;color:#374151;margin-bottom:8px;line-height:1.65}
+.finding-body ul{padding-left:18px;font-size:12.5px;color:#374151;margin-bottom:8px}
+.finding-body ul li{margin-bottom:4px}
+.finding-body h5{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#6b7280;margin:12px 0 5px}
+
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:700}
+.b-critical{background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5}
+.b-high{background:#ffedd5;color:#c2410c;border:1px solid #fed7aa}
+.b-design{background:#dcfce7;color:#15803d;border:1px solid #86efac}
+.b-code{background:#ede9fe;color:#6d28d9}
+.b-index{background:#dbeafe;color:#1d4ed8}
+.b-op{background:#fef9c3;color:#854d0e}
+
+table.dt{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:6px}
+table.dt th{background:#f9fafb;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#6b7280;padding:8px 10px;text-align:left;border-bottom:1px solid #e5e7eb}
+table.dt td{padding:8px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+table.dt tr:last-child td{border-bottom:none}
+
+.s{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:700}
+.s-ok{background:#dcfce7;color:#15803d}
+.s-bug{background:#fee2e2;color:#b91c1c}
+.s-warn{background:#fef9c3;color:#854d0e}
+
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.sum-card{border-radius:8px;padding:14px 16px;border:1px solid}
+.sum-card.critical{background:#fef2f2;border-color:#fca5a5}
+.sum-card.high{background:#fff7ed;border-color:#fed7aa}
+.sum-card.design{background:#f0fdf4;border-color:#86efac}
+.sum-num{font-size:30px;font-weight:900;margin-bottom:2px}
+.sum-card.critical .sum-num{color:#b91c1c}
+.sum-card.high .sum-num{color:#c2410c}
+.sum-card.design .sum-num{color:#15803d}
+.sum-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#6b7280}
+.sum-items{font-size:11px;color:#374151;margin-top:5px;line-height:1.7}
+
+table.master{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:6px}
+table.master th{background:#0f172a;color:#fff;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:8px 10px;text-align:left}
+table.master td{padding:8px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+table.master tr:last-child td{border-bottom:none}
+table.master td.num{text-align:center;font-weight:700;width:30px;color:#6b7280}
+
+.fix-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+.verdict{border:2px solid #fca5a5;border-radius:8px;padding:16px 18px;background:#fef2f2;margin-top:6px}
+.verdict-text{font-size:13px;line-height:1.75;color:#0f172a}
+.verdict-text strong{color:#b91c1c}
+
+footer{margin-top:28px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:10.5px;color:#9ca3af;text-align:center;line-height:1.8}
+</style>
+<script>
+function downloadHtml(){
+  const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='MOBILE_FLUTTER_GAP_REPORT_V19.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="header-row">
+  <div>
+    <div class="report-title">YohPal Mobile Flutter — Gap Report <span>v19</span></div>
+    <div class="report-meta">
+      Firebase: <strong>yohlab</strong> &nbsp;·&nbsp;
+      Branch: <strong>flutter_app</strong> &nbsp;·&nbsp;
+      Base: <strong>v18 (Phase 1R · Context Intelligence)</strong>
+    </div>
+    <div class="report-meta" style="margin-top:3px">
+      Scope: Zero-Wait · Follow · Following Feed · YCIOS · AI Studio &nbsp;·&nbsp;
+      Open: <strong style="color:#b91c1c">2 Critical</strong> &nbsp;
+      <strong style="color:#c2410c">3 High</strong> &nbsp;
+      <strong style="color:#15803d">1 By Design</strong>
+    </div>
+  </div>
+  <div class="report-date">
+    Date: 2026-07-02
+    <div class="btn-row">
+      <button class="print-btn no-print" onclick="window.print()">Print / PDF</button>
+      <button class="dl-btn no-print" onclick="downloadHtml()">&#8595; Save HTML</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOP METRICS ── -->
+<div class="metric-row1">
+  <div class="m1-card">
+    <div class="m1-lbl">Zero-Wait Engine</div>
+    <div class="m1-val red">MISSING</div>
+    <div class="m1-sub">Adaptive components not in codebase</div>
+  </div>
+  <div class="m1-card">
+    <div class="m1-lbl">Video Feed</div>
+    <div class="m1-val amber">PARTIAL</div>
+    <div class="m1-sub">Suggested ✓ · Trending ✓ · Following empty</div>
+  </div>
+  <div class="m1-card">
+    <div class="m1-lbl">YCIOS Workspace</div>
+    <div class="m1-val red">BROKEN</div>
+    <div class="m1-sub">PERMISSION_DENIED on every project open</div>
+  </div>
+  <div class="m1-card">
+    <div class="m1-lbl">AI Creator Studio</div>
+    <div class="m1-val amber">LOCKED</div>
+    <div class="m1-sub">Mark Ready gated on 5 AI tasks</div>
+  </div>
+</div>
+
+<div class="metric-row2">
+  <div class="m2-card">
+    <div class="m2-big red">2</div>
+    <div class="m2-lbl">Critical</div>
+    <div class="m2-sub">ZeroWait · _preloadAround</div>
+  </div>
+  <div class="m2-card">
+    <div class="m2-big amber">3</div>
+    <div class="m2-lbl">High</div>
+    <div class="m2-sub">Follow · Following feed · YCIOS</div>
+  </div>
+  <div class="m2-card">
+    <div class="m2-big green">1</div>
+    <div class="m2-lbl">By Design</div>
+    <div class="m2-sub">AI Studio checklist gate</div>
+  </div>
+  <div class="m2-card">
+    <div class="m2-big" style="color:#374151">4</div>
+    <div class="m2-lbl">Files affected</div>
+    <div class="m2-sub">controller · screen · repo · widget</div>
+  </div>
+  <div class="m2-card">
+    <div class="m2-big blue">1</div>
+    <div class="m2-lbl">Index missing</div>
+    <div class="m2-sub">yciosAssets creatorId+projectId</div>
+  </div>
+</div>
+
+<!-- ── SUMMARY ── -->
+<div class="sec-head red">Finding Summary</div>
+<div class="summary-grid">
+  <div class="sum-card critical">
+    <div class="sum-num">2</div>
+    <div class="sum-lbl">Critical — Playback</div>
+    <div class="sum-items">
+      ZeroWait adaptive controller not present<br>
+      _preloadAround fetches auth token every swipe<br>
+      All videos play 360p regardless of network<br>
+      markBroken() has no try/catch — owners can<br>permanently mark their own videos broken
+    </div>
+  </div>
+  <div class="sum-card high">
+    <div class="sum-num">3</div>
+    <div class="sum-lbl">High — Feed + YCIOS</div>
+    <div class="sum-items">
+      Follow button never toggles to "Following"<br>
+      Following feed queries non-existent field<br>
+      YCIOS assets PERMISSION_DENIED on load
+    </div>
+  </div>
+  <div class="sum-card design">
+    <div class="sum-num">1</div>
+    <div class="sum-lbl">By Design — AI Studio</div>
+    <div class="sum-items">
+      Mark Ready locked until all 5 AI tasks complete<br>
+      Works in mock mode — run all 5 to unlock<br>
+      Permanent fix: set YOHPAL_BRAIN_API_KEY
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ FINDING 1 ═══ -->
+<div class="sec-head red">Finding 1 — ZeroWait Adaptive Controller Not Present (Critical)</div>
+<div class="finding-card">
+  <div class="finding-header critical">
+    <div class="finding-num">1</div>
+    <div class="finding-title">zero_wait_playback_controller.dart — Adaptive Components Absent — All Videos 360p</div>
+    <span class="badge b-critical">CRITICAL</span>
+    <span class="badge b-code">Code</span>
+  </div>
+  <div class="finding-body">
+    <p>The controller file contains only the minimal base: <code>warmVideo(url)</code>,
+    <code>preloadAround(urlFor)</code>, <code>play()</code>, <code>pause()</code>,
+    <code>disposeVideo()</code>, <code>disposeFarAway()</code>. Network detection,
+    quality selection, and WiFi-triggered re-warm are entirely absent. Every video warms
+    at whatever URL <code>VideoModel.hlsUrl</code> resolves to — always
+    <code>hlsLowUrl</code> (360p) because <code>fromMap()</code> picks it first.</p>
+
+    <h5>Components Missing vs. Phase 1N Spec</h5>
+    <table class="dt">
+      <thead><tr><th>Component</th><th>Spec behaviour</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td><code>SmartNetworkProfiler</code></td><td>wifi→5 preloads · 4G→3 · 3G→1 · offline→0</td><td><span class="s s-bug">MISSING</span></td></tr>
+        <tr><td><code>AdaptiveVideoUrlResolver</code></td><td>cellular→hlsLowUrl (360p) · wifi→hlsHdUrl (720p)</td><td><span class="s s-bug">MISSING</span></td></tr>
+        <tr><td><code>_initConnectivity()</code></td><td>Reads network on startup, subscribes to changes</td><td><span class="s s-bug">MISSING</span></td></tr>
+        <tr><td><code>_onWifi</code> bool + <code>isOnWifi</code> getter</td><td>Current tier exposed to diagnostics</td><td><span class="s s-bug">MISSING</span></td></tr>
+        <tr><td><code>warmVideoAdaptive(videoData)</code></td><td>Resolves URL by tier before warming</td><td><span class="s s-bug">MISSING</span></td></tr>
+        <tr><td><code>preloadAroundAdaptive(dataFor)</code></td><td>Preloads neighbours at correct quality</td><td><span class="s s-bug">MISSING</span></td></tr>
+        <tr><td><code>_onQualityTierChanged()</code></td><td>Re-warms idle videos when WiFi toggles</td><td><span class="s s-bug">MISSING</span></td></tr>
+        <tr><td><code>_videoData</code> map</td><td>Caches raw video data for re-warm without re-passing</td><td><span class="s s-bug">MISSING</span></td></tr>
+        <tr><td><code>dynamicPreloadAhead</code> · <code>updatePreloadAhead()</code></td><td>Adjustable preload window driven by profiler</td><td><span class="s s-ok">PRESENT</span></td></tr>
+        <tr><td><code>warmVideo(url)</code> · <code>play()</code> · <code>pause()</code> · dispose</td><td>Core warm/play/pause/dispose</td><td><span class="s s-ok">PRESENT</span></td></tr>
+      </tbody>
+    </table>
+
+    <p>Note: <code>smart_network_profiler.dart</code> and <code>adaptive_video_url_resolver.dart</code>
+    both exist as standalone files — neither is imported by the controller.</p>
+
+    <div class="fix-row">
+      <span class="badge b-code">Add adaptive components to zero_wait_playback_controller.dart</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ FINDING 2 ═══ -->
+<div class="sec-head red">Finding 2 — _preloadAround() Uses Auth Header + Non-Adaptive Call (Critical)</div>
+<div class="finding-card">
+  <div class="finding-header critical">
+    <div class="finding-num">2</div>
+    <div class="finding-title">video_feed_screen.dart — Auth Token Fetched Every Swipe · Always 360p · markBroken Unguarded</div>
+    <span class="badge b-critical">CRITICAL</span>
+    <span class="badge b-code">Code</span>
+  </div>
+  <div class="finding-body">
+    <h5>Defect A — Firebase Auth token fetch on every swipe</h5>
+    <p><code>_preloadAround()</code> calls <code>FirebaseAuth.instance.currentUser?.getIdToken()</code>
+    on every page swipe and passes the result as a <code>Bearer</code> header. Firebase Storage
+    HLS download URLs embed their own <code>?token=</code> query param — the Bearer header is
+    not only unnecessary but causes <strong>HTTP 402</strong> errors on HLS segment requests.
+    The async token fetch also adds ~200 ms latency before the first warm call fires.</p>
+
+    <h5>Defect B — Always calls non-adaptive preloadAround(urlFor)</h5>
+    <p>The callback resolves every video to <code>VideoModel.fromMap(id, data).hlsUrl</code>,
+    which always returns <code>hlsLowUrl</code> (360p) because <code>VideoModel.fromMap()</code>
+    picks the lowest-latency URL regardless of network. Even after the adaptive controller is
+    restored, this call site would still lock every device to 360p.</p>
+
+    <h5>Defect C — markBroken() has no try/catch</h5>
+    <p><code>VideoFeedRepository.markBroken()</code> issues an unconditional Firestore update.
+    The <code>videos/{id}</code> rule only allows updates when <code>request.auth.uid == resource.data.userId</code>.
+    When a video owner watches their own video and the hardware decoder fails,
+    <code>markBroken()</code> <strong>succeeds</strong> and permanently sets <code>broken: true</code>
+    on that document. Non-owners get PERMISSION_DENIED but the unhandled exception surfaces as
+    an unhandled future error. A try/catch is needed to silently drop both cases.</p>
+
+    <h5>Diagnostic Side-Effect</h5>
+    <p>The <code>onFirstFrame</code> diagnostic records <code>networkType: 'unknown'</code>
+    hardcoded. Without the <code>isOnWifi</code> getter from the adaptive controller, the
+    field can never be populated correctly.</p>
+
+    <div class="fix-row">
+      <span class="badge b-code">Replace _preloadAround() with preloadAroundAdaptive() — no auth header</span>
+      <span class="badge b-code">Add try/catch to markBroken() in video_feed_repository.dart</span>
+      <span class="badge b-code">Wire isOnWifi into onFirstFrame networkType diagnostic</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ FINDING 3 ═══ -->
+<div class="sec-head orange">Finding 3 — Follow Button Never Toggles to "Following" (High)</div>
+<div class="finding-card">
+  <div class="finding-header high">
+    <div class="finding-num">3</div>
+    <div class="finding-title">Follow State Hardcoded false — No Live Stream in Rail Widget</div>
+    <span class="badge b-high">HIGH</span>
+    <span class="badge b-code">Code</span>
+  </div>
+  <div class="finding-body">
+    <h5>Defect A — _onFollow() always passes currentlyFollowing: false</h5>
+    <p>In <code>video_feed_screen.dart:104</code>, <code>_onFollow</code> calls
+    <code>toggleFollow(currentlyFollowing: false, …)</code> unconditionally. Every tap
+    calls <code>follow()</code> — never <code>unfollow()</code> — regardless of the actual
+    follow state. Tapping twice creates duplicate <code>/follows/</code> documents.</p>
+
+    <h5>Defect B — VideoEngagementRailWidget has no follow-state stream</h5>
+    <p>The follow button is rendered from a <code>const</code> static list with hardcoded
+    label <code>'Follow'</code> and icon <code>Icons.person_add_alt</code>. There is no
+    <code>StreamBuilder</code> on <code>FollowRepository.watchIsFollowing()</code> anywhere
+    in the widget tree, so the button never changes appearance after a follow action.</p>
+    <p><code>FollowRepository.watchIsFollowing()</code> already exists and returns
+    <code>Stream&lt;bool&gt;</code> — it just needs wiring into the rail and the callback.</p>
+
+    <h5>Fix</h5>
+    <ul>
+      <li>Wrap the follow button in <code>VideoEngagementRailWidget</code> in a
+      <code>StreamBuilder&lt;bool&gt;</code> on <code>FollowRepository.watchIsFollowing(followerUid, creatorUid)</code></li>
+      <li>When <code>isFollowing == true</code>: show <code>Icons.person_remove</code>,
+      label <code>'Following'</code>, tint green</li>
+      <li>Pass the live <code>isFollowing</code> value down through the <code>onFollow</code>
+      callback to <code>_onFollow</code>, then forward it to
+      <code>toggleFollow(currentlyFollowing: isFollowing)</code></li>
+    </ul>
+
+    <div class="fix-row">
+      <span class="badge b-code">StreamBuilder in VideoEngagementRailWidget</span>
+      <span class="badge b-code">Fix _onFollow currentlyFollowing param</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ FINDING 4 ═══ -->
+<div class="sec-head orange">Finding 4 — Following Feed Always Empty (High)</div>
+<div class="finding-card">
+  <div class="finding-header high">
+    <div class="finding-num">4</div>
+    <div class="finding-title">followingFeed() Queries followerIds — A Field That Is Never Written</div>
+    <span class="badge b-high">HIGH</span>
+    <span class="badge b-code">Query Redesign</span>
+    <span class="badge b-index">Index</span>
+  </div>
+  <div class="finding-body">
+    <p><code>VideoFeedRepository.followingFeed()</code> queries the <code>videos</code>
+    collection with <code>.where('followerIds', arrayContains: userId)</code>.
+    No video document has a <code>followerIds</code> field — the query always returns
+    zero results.</p>
+    <p><code>FollowRepository.follow()</code> writes a document to
+    <code>/follows/{followerUid}_{creatorUid}</code> and increments
+    <code>creatorProfiles/{uid}.followerCount</code>. It never writes to any video document.
+    The <code>followerIds</code> field is structurally absent from the data model.</p>
+
+    <h5>Fix — Two-Step Query via /follows/ Collection</h5>
+    <p>First fetch followed creator UIDs from <code>/follows/</code> filtered by
+    <code>followerUid == userId</code>, then stream videos where <code>userId</code>
+    is in that set using <code>whereIn</code> (max 30 per batch). The existing
+    <code>firestore.indexes.json</code> already contains a
+    <code>videos: userId + playbackReady + timestamp</code> composite index which covers
+    this query. For &gt;30 followed creators, paginate in chunks of 30 and merge.</p>
+
+    <div class="fix-row">
+      <span class="badge b-code">Redesign followingFeed() in video_feed_repository.dart</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ FINDING 5 ═══ -->
+<div class="sec-head orange">Finding 5 — YCIOS Workspace Assets PERMISSION_DENIED (High)</div>
+<div class="finding-card">
+  <div class="finding-header high">
+    <div class="finding-num">5</div>
+    <div class="finding-title">watchProjectAssets() Missing creatorId Filter — Firestore Rule Denies Query</div>
+    <span class="badge b-high">HIGH</span>
+    <span class="badge b-code">Code</span>
+    <span class="badge b-index">Index</span>
+  </div>
+  <div class="finding-body">
+    <p><code>YciosRepository.watchProjectAssets(projectId)</code> queries
+    <code>yciosAssets</code> filtered only by <code>projectId</code>. The Firestore rule
+    at <code>firestore.rules:494</code> requires
+    <code>resource.data.creatorId == request.auth.uid</code> on every read. Because the
+    query does not include a <code>where('creatorId', isEqualTo: uid)</code> clause,
+    Firestore cannot guarantee that all returned documents satisfy the rule and rejects
+    the entire query with <strong>PERMISSION_DENIED</strong> — even for the project owner.</p>
+    <p>Compare with <code>watchProjects(creatorId)</code> and <code>watchRenderJobs(creatorId)</code>
+    — both include the <code>creatorId</code> filter and work correctly.</p>
+
+    <h5>Fix</h5>
+    <p>Add a <code>creatorId</code> parameter to <code>watchProjectAssets()</code> and
+    prepend a <code>where('creatorId', isEqualTo: creatorId)</code> clause. A new composite
+    index on <code>yciosAssets: creatorId + projectId + createdAt</code> is required — it
+    is not currently present in <code>firestore/indexes/firestore.indexes.json</code>.
+    All call sites in <code>YciosProjectDetailScreen</code> must pass
+    <code>FirebaseAuth.instance.currentUser?.uid</code>.</p>
+
+    <div class="fix-row">
+      <span class="badge b-code">Add creatorId param to watchProjectAssets() in ycios_repository.dart</span>
+      <span class="badge b-code">Update call sites in YciosProjectDetailScreen</span>
+      <span class="badge b-index">Add yciosAssets: creatorId + projectId + createdAt index</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ FINDING 6 ═══ -->
+<div class="sec-head slate">Finding 6 — AI Creator Studio "Mark Ready" Button Locked (By Design)</div>
+<div class="finding-card">
+  <div class="finding-header design">
+    <div class="finding-num">6</div>
+    <div class="finding-title">Mark Ready Gated on 5 AI Checklist Flags — Functional in Mock Mode</div>
+    <span class="badge b-design">BY DESIGN</span>
+    <span class="badge b-op">Operator Action</span>
+  </div>
+  <div class="finding-body">
+    <p>The button is intentionally disabled until all five boolean flags
+    (<code>_captionsGenerated</code>, <code>_hooksGenerated</code>, <code>_hashtagsGenerated</code>,
+    <code>_thumbnailSelected</code>, <code>_viralScoreReviewed</code>) are <code>true</code>.
+    Each flag sets to <code>true</code> only when the corresponding Firestore job document
+    reaches <code>status == 'completed'</code>.</p>
+    <p>The Cloud Function <code>processAiVideoJob</code> is deployed and running in
+    mock mode because <code>YOHPAL_BRAIN_API_KEY</code> and <code>YOHPAL_BRAIN_API_URL</code>
+    are not set in Firebase Secret Manager. Mock mode does complete jobs with generated
+    data — the button unlocks after all 5 tasks are run in sequence.</p>
+
+    <h5>To Unlock Now (Mock Mode)</h5>
+    <table class="dt">
+      <thead><tr><th>#</th><th>Task button</th><th>Required input</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>AI Captions</td><td>Language (default: en)</td></tr>
+        <tr><td>2</td><td>AI Hooks</td><td>Video topic field</td></tr>
+        <tr><td>3</td><td>AI Hashtags</td><td>Draft caption field</td></tr>
+        <tr><td>4</td><td>Viral Score</td><td>Title + Description fields</td></tr>
+        <tr><td>5</td><td>Thumbnail Ideas</td><td>Video topic field, then select one idea</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:8px">If any job returns <code>status: failed</code>, re-run that task
+    before proceeding — the flag stays <code>false</code> on failure.</p>
+
+    <h5>Permanent Fix — Live AI Mode</h5>
+    <p>Set <code>YOHPAL_BRAIN_API_KEY</code> and <code>YOHPAL_BRAIN_API_URL</code> in
+    Firebase Secret Manager (~15 min). Once set, all five tasks run against the real AI
+    and complete with real content.</p>
+
+    <div class="fix-row">
+      <span class="badge b-op">Set YOHPAL_BRAIN_API_KEY in Firebase Secret Manager</span>
+      <span class="badge b-op">Set YOHPAL_BRAIN_API_URL in Firebase Secret Manager</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ MASTER TABLE ══ -->
+<div class="sec-head blue">Prioritised Fix Plan</div>
+<table class="master">
+  <thead>
+    <tr>
+      <th class="num">#</th>
+      <th>Task</th>
+      <th>File(s)</th>
+      <th>Type</th>
+      <th>Est.</th>
+      <th>Priority</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="num">1</td>
+      <td><strong>Add adaptive components to ZeroWait controller</strong><br>
+        SmartNetworkProfiler · AdaptiveVideoUrlResolver · _initConnectivity()
+        · warmVideoAdaptive() · preloadAroundAdaptive() · _onQualityTierChanged()
+        · _videoData map · isOnWifi getter</td>
+      <td><code>zero_wait_playback_controller.dart</code></td>
+      <td><span class="badge b-code">Code</span></td>
+      <td>45 min</td>
+      <td><span class="badge b-critical">CRITICAL</span></td>
+    </tr>
+    <tr>
+      <td class="num">2</td>
+      <td><strong>Fix _preloadAround() — adaptive call, no auth token</strong><br>
+        Remove getIdToken() / Bearer header. Call preloadAroundAdaptive(dataFor).
+        Wire isOnWifi into networkType diagnostic. Add try/catch to markBroken().</td>
+      <td><code>video_feed_screen.dart</code><br><code>video_feed_repository.dart</code></td>
+      <td><span class="badge b-code">Code</span></td>
+      <td>15 min</td>
+      <td><span class="badge b-critical">CRITICAL</span></td>
+    </tr>
+    <tr>
+      <td class="num">3</td>
+      <td><strong>Wire follow-state stream into engagement rail</strong><br>
+        StreamBuilder&lt;bool&gt; on watchIsFollowing(). Toggle icon / label.
+        Pass live value through onFollow callback to toggleFollow().</td>
+      <td><code>video_engagement_rail_widget.dart</code><br><code>video_feed_screen.dart</code></td>
+      <td><span class="badge b-code">Code</span></td>
+      <td>30 min</td>
+      <td><span class="badge b-high">HIGH</span></td>
+    </tr>
+    <tr>
+      <td class="num">4</td>
+      <td><strong>Redesign followingFeed() — two-step /follows/ query</strong><br>
+        Fetch creatorIds from /follows/ where followerUid == userId,
+        then whereIn videos.userId. Existing index covers this query.</td>
+      <td><code>video_feed_repository.dart</code></td>
+      <td><span class="badge b-code">Code</span></td>
+      <td>25 min</td>
+      <td><span class="badge b-high">HIGH</span></td>
+    </tr>
+    <tr>
+      <td class="num">5</td>
+      <td><strong>Fix watchProjectAssets() — add creatorId filter + index</strong><br>
+        Add creatorId param. Prepend where('creatorId', isEqualTo: creatorId).
+        Add composite index. Update all call sites.</td>
+      <td><code>ycios_repository.dart</code><br><code>firestore/indexes/firestore.indexes.json</code></td>
+      <td><span class="badge b-code">Code</span> <span class="badge b-index">Index</span></td>
+      <td>20 min</td>
+      <td><span class="badge b-high">HIGH</span></td>
+    </tr>
+    <tr>
+      <td class="num">6</td>
+      <td><strong>Set YOHPAL_BRAIN_API_KEY + YOHPAL_BRAIN_API_URL</strong><br>
+        Switches AI Studio from mock to live. All 5 tasks complete with real AI content.</td>
+      <td>Firebase Secret Manager</td>
+      <td><span class="badge b-op">Operator</span></td>
+      <td>15 min</td>
+      <td><span class="s s-warn">P1 HIGH</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════════ ZEROWAIT AUDIT ══ -->
+<div class="sec-head purple">Zero-Wait System — Full Component Audit</div>
+<table class="dt" style="margin-bottom:16px">
+  <thead>
+    <tr><th>Component</th><th>File</th><th>Phase 1N Spec</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>ZeroWaitPlaybackController</code> — adaptive</td>
+      <td><code>zero_wait_playback_controller.dart</code></td>
+      <td>Full adaptive warm/preload/re-warm</td>
+      <td><span class="s s-bug">MISSING — base only</span></td>
+    </tr>
+    <tr>
+      <td><code>SmartNetworkProfiler</code></td>
+      <td><code>smart_network_profiler.dart</code></td>
+      <td>Network class → preload slot count</td>
+      <td><span class="s s-warn">File OK — not imported by controller</span></td>
+    </tr>
+    <tr>
+      <td><code>AdaptiveVideoUrlResolver</code></td>
+      <td><code>adaptive_video_url_resolver.dart</code></td>
+      <td>Cellular→360p · WiFi→720p URL resolution</td>
+      <td><span class="s s-warn">File OK — not imported by controller</span></td>
+    </tr>
+    <tr>
+      <td><code>_preloadAround()</code> in feed screen</td>
+      <td><code>video_feed_screen.dart</code></td>
+      <td>Adaptive preload on swipe · no auth header</td>
+      <td><span class="s s-bug">MISSING — auth token + non-adaptive</span></td>
+    </tr>
+    <tr>
+      <td><code>markBroken()</code> try/catch</td>
+      <td><code>video_feed_repository.dart</code></td>
+      <td>Silently drop PERMISSION_DENIED for non-owners</td>
+      <td><span class="s s-bug">MISSING — unguarded Firestore update</span></td>
+    </tr>
+    <tr>
+      <td><code>isOnWifi</code> in onFirstFrame diagnostic</td>
+      <td><code>video_feed_screen.dart</code></td>
+      <td>Reports actual network tier (wifi / mobile)</td>
+      <td><span class="s s-bug">MISSING — hardcoded 'unknown'</span></td>
+    </tr>
+    <tr>
+      <td><code>ZeroWaitVideoPlayer</code></td>
+      <td><code>zero_wait_video_player.dart</code></td>
+      <td>Frame listener · startup timer · quality-tier re-play</td>
+      <td><span class="s s-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td><code>PlaybackDiagnosticsRepository</code></td>
+      <td><code>playback_diagnostics_repository.dart</code></td>
+      <td>Records timeToFirstFrame · preloadHit to Firestore</td>
+      <td><span class="s s-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td><code>VideoFeedRepository.suggestedFeed()</code></td>
+      <td><code>video_feed_repository.dart</code></td>
+      <td>hlsLowUrl &gt; '' filter · HLS-only pool</td>
+      <td><span class="s s-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td><code>VideoFeedRepository.trendingFeed()</code></td>
+      <td><code>video_feed_repository.dart</code></td>
+      <td>HLS-only pool sorted by views</td>
+      <td><span class="s s-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>Firebase Storage rules <code>videos-hls/**</code></td>
+      <td><code>storage.rules</code></td>
+      <td>allow read: if true — no App Check token needed</td>
+      <td><span class="s s-ok">OK — deployed</span></td>
+    </tr>
+    <tr>
+      <td>HLS backfill (57 videos)</td>
+      <td><code>backfill_playback_ready.js</code></td>
+      <td>playbackReady=true · broken=false · tokenised HLS URLs</td>
+      <td><span class="s s-ok">OK — all 57 reset</span></td>
+    </tr>
+    <tr>
+      <td>Firestore <code>playbackReady + engagementScore</code> index</td>
+      <td><code>firestore.indexes.json</code></td>
+      <td>Supports suggestedFeed + trendingFeed queries</td>
+      <td><span class="s s-ok">OK — deployed</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════════ VERDICT ══ -->
+<div class="sec-head slate">Verdict</div>
+<div class="verdict">
+  <div class="verdict-text">
+    The platform is at <strong>99% feature-complete</strong> (v18 baseline). Videos load and
+    play in the Suggested and Trending feeds — the Zero-Wait engine is operational at the
+    base level but the <strong>adaptive quality layer is not present</strong>, leaving every
+    device at 360p regardless of network tier. The auth-token fetch in
+    <code>_preloadAround()</code> adds latency on every swipe and risks 402 errors on HLS
+    segments.
+    <br><br>
+    Three further high-severity issues exist independently: the Follow button never reflects
+    state, the Following feed has a structural query flaw that guarantees zero results, and
+    the YCIOS Workspace throws PERMISSION_DENIED on every project open due to a missing
+    Firestore query constraint.
+    <br><br>
+    <strong>Recommended fix order (total ~2 h):</strong>
+    ZeroWait controller (45 min) → _preloadAround + markBroken (15 min) →
+    YCIOS creatorId filter (20 min) → Follow state stream (30 min) →
+    followingFeed redesign (25 min) → AI secrets (15 min operator).
+  </div>
+</div>
+
+<footer>
+  YohPal Live · Gap Report v19 · 2026-07-02 · firebase: yohlab · branch: flutter_app<br>
+  Findings: Zero-Wait (1–2) · Follow (3) · Following Feed (4) · YCIOS PERMISSION_DENIED (5) · AI Studio (6)<br>
+  Previous: v18 — Phase 1R Context Intelligence Engine
+</footer>
+
+</body>
+</html>

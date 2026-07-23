@@ -1,0 +1,499 @@
+<title>YohPal Platform Phase 17 — Ecosystem Migration Validation Report</title>
+<style>
+  :root {
+    --gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);
+    --ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;
+    --paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;
+    --pass:#1b5e20;--pass-bg:#e8f5e9;
+    --pend:#78350f;--pend-bg:#fef3c7;
+    --fail:#b71c1c;--fail-bg:#fce4e4;
+    --info:#0d47a1;--info-bg:#e8eef7;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+    --radius:2px;--doc-max:900px;
+  }
+  @media(prefers-color-scheme:dark){:root{
+    --gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);
+    --ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;
+    --paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;
+    --pass:#4caf50;--pass-bg:#1b2e1c;
+    --pend:#fbbf24;--pend-bg:#1f1600;
+    --fail:#ef5350;--fail-bg:#2d1212;
+    --info:#90caf9;--info-bg:#0d1e33;
+  }}
+  :root[data-theme="light"]{--gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);--ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;--paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;--pass:#1b5e20;--pass-bg:#e8f5e9;--pend:#78350f;--pend-bg:#fef3c7;--fail:#b71c1c;--fail-bg:#fce4e4;--info:#0d47a1;--info-bg:#e8eef7;}
+  :root[data-theme="dark"]{--gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);--ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;--paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;--pass:#4caf50;--pass-bg:#1b2e1c;--pend:#fbbf24;--pend-bg:#1f1600;--fail:#ef5350;--fail-bg:#2d1212;--info:#90caf9;--info-bg:#0d1e33;}
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif;font-size:13.5px;line-height:1.65;background:var(--paper);color:var(--ink);padding-bottom:5rem;}
+
+  .print-bar{position:sticky;top:0;z-index:100;background:var(--paper-2);border-bottom:1px solid var(--paper-3);padding:.45rem 1.5rem;display:flex;align-items:center;gap:1rem;font-size:11px;color:var(--ink-3);}
+  .print-bar .brand{font-weight:700;color:var(--gold-text);letter-spacing:.06em;font-size:12px;}
+  .print-bar .spacer{flex:1;}
+  .print-bar .verdict{font-weight:700;font-size:10px;letter-spacing:.08em;padding:.2rem .65rem;border-radius:var(--radius);background:var(--pend-bg);color:var(--pend);border:1px solid var(--pend);text-transform:uppercase;}
+  .dl-btn{background:var(--gold);color:#fff;border:none;padding:.3rem 1rem;border-radius:var(--radius);font-size:11px;font-weight:700;letter-spacing:.06em;cursor:pointer;text-transform:uppercase;}
+  .dl-btn:hover{background:var(--gold-2);}
+
+  .doc{max-width:var(--doc-max);margin:0 auto;padding:2.5rem 1.5rem 0;}
+
+  .masthead{border-top:3px solid var(--gold);border-bottom:3px solid var(--gold);padding:1.1rem 0 1rem;margin-bottom:1.75rem;position:relative;}
+  .masthead::after{content:'';display:block;height:1px;background:var(--gold);position:absolute;bottom:5px;left:0;right:0;opacity:.35;}
+  .masthead .eyebrow{font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.3rem;}
+  .masthead h1{font-family:Georgia,'Times New Roman',serif;font-size:1.6rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.65rem;text-wrap:balance;}
+  .meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.25rem .75rem;font-size:11.5px;color:var(--ink-3);}
+  .meta-grid .m{display:flex;gap:.3rem;}
+  .meta-grid strong{color:var(--ink-2);}
+
+  .section{margin-bottom:1.75rem;}
+  .sh{font-family:Georgia,'Times New Roman',serif;font-size:.95rem;font-weight:700;color:var(--ink);padding-bottom:.35rem;border-bottom:1px solid var(--gold);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem;}
+  .sh .sn{background:var(--gold);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:system-ui,sans-serif;}
+
+  /* Gate bar */
+  .gate-bar{display:flex;gap:0;border:1px solid var(--paper-3);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem;}
+  .gate-cell{flex:1;padding:.65rem .5rem;text-align:center;border-right:1px solid var(--paper-3);}
+  .gate-cell:last-child{border-right:none;}
+  .gate-cell .gn{font-size:1.45rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;margin-bottom:.15rem;}
+  .gate-cell .gl{font-size:9px;text-transform:uppercase;letter-spacing:.07em;font-weight:700;color:var(--ink-3);}
+  .gate-cell.gc-pass{background:var(--pass-bg);} .gate-cell.gc-pass .gn{color:var(--pass);}
+  .gate-cell.gc-pend{background:var(--pend-bg);} .gate-cell.gc-pend .gn{color:var(--pend);}
+  .gate-cell.gc-info{background:var(--info-bg);} .gate-cell.gc-info .gn{color:var(--info);}
+
+  /* Tables */
+  .ev-wrap{overflow-x:auto;margin-bottom:.75rem;}
+  .ev{width:100%;border-collapse:collapse;}
+  .ev th{background:var(--paper-2);font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:.4rem .6rem;text-align:left;border:1px solid var(--paper-3);white-space:nowrap;}
+  .ev th.center{text-align:center;}
+  .ev td{padding:.45rem .6rem;border:1px solid var(--paper-3);vertical-align:middle;font-size:12px;color:var(--ink-2);}
+  .ev td:first-child{color:var(--ink);font-weight:600;background:var(--paper-2);white-space:nowrap;}
+  .ev td.center{text-align:center;}
+  .ev td.mono{font-family:var(--mono);font-size:11px;color:var(--ink-3);}
+
+  /* Migration matrix */
+  .matrix-wrap{overflow-x:auto;margin-bottom:.75rem;}
+  .matrix{width:100%;border-collapse:collapse;font-size:11px;}
+  .matrix th{background:var(--paper-2);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:.4rem .5rem;border:1px solid var(--paper-3);text-align:center;white-space:nowrap;}
+  .matrix th.left{text-align:left;min-width:90px;}
+  .matrix td{padding:.4rem .5rem;border:1px solid var(--paper-3);text-align:center;vertical-align:middle;}
+  .matrix td.module{font-weight:700;color:var(--ink);background:var(--paper-2);text-align:left;white-space:nowrap;font-size:12px;}
+
+  /* Chips */
+  .chip{display:inline-flex;align-items:center;padding:.12rem .4rem;border-radius:var(--radius);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+  .chip.pass{background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass);}
+  .chip.pend{background:var(--pend-bg);color:var(--pend);border:1px solid var(--pend);}
+  .chip.fail{background:var(--fail-bg);color:var(--fail);border:1px solid var(--fail);}
+  .chip.info{background:var(--info-bg);color:var(--info);border:1px solid var(--info);}
+
+  /* Callouts */
+  .callout{padding:.85rem 1rem;margin-bottom:1.1rem;border-radius:0 var(--radius) var(--radius) 0;}
+  .callout.info{background:var(--info-bg);border-left:4px solid var(--info);}
+  .callout.warn{background:var(--pend-bg);border-left:4px solid var(--pend);}
+  .callout.audit{background:var(--fail-bg);border-left:4px solid var(--fail);}
+  .callout h3{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.4rem;}
+  .callout.info h3{color:var(--info);}
+  .callout.warn h3{color:var(--pend);}
+  .callout.audit h3{color:var(--fail);}
+  .callout p{font-size:12.5px;color:var(--ink-2);line-height:1.7;}
+
+  /* Readiness score grid */
+  .score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.85rem;}
+  .score-card{border:1px solid var(--paper-3);border-radius:var(--radius);padding:.65rem .75rem;background:var(--paper-2);}
+  .score-card .sc-label{font-size:10px;font-weight:700;color:var(--ink-3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.35rem;}
+  .score-card .sc-val{font-size:1.1rem;font-weight:700;color:var(--pend);font-variant-numeric:tabular-nums;}
+
+  /* Proof checklist */
+  .proof-list{list-style:none;padding:0;margin-bottom:.75rem;}
+  .proof-list li{font-size:12.5px;color:var(--ink-2);padding:.35rem 0;border-bottom:1px solid var(--paper-3);display:flex;gap:.75rem;align-items:center;}
+  .proof-list li:last-child{border-bottom:none;}
+  .proof-check{width:14px;height:14px;border:1.5px solid var(--pend);border-radius:2px;flex-shrink:0;display:inline-block;background:var(--pend-bg);}
+
+  /* Decision box */
+  .decision-box{border:2px solid var(--pend);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.5rem;background:var(--pend-bg);}
+  .decision-box h3{font-size:12px;font-weight:700;color:var(--pend);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.75rem;}
+  .decision-row{display:flex;gap:.65rem;flex-wrap:wrap;}
+  .decision-opt{flex:1;min-width:160px;border:1px solid var(--paper-3);border-radius:var(--radius);padding:.65rem .9rem;background:var(--paper-2);}
+  .decision-opt .do-label{font-size:11.5px;font-weight:700;color:var(--ink);margin-bottom:.2rem;}
+  .decision-opt .do-cond{font-size:10.5px;color:var(--ink-3);line-height:1.5;}
+
+  /* Phase 18 teaser */
+  .next-phase{border:2px solid var(--gold);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;background:var(--gold-dim);}
+  .next-phase .np-eyebrow{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.3rem;}
+  .next-phase h2{font-family:Georgia,'Times New Roman',serif;font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.85rem;}
+  .gate-list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:.15rem .75rem;margin-bottom:.85rem;}
+  .gate-list li{font-size:12px;color:var(--ink-2);padding:.2rem 0;display:flex;gap:.5rem;}
+  .gate-list li::before{content:'◈';color:var(--gold);font-size:10px;flex-shrink:0;padding-top:.15rem;}
+  .outcome-box{background:var(--pass-bg);border:1px solid var(--pass);border-left:4px solid var(--pass);border-radius:0 var(--radius) var(--radius) 0;padding:.75rem 1rem;}
+  .outcome-box p{font-size:12.5px;color:var(--ink-2);line-height:1.7;}
+
+  .footer-rule{border:none;border-top:2px solid var(--gold);margin:2rem 0 0;opacity:.5;}
+
+  @media(max-width:680px){.meta-grid{grid-template-columns:1fr 1fr;}.gate-bar{flex-wrap:wrap;}.gate-cell{min-width:calc(50% - 1px);}.score-grid{grid-template-columns:1fr 1fr;}.gate-list{grid-template-columns:1fr;}}
+  @media print{.print-bar{display:none;}body{font-size:12px;padding-bottom:0;}.doc{padding:1rem .75rem 0;}.masthead h1{font-size:1.3rem;}.section{break-inside:avoid;}@page{margin:1.5cm;}}
+</style>
+
+<div class="print-bar">
+  <span class="brand">YohPal Platform</span>
+  <span class="verdict">Evidence Gate — Not Yet Validated</span>
+  <span class="spacer"></span>
+  <button class="dl-btn" onclick="window.print()">Download PDF</button>
+</div>
+
+<div class="doc">
+
+  <div class="masthead">
+    <div class="eyebrow">Platform Engineering — Evidence Gate</div>
+    <h1>YohPal Platform Phase 17 — Ecosystem Migration Validation Report</h1>
+    <div class="meta-grid">
+      <div class="m"><strong>Version:</strong> 1.0</div>
+      <div class="m"><strong>Date:</strong> 2026-07-09</div>
+      <div class="m"><strong>Gate Status:</strong> Not Yet Validated</div>
+      <div class="m"><strong>Branch:</strong> Developer to provide</div>
+      <div class="m"><strong>Commit:</strong> Developer to provide</div>
+      <div class="m"><strong>Prerequisite:</strong> Phase 16 Migration Complete</div>
+    </div>
+  </div>
+
+  <!-- Gate summary -->
+  <div class="gate-bar">
+    <div class="gate-cell gc-pend">
+      <div class="gn">0 / 7</div>
+      <div class="gl">Modules Validated</div>
+    </div>
+    <div class="gate-cell gc-pend">
+      <div class="gn">0 / 7</div>
+      <div class="gl">Duplicates Removed</div>
+    </div>
+    <div class="gate-cell gc-pend">
+      <div class="gn">—</div>
+      <div class="gl">flutter analyze</div>
+    </div>
+    <div class="gate-cell gc-pend">
+      <div class="gn">—</div>
+      <div class="gl">flutter test</div>
+    </div>
+    <div class="gate-cell gc-pend">
+      <div class="gn">Pending</div>
+      <div class="gl">Final Readiness</div>
+    </div>
+  </div>
+
+  <!-- Audit note -->
+  <div class="callout audit">
+    <h3>Audit Finding — Governance Gaps Must Be Closed</h3>
+    <p>The latest multistreaming audit confirmed unresolved governance gaps at the time of review: missing tests, missing CI coverage, and missing handover documentation. Phase 17 is an evidence gate, not an assumed completion. Approval requires developers to supply all items listed below. Claims without attached output will not be accepted.</p>
+  </div>
+
+  <div class="callout info">
+    <h3>Executive Integrity Note</h3>
+    <p>This report distinguishes what has been independently verified from what remains pending developer confirmation. The gate is open — it is not assumed closed. Phase 18 may not begin until this report is approved with evidence attached.</p>
+  </div>
+
+  <!-- 1. Repository Evidence -->
+  <div class="section">
+    <div class="sh"><span class="sn">1</span>Repository Evidence</div>
+    <div class="ev-wrap">
+      <table class="ev">
+        <thead><tr><th>Item</th><th>Required Evidence</th><th class="center">Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Git branch</td>
+            <td>Developer to provide</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Commit hash</td>
+            <td>Developer to provide</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Release tag</td>
+            <td>Developer to provide</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 2. Migrated Modules -->
+  <div class="section">
+    <div class="sh"><span class="sn">2</span>Migrated Modules — Service Coverage</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.85rem;">Each cell must be confirmed by a developer with code evidence. A module is not complete until all seven shared services are consumed and the corresponding duplicate removed.</p>
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th class="left">Module</th>
+            <th>Identity</th>
+            <th>Wallet</th>
+            <th>Notifs</th>
+            <th>Search</th>
+            <th>Brain</th>
+            <th>Analytics</th>
+            <th>Deep Links</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="module">YohPal Live</td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="module">Hustle</td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="module">Jobs</td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="module">Market</td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="module">Wallet</td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="module">Brain</td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="module">YCIOS</td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+            <td><span class="chip pend">Pending</span></td><td><span class="chip pend">Pending</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 3. Duplicate Services Removed -->
+  <div class="section">
+    <div class="sh"><span class="sn">3</span>Duplicate Services Removed</div>
+    <div class="ev-wrap">
+      <table class="ev">
+        <thead><tr><th>Module</th><th>Duplicate Service to Remove</th><th>Shared Replacement</th><th class="center">Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Hustle</td>
+            <td>Developer to list all local auth / wallet / AI classes</td>
+            <td class="mono">YohPalPlatformProvider.*</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Jobs</td>
+            <td>Developer to list all local auth / wallet / AI classes</td>
+            <td class="mono">YohPalPlatformProvider.*</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Market</td>
+            <td>Developer to list all local auth / wallet / search classes</td>
+            <td class="mono">YohPalPlatformProvider.*</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Wallet</td>
+            <td>Developer to list any local wallet / analytics classes</td>
+            <td class="mono">YohPalPlatformProvider.*</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Brain</td>
+            <td>All direct AI SDK calls in modules</td>
+            <td class="mono">YohPalPlatformProvider.brain</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>YCIOS</td>
+            <td>Developer to list all local auth / AI / analytics classes</td>
+            <td class="mono">YohPalPlatformProvider.*</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 4. Build & Test Evidence -->
+  <div class="section">
+    <div class="sh"><span class="sn">4</span>Build &amp; Test Evidence</div>
+    <div class="ev-wrap">
+      <table class="ev">
+        <thead><tr><th>Validation</th><th>Required Output</th><th class="center">Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>flutter analyze</td>
+            <td>No issues — developer to attach full output</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>flutter test</td>
+            <td>All tests pass — developer to attach full output</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Integration tests</td>
+            <td>Migration adapter tests pass for all 7 modules</td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Shared service tests</td>
+            <td>Platform layer tests — 13/13 (deep links 8 + registry 5)</td>
+            <td class="center"><span class="chip info">13 / 13 (platform)</span></td>
+          </tr>
+          <tr>
+            <td>Ecosystem registry gate</td>
+            <td><span style="font-family:var(--mono);font-size:11px;">allRequiredModulesRegistered == true</span></td>
+            <td class="center"><span class="chip pend">Pending</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 5. Required Proof -->
+  <div class="section">
+    <div class="sh"><span class="sn">5</span>Required Proof Items</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.75rem;">Developers must attach evidence for each item. Verbal confirmation is not sufficient — output or code references are required.</p>
+    <ul class="proof-list">
+      <li><span class="proof-check"></span>Shared Identity usage — code reference showing <span style="font-family:var(--mono);font-size:11px;">platform.identity</span> called in each module</li>
+      <li><span class="proof-check"></span>Shared Wallet usage — code reference showing <span style="font-family:var(--mono);font-size:11px;">platform.wallet.getBalance()</span>; no client-side writes</li>
+      <li><span class="proof-check"></span>Shared Notifications usage — <span style="font-family:var(--mono);font-size:11px;">platform.notifications.sendInApp()</span> or <span style="font-family:var(--mono);font-size:11px;">sendPush()</span> called, not local FCM logic</li>
+      <li><span class="proof-check"></span>Shared Search usage — <span style="font-family:var(--mono);font-size:11px;">platform.search.search(query)</span> called; no per-module search collections</li>
+      <li><span class="proof-check"></span>Shared BrainGateway usage — all AI calls via <span style="font-family:var(--mono);font-size:11px;">platform.brain.execute()</span>; no direct AI SDK imports in modules</li>
+      <li><span class="proof-check"></span>Shared Analytics usage — <span style="font-family:var(--mono);font-size:11px;">platform.analytics.track()</span> and <span style="font-family:var(--mono);font-size:11px;">screenView()</span> in all modules</li>
+      <li><span class="proof-check"></span>Shared DeepLink usage — <span style="font-family:var(--mono);font-size:11px;">platform.deepLinks.build()</span> and <span style="font-family:var(--mono);font-size:11px;">parse()</span> used for all cross-module navigation</li>
+      <li><span class="proof-check"></span>Duplicate service removal — class list per module with git diff reference</li>
+      <li><span class="proof-check"></span>Ecosystem Migration Completion Report — <span style="font-family:var(--mono);font-size:11px;">docs/YOHPAL_ECOSYSTEM_MIGRATION_COMPLETION_REPORT.md</span> filled in and attached</li>
+    </ul>
+  </div>
+
+  <!-- 6. Final Readiness Score -->
+  <div class="section">
+    <div class="sh"><span class="sn">6</span>Final Readiness Score</div>
+    <div class="score-grid">
+      <div class="score-card"><div class="sc-label">Shared Identity</div><div class="sc-val">Pending</div></div>
+      <div class="score-card"><div class="sc-label">Shared Wallet</div><div class="sc-val">Pending</div></div>
+      <div class="score-card"><div class="sc-label">Shared AI Gateway</div><div class="sc-val">Pending</div></div>
+      <div class="score-card"><div class="sc-label">Shared Notifications</div><div class="sc-val">Pending</div></div>
+      <div class="score-card"><div class="sc-label">Shared Search</div><div class="sc-val">Pending</div></div>
+      <div class="score-card"><div class="sc-label">Shared Analytics</div><div class="sc-val">Pending</div></div>
+      <div class="score-card"><div class="sc-label">Shared Deep Links</div><div class="sc-val">Pending</div></div>
+      <div class="score-card"><div class="sc-label">Test Coverage</div><div class="sc-val">Pending</div></div>
+      <div class="score-card"><div class="sc-label">Documentation</div><div class="sc-val">Pending</div></div>
+    </div>
+    <div class="callout warn">
+      <h3>Overall Readiness</h3>
+      <p>Pending developer evidence. Score will be updated once all nine areas above are confirmed with attached output. The audit specifically flagged missing tests, CI, and handover docs — these three areas must be explicitly closed, not assumed complete.</p>
+    </div>
+  </div>
+
+  <!-- 7. Executive Recommendation -->
+  <div class="section">
+    <div class="sh"><span class="sn">7</span>Executive Recommendation</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.85rem;">Current status: <strong>Not yet validated.</strong> Phase 17 can be approved only after the developers return all evidence listed in sections 1–5 above. The migration infrastructure (Phase 16) is committed and tested. The module-level migration work is the remaining gap.</p>
+    <div class="ev-wrap">
+      <table class="ev">
+        <thead><tr><th>Item</th><th>Phase 16 (Infrastructure)</th><th>Phase 17 (Module Migration)</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Migration adapter contract</td>
+            <td><span class="chip pass">Built &amp; tested</span></td>
+            <td><span class="chip pend">Pending per module</span></td>
+          </tr>
+          <tr>
+            <td>Ecosystem registry</td>
+            <td><span class="chip pass">Built &amp; tested</span></td>
+            <td><span class="chip pend">0 / 7 registered</span></td>
+          </tr>
+          <tr>
+            <td>YCIOS reference adapter</td>
+            <td><span class="chip pass">Built</span></td>
+            <td><span class="chip pend">Live validation pending</span></td>
+          </tr>
+          <tr>
+            <td>flutter analyze (platform)</td>
+            <td><span class="chip pass">No issues</span></td>
+            <td><span class="chip pend">Full project pending</span></td>
+          </tr>
+          <tr>
+            <td>flutter test (platform)</td>
+            <td><span class="chip pass">13 / 13</span></td>
+            <td><span class="chip pend">Integration tests pending</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 8. Final Decision -->
+  <div class="section">
+    <div class="sh"><span class="sn">8</span>Final Decision</div>
+    <div class="decision-box">
+      <h3>Choose after evidence is submitted</h3>
+      <div class="decision-row">
+        <div class="decision-opt">
+          <div class="do-label">☐ Ecosystem Migration Validated</div>
+          <div class="do-cond">All 7 modules confirmed · duplicates removed · analyze clean · all tests pass · completion report attached</div>
+        </div>
+        <div class="decision-opt">
+          <div class="do-label">☐ Validated after minor fixes</div>
+          <div class="do-cond">Core services migrated · isolated gaps remain · named items and owner assigned</div>
+        </div>
+        <div class="decision-opt">
+          <div class="do-label">☐ Not validated</div>
+          <div class="do-cond">Evidence incomplete or insufficient · Phase 18 blocked until resubmission</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 18 teaser -->
+  <div class="next-phase">
+    <div class="np-eyebrow">Next Smart Move</div>
+    <h2>YohPal Platform Phase 18 — Unified Ecosystem Release Governance</h2>
+    <ul class="gate-list">
+      <li>One release governance model for all seven modules</li>
+      <li>Architecture gate — design review before every release</li>
+      <li>Build gate — flutter analyze + test pass required</li>
+      <li>Security gate — dependency audit + vulnerability scan</li>
+      <li>Data gate — Firestore rules + index review</li>
+      <li>Wallet gate — financial compliance sign-off</li>
+      <li>AI gate — BrainGateway coverage + latency benchmark</li>
+      <li>UX gate — design system compliance check</li>
+      <li>Documentation gate — blueprint + runbook current</li>
+      <li>Operations gate — rollback plan confirmed</li>
+      <li>Unified Release Governance Manual produced</li>
+      <li>Ecosystem Risk Register maintained</li>
+      <li>Cross-Module Rollback Plan documented</li>
+      <li>Executive Release Approval Certificate issued per release</li>
+    </ul>
+    <div class="outcome-box">
+      <p><strong>Outcome:</strong> YohPal gains one production governance framework that applies to every module in the ecosystem. No module ships without passing the unified gate. Releases become predictable, auditable, and reversible.</p>
+    </div>
+  </div>
+
+  <hr class="footer-rule">
+
+</div>

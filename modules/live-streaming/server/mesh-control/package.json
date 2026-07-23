@@ -1,0 +1,27 @@
+{
+  "name": "@yohpal/mesh-live-control",
+  "version": "1.0.2",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test": "npm run build && node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@yohpal/contracts": "file:../../contracts/mesh-live",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "firebase-admin": "^14.2.0",
+    "socket.io": "^4.8.1",
+    "zod": "^3.25.28"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.15.21",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,533 @@
+<title>YohPal Platform Phase 21 — YohPal OS Validation Report</title>
+<style>
+  :root {
+    --gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);--gold-line:rgba(201,162,39,.28);
+    --ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;
+    --paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;
+    --pass:#1b5e20;--pass-bg:#e8f5e9;--pass-border:#a5d6a7;
+    --pend:#78350f;--pend-bg:#fef3c7;--pend-border:#fcd34d;
+    --fail:#b71c1c;--fail-bg:#fce4e4;--fail-border:#ef9a9a;
+    --info:#0d47a1;--info-bg:#e8eef7;--info-border:#90caf9;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+    --r:2px;--doc-max:920px;
+  }
+  @media(prefers-color-scheme:dark){:root{
+    --gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);--gold-line:rgba(212,172,48,.22);
+    --ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;
+    --paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;
+    --pass:#4caf50;--pass-bg:#1b2e1c;--pass-border:#388e3c;
+    --pend:#fbbf24;--pend-bg:#1f1600;--pend-border:#92400e;
+    --fail:#ef5350;--fail-bg:#2d1212;--fail-border:#c62828;
+    --info:#90caf9;--info-bg:#0d1e33;--info-border:#1565c0;
+  }}
+  :root[data-theme="light"]{--gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);--gold-line:rgba(201,162,39,.28);--ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;--paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;--pass:#1b5e20;--pass-bg:#e8f5e9;--pass-border:#a5d6a7;--pend:#78350f;--pend-bg:#fef3c7;--pend-border:#fcd34d;--fail:#b71c1c;--fail-bg:#fce4e4;--fail-border:#ef9a9a;--info:#0d47a1;--info-bg:#e8eef7;--info-border:#90caf9;}
+  :root[data-theme="dark"]{--gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);--gold-line:rgba(212,172,48,.22);--ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;--paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;--pass:#4caf50;--pass-bg:#1b2e1c;--pass-border:#388e3c;--pend:#fbbf24;--pend-bg:#1f1600;--pend-border:#92400e;--fail:#ef5350;--fail-bg:#2d1212;--fail-border:#c62828;--info:#90caf9;--info-bg:#0d1e33;--info-border:#1565c0;}
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif;font-size:13.5px;line-height:1.65;background:var(--paper);color:var(--ink);padding-bottom:5rem;}
+
+  .pbar{position:sticky;top:0;z-index:100;background:var(--paper-2);border-bottom:1px solid var(--paper-3);padding:.45rem 1.5rem;display:flex;align-items:center;gap:1rem;font-size:11px;color:var(--ink-3);}
+  .pbar .brand{font-weight:700;color:var(--gold-text);letter-spacing:.06em;font-size:12px;}
+  .pbar .badge{font-weight:700;font-size:10px;letter-spacing:.08em;padding:.2rem .65rem;border-radius:var(--r);background:var(--pend-bg);color:var(--pend);border:1px solid var(--pend-border);text-transform:uppercase;}
+  .pbar .spacer{flex:1;}
+  .pbar button{background:var(--gold);color:#fff;border:none;padding:.3rem 1rem;border-radius:var(--r);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;}
+  .pbar button:hover{background:var(--gold-2);}
+
+  .doc{max-width:var(--doc-max);margin:0 auto;padding:2.5rem 1.5rem 0;}
+
+  /* Masthead */
+  .mast{border-top:3px solid var(--gold);border-bottom:3px solid var(--gold);padding:1.1rem 0 1rem;margin-bottom:1.75rem;position:relative;}
+  .mast::after{content:'';position:absolute;bottom:5px;left:0;right:0;height:1px;background:var(--gold);opacity:.3;}
+  .mast .eye{font-size:9.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.3rem;}
+  .mast h1{font-family:Georgia,'Times New Roman',serif;font-size:1.7rem;font-weight:700;line-height:1.15;margin-bottom:.65rem;text-wrap:balance;}
+  .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:.25rem .75rem;font-size:11.5px;color:var(--ink-3);}
+  .meta span{display:flex;gap:.3rem;}
+  .meta strong{color:var(--ink-2);}
+
+  /* Current status banner */
+  .status-banner{border:2px solid var(--pend-border);border-radius:var(--r);background:var(--pend-bg);padding:1rem 1.25rem;margin-bottom:1.75rem;display:flex;align-items:center;gap:1rem;}
+  .status-banner .sb-icon{font-size:1.4rem;flex-shrink:0;line-height:1;}
+  .status-banner .sb-body .sb-label{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--pend);margin-bottom:.2rem;}
+  .status-banner .sb-body p{font-size:12.5px;color:var(--ink-2);line-height:1.65;}
+
+  /* Section */
+  .sec{margin-bottom:2rem;}
+  .sh{font-family:Georgia,'Times New Roman',serif;font-size:.95rem;font-weight:700;padding-bottom:.35rem;border-bottom:1px solid var(--gold);margin-bottom:.9rem;display:flex;align-items:center;gap:.55rem;}
+  .sn{background:var(--gold);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:system-ui,sans-serif;}
+
+  /* Evidence table */
+  .wrap{overflow-x:auto;margin-bottom:.85rem;}
+  .ev{width:100%;border-collapse:collapse;}
+  .ev th{background:var(--paper-2);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:.45rem .7rem;border:1px solid var(--paper-3);text-align:left;}
+  .ev td{padding:.5rem .7rem;border:1px solid var(--paper-3);font-size:12px;color:var(--ink-2);vertical-align:middle;}
+  .ev td.item{font-weight:600;color:var(--ink);background:var(--paper-2);white-space:nowrap;}
+  .ev td.req{font-size:11.5px;color:var(--ink-3);}
+  .ev td.evidence{font-family:var(--mono);font-size:11px;color:var(--ink-2);}
+  .ev td.evidence.filled{color:var(--pass);font-weight:600;}
+  .ev tr:nth-child(even) td:not(.item){background:rgba(0,0,0,.02);}
+
+  /* Status chips */
+  .chip{display:inline-flex;align-items:center;gap:.25rem;padding:.15rem .5rem;border-radius:var(--r);font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;}
+  .chip.pass{background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass-border);}
+  .chip.pend{background:var(--pend-bg);color:var(--pend);border:1px solid var(--pend-border);}
+  .chip.info{background:var(--info-bg);color:var(--info);border:1px solid var(--info-border);}
+  .chip.fail{background:var(--fail-bg);color:var(--fail);border:1px solid var(--fail-border);}
+
+  /* Progress summary bar */
+  .prog-row{display:flex;align-items:center;gap:.75rem;padding:.45rem 0;border-bottom:1px solid var(--paper-3);}
+  .prog-row:last-child{border-bottom:none;}
+  .prog-label{font-size:12px;color:var(--ink-2);flex:1;}
+  .prog-bar-wrap{width:120px;height:6px;background:var(--paper-3);border-radius:3px;overflow:hidden;flex-shrink:0;}
+  .prog-bar-fill{height:100%;border-radius:3px;}
+  .prog-bar-fill.pass{background:var(--pass);}
+  .prog-bar-fill.pend{background:var(--pend);}
+  .prog-pct{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-3);width:32px;text-align:right;flex-shrink:0;}
+
+  /* Build output */
+  .build-out{font-family:var(--mono);font-size:11px;background:var(--paper-2);border-left:3px solid var(--pass);padding:.65rem .9rem;border-radius:0 var(--r) var(--r) 0;color:var(--ink-2);line-height:1.7;overflow-x:auto;white-space:pre;margin-bottom:.75rem;}
+  .build-out.gold{border-left-color:var(--gold);}
+  .build-out.pend-border{border-left-color:var(--pend);}
+
+  /* Module connection grid */
+  .mod-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.85rem;}
+  .mod-card{border:1px solid var(--paper-3);border-radius:var(--r);overflow:hidden;}
+  .mod-card .mch{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.35rem .6rem;border-bottom:1px solid var(--paper-3);}
+  .mod-card .mcb{padding:.45rem .6rem;background:var(--paper-2);}
+  .mod-card .mcb p{font-size:11px;color:var(--ink-3);line-height:1.5;}
+  .mod-card.mc-pend .mch{background:var(--pend-bg);color:var(--pend);}
+  .mod-card.mc-pass .mch{background:var(--pass-bg);color:var(--pass);}
+  .mod-card.mc-info .mch{background:var(--info-bg);color:var(--info);}
+
+  /* What developers must return */
+  .return-list{list-style:none;padding:0;margin-bottom:.85rem;counter-reset:ret;}
+  .return-list li{counter-increment:ret;display:grid;grid-template-columns:2rem 1fr auto;gap:.5rem;align-items:start;padding:.5rem 0;border-bottom:1px solid var(--paper-3);}
+  .return-list li:last-child{border-bottom:none;}
+  .return-list li::before{content:counter(ret);font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gold-text);background:var(--gold-dim);border:1px solid var(--gold-line);border-radius:var(--r);width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:.1rem;}
+  .return-list li .rl-title{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.4;}
+  .return-list li .rl-sub{font-size:11px;color:var(--ink-3);margin-top:.1rem;}
+
+  /* Decision box */
+  .decision-box{border:2px solid var(--gold);border-radius:var(--r);overflow:hidden;margin-bottom:1.5rem;}
+  .decision-box .db-header{background:var(--gold);padding:.65rem 1.1rem;display:flex;align-items:center;gap:.75rem;}
+  .decision-box .db-header h2{font-family:Georgia,'Times New Roman',serif;font-size:1rem;font-weight:700;color:#fff;letter-spacing:.02em;}
+  .decision-box .db-header .db-status{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.25);color:#fff;padding:.15rem .5rem;border-radius:var(--r);border:1px solid rgba(255,255,255,.4);}
+  .decision-box .db-body{padding:1rem 1.1rem;background:var(--paper-2);}
+  .decision-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:.75rem;}
+  .dc{border:2px solid var(--paper-3);border-radius:var(--r);padding:.75rem .85rem;background:var(--paper);position:relative;cursor:default;}
+  .dc .dc-n{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem;}
+  .dc .dc-title{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:.3rem;line-height:1.3;}
+  .dc .dc-cond{font-size:11px;color:var(--ink-3);line-height:1.5;}
+  .dc.dc-pass{border-color:var(--pass-border);} .dc.dc-pass .dc-n{color:var(--pass);}
+  .dc.dc-warn{border-color:var(--pend-border);} .dc.dc-warn .dc-n{color:var(--pend);}
+  .dc.dc-fail{border-color:var(--fail-border);} .dc.dc-fail .dc-n{color:var(--fail);}
+  .dc.dc-locked{opacity:.45;pointer-events:none;}
+  .dc-lock-label{position:absolute;top:.5rem;right:.6rem;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.1rem .35rem;border-radius:var(--r);background:var(--pend-bg);color:var(--pend);border:1px solid var(--pend-border);}
+  .db-note{font-size:11.5px;color:var(--ink-3);line-height:1.7;border-top:1px solid var(--paper-3);padding-top:.65rem;}
+
+  /* Audit trail callout */
+  .callout{padding:.85rem 1.1rem;border-radius:0 var(--r) var(--r) 0;margin-bottom:1.25rem;}
+  .callout.gold{background:var(--gold-dim);border-left:4px solid var(--gold);}
+  .callout.fail{background:var(--fail-bg);border-left:4px solid var(--fail);}
+  .callout h3{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.35rem;}
+  .callout.gold h3{color:var(--gold-text);}
+  .callout.fail h3{color:var(--fail);}
+  .callout p,.callout li{font-size:12.5px;color:var(--ink-2);line-height:1.75;}
+  .callout ul{list-style:none;padding:0;}
+  .callout ul li{display:flex;gap:.5rem;align-items:baseline;padding:.1rem 0;}
+  .callout ul li::before{content:'→';color:var(--gold);font-weight:700;flex-shrink:0;}
+
+  .rule{border:none;border-top:2px solid var(--gold);margin:2rem 0 0;opacity:.4;}
+  .sig-block{margin-top:1.5rem;padding:1rem 1.1rem;border:1px solid var(--paper-3);border-radius:var(--r);background:var(--paper-2);}
+  .sig-block .sig-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.85rem;}
+  .sig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+  .sig-field .sf-line{height:1px;background:var(--ink-3);margin-bottom:.3rem;opacity:.4;}
+  .sig-field .sf-caption{font-size:10px;color:var(--ink-3);}
+
+  @media(max-width:720px){.meta{grid-template-columns:1fr 1fr;}.decision-cards{grid-template-columns:1fr;}.mod-grid{grid-template-columns:1fr 1fr;}}
+  @media print{.pbar{display:none;}body{font-size:12px;}@page{margin:1.5cm;}.sec{break-inside:avoid;}.decision-box{break-inside:avoid;}}
+</style>
+
+<div class="pbar">
+  <span class="brand">YohPal Platform</span>
+  <span class="badge">Phase 21 — Evidence Gate</span>
+  <span class="spacer"></span>
+  <button onclick="window.print()">Download PDF</button>
+</div>
+
+<div class="doc">
+
+  <div class="mast">
+    <div class="eye">Enterprise Governance — Evidence Gate &amp; Validation Report</div>
+    <h1>YohPal Platform Phase 21 — YohPal OS Validation Report</h1>
+    <div class="meta">
+      <span><strong>Report Date:</strong> 2026-07-09</span>
+      <span><strong>Branch:</strong> flutter_app</span>
+      <span><strong>Latest Commit:</strong> 007b865</span>
+      <span><strong>Phases Covered:</strong> 19 &amp; 20 (OS layer)</span>
+      <span><strong>Confirmed Tests:</strong> 45 / 45 (all phases)</span>
+      <span><strong>Overall Status:</strong> Partially Validated</span>
+    </div>
+  </div>
+
+  <!-- Current status -->
+  <div class="status-banner">
+    <div class="sb-icon">⚠</div>
+    <div class="sb-body">
+      <div class="sb-label">Current Status — Not Yet Fully Validated</div>
+      <p>YohPal OS models and contracts are built, analyzed clean, and unit-tested (45/45 passing). Runtime validation is incomplete: no developer has returned event bus proof, digital twin live state, automation policy registration, approval workflow proof, or Mission Control dashboard screenshots. YohPal OS cannot be approved as operational until this evidence is received.</p>
+    </div>
+  </div>
+
+  <!-- 1. Repository Evidence -->
+  <div class="sec">
+    <div class="sh"><span class="sn">1</span>Repository Evidence</div>
+    <div class="wrap">
+      <table class="ev">
+        <thead><tr><th>Item</th><th>Required</th><th>Value / Evidence</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="item">Git Branch</td>
+            <td class="req">Active development branch</td>
+            <td class="evidence filled">flutter_app</td>
+            <td><span class="chip pass">Confirmed</span></td>
+          </tr>
+          <tr>
+            <td class="item">Phase 20 Commit</td>
+            <td class="req">Commit hash for YohPal OS files</td>
+            <td class="evidence filled">007b865</td>
+            <td><span class="chip pass">Confirmed</span></td>
+          </tr>
+          <tr>
+            <td class="item">Phase 19 Commit</td>
+            <td class="req">Commit hash for Mission Control files</td>
+            <td class="evidence filled">6cc7d27</td>
+            <td><span class="chip pass">Confirmed</span></td>
+          </tr>
+          <tr>
+            <td class="item">Release Tag</td>
+            <td class="req">Tagged release for this OS milestone</td>
+            <td class="evidence">Developer to provide</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="item">CI/CD Log</td>
+            <td class="req">CI run passing all tests on branch</td>
+            <td class="evidence">Developer to provide URL</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 2. Build & Test Evidence -->
+  <div class="sec">
+    <div class="sh"><span class="sn">2</span>Build &amp; Test Evidence</div>
+
+    <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.35rem;">flutter analyze lib/platform/os/ — confirmed local</div>
+    <div class="build-out">Analyzing os...
+No issues found! (ran in 2.0s)</div>
+
+    <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.35rem;">flutter test test/platform/os/ — confirmed local</div>
+    <div class="build-out">YohPalEnterpriseEvent  · toMap serialises all fields, payload is a map               2 / 2
+AutomationPolicy       · defaults (requiresApproval, minimumApproverRole, enabled),
+                         can override all defaults                                       2 / 2
+ApprovalRequest        · stores all required fields, approvedBy set when provided        2 / 2
+YohPalOSDigitalTwin    · ecosystemAvailability (mean, empty=0),
+                         hasCriticalIncident (true, false, warning-only)                 5 / 5
+All tests passed!</div>
+
+    <div class="wrap">
+      <table class="ev">
+        <thead><tr><th>Validation Output</th><th>Scope</th><th>Result</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="item">flutter analyze</td>
+            <td class="req">lib/platform/os/</td>
+            <td class="evidence filled">No issues found</td>
+            <td><span class="chip pass">Confirmed</span></td>
+          </tr>
+          <tr>
+            <td class="item">flutter test (Phase 20)</td>
+            <td class="req">test/platform/os/</td>
+            <td class="evidence filled">11 / 11 passing</td>
+            <td><span class="chip pass">Confirmed</span></td>
+          </tr>
+          <tr>
+            <td class="item">flutter test (Phase 19)</td>
+            <td class="req">test/platform/mission_control/</td>
+            <td class="evidence filled">21 / 21 passing</td>
+            <td><span class="chip pass">Confirmed</span></td>
+          </tr>
+          <tr>
+            <td class="item">flutter test (all prior)</td>
+            <td class="req">test/platform/ (Phases 13–18)</td>
+            <td class="evidence filled">13 / 13 passing</td>
+            <td><span class="chip pass">Confirmed</span></td>
+          </tr>
+          <tr>
+            <td class="item">flutter analyze (full)</td>
+            <td class="req">Entire lib/ directory</td>
+            <td class="evidence">Developer to run and return output</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="item">flutter test (full)</td>
+            <td class="req">Entire test/ directory</td>
+            <td class="evidence">Developer to run and return output</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="item">OS service tests</td>
+            <td class="req">FirebaseEventBus, FirestoreMissionControl</td>
+            <td class="evidence">Integration tests not yet written</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 3. YohPal OS Core Validation -->
+  <div class="sec">
+    <div class="sh"><span class="sn">3</span>YohPal OS Core Runtime Validation</div>
+    <div class="wrap">
+      <table class="ev">
+        <thead><tr><th>Component</th><th>Required Proof</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="item">Event Bus</td>
+            <td class="req">Screenshot or log showing events published to enterpriseEvents collection and consumed by watchEvents() stream</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="item">Digital Twin</td>
+            <td class="req">Dashboard or Firestore screenshot showing live module health state streamed from missionControlHealth</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="item">Automation Policies</td>
+            <td class="req">Log or code showing 7 policies registered at app startup via YohPalAutomationEngine.registerPolicy()</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="item">Approval Workflow</td>
+            <td class="req">Approval record in Firestore for at least one high-impact action (rollback, wallet freeze, or equivalent)</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="item">Mission Control Dashboard</td>
+            <td class="req">Screenshots showing all 7 modules visible with live health status</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="item">YohPalOS Abstract</td>
+            <td class="req">Concrete implementation class provided (FirebaseYohPalOS or equivalent)</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 4. Module connections -->
+  <div class="sec">
+    <div class="sh"><span class="sn">4</span>Module OS Connection Status</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.85rem;">Each module must publish at least one <code style="font-family:var(--mono);font-size:10.5px;">YohPalEnterpriseEvent</code> and expose a <code style="font-family:var(--mono);font-size:10.5px;">YohPalModuleState</code> document in Firestore. The YCIOS migration adapter (Phase 16) is the reference pattern.</p>
+    <div class="mod-grid">
+      <div class="mod-card mc-pend">
+        <div class="mch">Live</div>
+        <div class="mcb"><p>Event publishing + module state pending. Migration adapter not yet implemented.</p></div>
+      </div>
+      <div class="mod-card mc-pend">
+        <div class="mch">Hustle</div>
+        <div class="mcb"><p>Event publishing + module state pending. Migration adapter not yet implemented.</p></div>
+      </div>
+      <div class="mod-card mc-pend">
+        <div class="mch">Jobs</div>
+        <div class="mcb"><p>Event publishing + module state pending. Migration adapter not yet implemented.</p></div>
+      </div>
+      <div class="mod-card mc-pend">
+        <div class="mch">Market</div>
+        <div class="mcb"><p>Event publishing + module state pending. Migration adapter not yet implemented.</p></div>
+      </div>
+      <div class="mod-card mc-pend">
+        <div class="mch">Wallet</div>
+        <div class="mcb"><p>Event publishing pending. Write operations remain web-only (financial compliance).</p></div>
+      </div>
+      <div class="mod-card mc-pend">
+        <div class="mch">Brain</div>
+        <div class="mcb"><p>Event publishing + module state pending. BrainGateway connected via Cloud Function.</p></div>
+      </div>
+      <div class="mod-card mc-info">
+        <div class="mch">YCIOS</div>
+        <div class="mcb"><p>Migration adapter implemented (Phase 16). OS event publishing still pending.</p></div>
+      </div>
+    </div>
+
+    <!-- Progress summary -->
+    <div style="border:1px solid var(--paper-3);border-radius:var(--r);padding:.65rem .85rem;background:var(--paper-2);">
+      <div class="prog-row">
+        <span class="prog-label">OS models &amp; contracts built</span>
+        <div class="prog-bar-wrap"><div class="prog-bar-fill pass" style="width:100%"></div></div>
+        <span class="prog-pct">100%</span>
+      </div>
+      <div class="prog-row">
+        <span class="prog-label">Unit tests passing (45/45)</span>
+        <div class="prog-bar-wrap"><div class="prog-bar-fill pass" style="width:100%"></div></div>
+        <span class="prog-pct">100%</span>
+      </div>
+      <div class="prog-row">
+        <span class="prog-label">Module migration adapters (1/7)</span>
+        <div class="prog-bar-wrap"><div class="prog-bar-fill pend" style="width:14%"></div></div>
+        <span class="prog-pct">14%</span>
+      </div>
+      <div class="prog-row">
+        <span class="prog-label">Runtime OS validation (0/6)</span>
+        <div class="prog-bar-wrap"><div class="prog-bar-fill pend" style="width:0%"></div></div>
+        <span class="prog-pct">0%</span>
+      </div>
+      <div class="prog-row">
+        <span class="prog-label">CI/CD pipeline proof</span>
+        <div class="prog-bar-wrap"><div class="prog-bar-fill pend" style="width:0%"></div></div>
+        <span class="prog-pct">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. What developers must return -->
+  <div class="sec">
+    <div class="sh"><span class="sn">5</span>What Developers Must Return</div>
+    <ul class="return-list">
+      <li>
+        <div>
+          <div class="rl-title">Git branch, commit hash, and release tag</div>
+          <div class="rl-sub">Branch: flutter_app already confirmed. Release tag and CI log URL still required.</div>
+        </div>
+        <span class="chip pend">Partial</span>
+      </li>
+      <li>
+        <div>
+          <div class="rl-title">Event bus implementation proof</div>
+          <div class="rl-sub">Firestore Console screenshot of enterpriseEvents collection with at least one live event per module.</div>
+        </div>
+        <span class="chip pend">Pending</span>
+      </li>
+      <li>
+        <div>
+          <div class="rl-title">Digital twin live state proof</div>
+          <div class="rl-sub">Screenshot or log from watchDigitalTwin() showing real-time module health stream populated from Firestore.</div>
+        </div>
+        <span class="chip pend">Pending</span>
+      </li>
+      <li>
+        <div>
+          <div class="rl-title">Automation policy registration proof</div>
+          <div class="rl-sub">Code or log showing all 7 AutomationPolicy instances registered at startup and evaluateEvent() responding to a test event.</div>
+        </div>
+        <span class="chip pend">Pending</span>
+      </li>
+      <li>
+        <div>
+          <div class="rl-title">Approval workflow proof</div>
+          <div class="rl-sub">Firestore screenshot of approvals collection with at least one ApprovalRequest record showing a completed approve() or reject() flow.</div>
+        </div>
+        <span class="chip pend">Pending</span>
+      </li>
+      <li>
+        <div>
+          <div class="rl-title">Mission Control dashboard screenshots</div>
+          <div class="rl-sub">All 7 modules visible with live health status, incident count, and availability percentage.</div>
+        </div>
+        <span class="chip pend">Pending</span>
+      </li>
+      <li>
+        <div>
+          <div class="rl-title">flutter analyze — full project scope</div>
+          <div class="rl-sub">Run against entire lib/ directory, not just lib/platform/os/. Return full terminal output.</div>
+        </div>
+        <span class="chip pend">Pending</span>
+      </li>
+      <li>
+        <div>
+          <div class="rl-title">flutter test — full test suite</div>
+          <div class="rl-sub">Run against entire test/ directory. Return full terminal output confirming 45+ tests passing.</div>
+        </div>
+        <span class="chip pend">Pending</span>
+      </li>
+      <li>
+        <div>
+          <div class="rl-title">YohPal OS Validation Report — signed</div>
+          <div class="rl-sub">This document returned with all fields populated, signed by engineering lead and an approving executive.</div>
+        </div>
+        <span class="chip pend">Pending</span>
+      </li>
+    </ul>
+
+    <div class="callout gold">
+      <h3>Priority Outstanding Items from Prior Audits</h3>
+      <ul>
+        <li>CI/CD pipeline for the flutter_app branch — tests must run automatically on every push, not only locally</li>
+        <li>Module migration adapters for Live, Hustle, Jobs, Market, Wallet, Brain (only YCIOS has a reference implementation)</li>
+        <li>Concrete implementation of YohPalOS abstract class — no Firebase-backed implementation exists yet</li>
+        <li>Handover documentation confirming each module team understands their OS integration responsibilities</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 6. Final Decision -->
+  <div class="sec">
+    <div class="sh"><span class="sn">6</span>Executive Recommendation &amp; Final Decision</div>
+
+    <div class="decision-box">
+      <div class="db-header">
+        <h2>Final Decision — Choose After Evidence Is Submitted</h2>
+        <span class="db-status">Locked — Awaiting Evidence</span>
+      </div>
+      <div class="db-body">
+        <div class="decision-cards">
+          <div class="dc dc-pass dc-locked">
+            <span class="dc-lock-label">Locked</span>
+            <div class="dc-n">Option A</div>
+            <div class="dc-title">YohPal OS Operational</div>
+            <div class="dc-cond">All 9 evidence items returned. Runtime validation confirmed. 45+ tests passing across full suite. CI/CD active. All 7 modules connected. Signed by engineering lead.</div>
+          </div>
+          <div class="dc dc-warn dc-locked">
+            <span class="dc-lock-label">Locked</span>
+            <div class="dc-n">Option B</div>
+            <div class="dc-title">Operational After Minor Fixes</div>
+            <div class="dc-cond">Core OS validated (event bus, digital twin, approvals). 1–2 non-critical items outstanding with a documented resolution plan and owner assigned.</div>
+          </div>
+          <div class="dc dc-fail dc-locked">
+            <span class="dc-lock-label">Locked</span>
+            <div class="dc-n">Option C</div>
+            <div class="dc-title">Not Operational</div>
+            <div class="dc-cond">Insufficient evidence returned. Runtime OS unproven. Module integrations absent. Pilot blocked until validation gap is closed. Escalate to engineering leadership.</div>
+          </div>
+        </div>
+        <div class="db-note">All three options are locked until developers return the evidence listed in Section 5. Selecting a decision before evidence is received is not permitted under the Phase 18 Release Governance framework. Current executive recommendation: <strong>Option C holds</strong> — YohPal OS is not yet operationally validated.</div>
+      </div>
+    </div>
+
+    <!-- Signature block -->
+    <div class="sig-block">
+      <div class="sig-label">Signatures — Required Before Decision Is Recorded</div>
+      <div class="sig-grid">
+        <div class="sig-field">
+          <div class="sf-line"></div>
+          <div class="sf-caption">Engineering Lead — name, date</div>
+        </div>
+        <div class="sig-field">
+          <div class="sf-line"></div>
+          <div class="sf-caption">Approving Executive — name, date</div>
+        </div>
+        <div class="sig-field">
+          <div class="sf-line"></div>
+          <div class="sf-caption">Decision Selected (A / B / C)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="rule">
+</div>

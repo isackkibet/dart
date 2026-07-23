@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+  mesh-control:
+    build:
+      context: ..
+      dockerfile: server/mesh-control/Dockerfile
+    container_name: yohpal-mesh-live-control
+    env_file:
+      - ../.env
+    environment:
+      PORT: 8080
+      PERSISTENCE_MODE: firestore
+      AUTH_MODE: firebase
+      SFU_CONTROL_URL: http://mediasoup:${MEDIASOUP_API_PORT:-3000}
+      SFU_CONTROL_TOKEN: ${SFU_CONTROL_TOKEN}
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/firebase-service-account.json
+    ports:
+      - "${MESH_CONTROL_PORT:-8080}:8080"
+    volumes:
+      - ${FIREBASE_SERVICE_ACCOUNT_PATH}:/run/secrets/firebase-service-account.json:ro
+    depends_on:
+      mediasoup:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mediasoup:
+    build:
+      context: ../server/mediasoup
+    container_name: yohpal-live-mediasoup
+    env_file:
+      - ../.env
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ../server/mediasoup/src:/app/src
+      - ../test-client:/app/test-client:ro
+    healthcheck:
+      test: ["CMD", "node", "scripts/healthcheck.js"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  turn:
+    image: coturn/coturn:4.6.2
+    container_name: yohpal-live-turn
+    network_mode: host
+    restart: unless-stopped
+    command: ["-c", "/etc/coturn/turnserver.conf"]
+    volumes:
+      - ../docker/turn/turnserver.conf:/etc/coturn/turnserver.conf:ro
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: yohpal-live-nginx
+    restart: unless-stopped
+    ports:
+      - "${NGINX_HTTPS_PORT}:443"
+    volumes:
+      - ../docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../docker/certs:/etc/nginx/certs:ro
+      - ../test-client:/usr/share/nginx/html/test-client:ro
+    depends_on:
+      - mediasoup
+
+  test-client:
+    image: nginx:1.27-alpine
+    container_name: yohpal-live-test-client
+    profiles:
+      - optional
+    ports:
+      - "8088:80"
+    volumes:
+      - ../test-client:/usr/share/nginx/html:ro

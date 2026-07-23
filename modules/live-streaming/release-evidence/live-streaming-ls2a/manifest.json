@@ -1,0 +1,63 @@
+{
+  "release": "YOHPAL LIVE STREAMING LS-2A",
+  "decisionRequested": "IMPLEMENTATION CLOSURE",
+  "candidate": {
+    "featureBranch": "feature/yohpal-live-streaming-ls2a",
+    "releaseBranch": "release/yohpal-live-streaming-ls2a-rc1",
+    "commitHash": "REPLACE_WITH_FULL_40_CHARACTER_SHA",
+    "annotatedTag": "yohpal-live-streaming-ls2a-rc1",
+    "workingTree": "CLEAN"
+  },
+  "architecture": {
+    "canonicalRuntime": "mediasoup",
+    "adr": "docs/architecture/ADR-024-single-live-streaming-runtime.md",
+    "liveKitProductionEnabled": false
+  },
+  "gates": [
+    {
+      "id": "LS2A-UI-12",
+      "status": "PENDING",
+      "evidence": ["flutter-test.txt"]
+    },
+    {
+      "id": "LS2A-UI-13",
+      "status": "PENDING",
+      "evidence": ["flutter-test.txt"]
+    },
+    {
+      "id": "FLUTTER_ANALYZE",
+      "status": "PENDING",
+      "evidence": ["flutter-analyze.txt"]
+    },
+    {
+      "id": "FLUTTER_TEST",
+      "status": "PENDING",
+      "evidence": ["flutter-test.txt"]
+    },
+    {
+      "id": "SERVER_TEST",
+      "status": "PENDING",
+      "evidence": ["server-test.txt"]
+    },
+    {
+      "id": "CLEAN_WORKING_TREE",
+      "status": "PENDING",
+      "evidence": [
+        "working-tree-before.txt",
+        "working-tree-after.txt"
+      ]
+    },
+    {
+      "id": "ANNOTATED_TAG",
+      "status": "PENDING",
+      "evidence": ["tag-proof.txt"]
+    },
+    {
+      "id": "ADR_024",
+      "status": "PENDING",
+      "evidence": [
+        "../../../docs/architecture/ADR-024-single-live-streaming-runtime.md"
+      ]
+    }
+  ]
+}

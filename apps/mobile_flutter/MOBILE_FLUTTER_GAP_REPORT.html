@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>YohPal Mobile Flutter — Blueprint Gap Report</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13px;line-height:1.55;color:#0f172a;background:#f8fafc;padding:28px}
+@media print{body{background:#fff;padding:0}.no-print{display:none}h2.module-title{page-break-after:avoid}table{page-break-inside:avoid}.phase-grid{page-break-inside:avoid}}
+
+/* ── Header ── */
+.report-header{border-bottom:3px solid #0f172a;padding-bottom:14px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end}
+.report-header h1{font-size:20px;font-weight:800;letter-spacing:-.3px}
+.report-header .meta{font-size:11.5px;color:#64748b;text-align:right;line-height:1.7}
+button.print-btn{background:#0f172a;color:#fff;border:none;padding:6px 14px;border-radius:5px;cursor:pointer;font-size:11.5px}
+
+/* ── Summary bar ── */
+.summary-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:22px}
+.sum-card{background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:13px 14px}
+.sum-card .num{font-size:26px;font-weight:900;line-height:1}
+.sum-card .lbl{font-size:11px;color:#64748b;font-weight:600;margin-top:3px;text-transform:uppercase;letter-spacing:.3px}
+.sum-card .sub{font-size:10.5px;color:#94a3b8;margin-top:2px}
+.num-green{color:#15803d}.num-blue{color:#1d4ed8}.num-red{color:#b91c1c}.num-yellow{color:#92400e}.num-purple{color:#6d28d9}
+
+/* ── Section headings ── */
+h2.module-title{font-size:14px;font-weight:800;color:#0f172a;margin:24px 0 3px;padding:9px 13px;background:#f1f5f9;border-left:4px solid #0f172a;border-radius:0 5px 5px 0;display:flex;justify-content:space-between;align-items:center}
+h2.module-title .cov{font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px}
+.cov-good{background:#dcfce7;color:#15803d}
+.cov-mid{background:#fef9c3;color:#854d0e}
+.cov-low{background:#fee2e2;color:#b91c1c}
+.cov-zero{background:#f1f5f9;color:#475569}
+.module-desc{font-size:12px;color:#475569;margin-bottom:8px;padding:0 2px}
+
+/* ── Gap tables ── */
+table.gap-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;margin-bottom:6px;font-size:12px}
+.gap-table th{background:#f8fafc;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:#475569;padding:8px 11px;text-align:left;border-bottom:1px solid #e2e8f0}
+.gap-table td{padding:8px 11px;border-bottom:1px solid #f8fafc;vertical-align:top}
+.gap-table tr:last-child td{border-bottom:none}
+.gap-table tr:hover td{background:#fafafa}
+
+/* ── Status pills ── */
+.s{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.s-ok   {background:#dcfce7;color:#15803d}
+.s-part {background:#fef9c3;color:#854d0e}
+.s-stub {background:#e0e7ff;color:#3730a3}
+.s-miss {background:#fee2e2;color:#b91c1c}
+
+/* ── Security / architecture section ── */
+h2.sec-title{font-size:14px;font-weight:800;color:#0f172a;margin:28px 0 8px;padding:9px 13px;background:#fff7ed;border-left:4px solid #ea580c;border-radius:0 5px 5px 0}
+table.sec-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;margin-bottom:10px;font-size:12px}
+.sec-table th{background:#f8fafc;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#475569;padding:8px 11px;text-align:left;border-bottom:1px solid #e2e8f0}
+.sec-table td{padding:8px 11px;border-bottom:1px solid #f8fafc;vertical-align:top}
+.sec-table tr:last-child td{border-bottom:none}
+
+/* ── Phase roadmap ── */
+h2.phase-title{font-size:14px;font-weight:800;color:#0f172a;margin:28px 0 8px;padding:9px 13px;background:#eff6ff;border-left:4px solid #1d4ed8;border-radius:0 5px 5px 0}
+.phase-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.phase-card{background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:13px 14px}
+.phase-card.done{border-color:#86efac;background:#f0fdf4}
+.phase-card.part{border-color:#fbbf24;background:#fefce8}
+.phase-card.next{border-color:#93c5fd;background:#eff6ff}
+.phase-card .ph-badge{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:999px;margin-bottom:6px}
+.phase-card.done .ph-badge{background:#15803d;color:#fff}
+.phase-card.part .ph-badge{background:#92400e;color:#fff}
+.phase-card.next .ph-badge{background:#1d4ed8;color:#fff}
+.ph-badge.future{background:#e2e8f0;color:#475569}
+.phase-card h4{font-size:12.5px;font-weight:700;margin-bottom:5px}
+.phase-card ul{padding-left:14px;font-size:11.5px;color:#475569;list-style:disc}
+.phase-card li{margin-bottom:2px}
+.phase-card .ph-cov{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+
+/* ── Scorecard ── */
+h2.score-title{font-size:14px;font-weight:800;color:#0f172a;margin:28px 0 8px;padding:9px 13px;background:#f0fdf4;border-left:4px solid #15803d;border-radius:0 5px 5px 0}
+table.score-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;margin-bottom:10px;font-size:12px}
+.score-table th{background:#0f172a;color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:8px 11px;text-align:left}
+.score-table td{padding:8px 11px;border-bottom:1px solid #f8fafc;vertical-align:middle}
+.score-table tr:last-child td{border-bottom:none;font-weight:800;background:#f8fafc}
+.td-ok{color:#15803d;font-weight:700;text-align:center}
+.td-part{color:#854d0e;font-weight:700;text-align:center}
+.td-stub{color:#3730a3;font-weight:700;text-align:center}
+.td-miss{color:#b91c1c;font-weight:700;text-align:center}
+.td-ctr{text-align:center;font-weight:700}
+.bar-wrap{width:100%;background:#f1f5f9;border-radius:999px;height:7px;margin-top:3px}
+.bar-fill{height:7px;border-radius:999px;background:#15803d}
+.bar-fill.amber{background:#f59e0b}
+.bar-fill.red{background:#ef4444}
+
+/* ── Footer ── */
+.report-footer{margin-top:28px;padding:11px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;font-size:11px;color:#64748b}
+
+code{font-family:'Courier New',monospace;font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;color:#4f46e5}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="report-header">
+  <div>
+    <h1>YohPal Mobile Flutter — Blueprint Gap Report</h1>
+    <div style="font-size:12px;color:#475569;margin-top:3px">Static analysis against YOHPAL LIVE MASTER BLUEPRINT &nbsp;·&nbsp; apps/mobile_flutter/ only</div>
+  </div>
+  <div class="meta">
+    2026-06-15 &nbsp;·&nbsp; Branch: yohpaladmin &nbsp;·&nbsp; Project: yohpal_live_v2<br>
+    Flutter SDK ≥3.3.0 &nbsp;·&nbsp; 16 modules scanned &nbsp;·&nbsp; 68 source files<br>
+    <button class="print-btn no-print" onclick="window.print()">Print / Save PDF</button>
+  </div>
+</div>
+
+<!-- ═══ SUMMARY BAR ═══ -->
+<div class="summary-bar">
+  <div class="sum-card">
+    <div class="num num-yellow">22%</div>
+    <div class="lbl">Blueprint Coverage</div>
+    <div class="sub">Phase 1 ~55% done; 5 phases untouched</div>
+  </div>
+  <div class="sum-card">
+    <div class="num num-green">1</div>
+    <div class="lbl">Fully Working Module</div>
+    <div class="sub">Video feed + HLS playback</div>
+  </div>
+  <div class="sum-card">
+    <div class="num num-blue">11</div>
+    <div class="lbl">Scaffold-only modules</div>
+    <div class="sub">Model + repo + stub screen</div>
+  </div>
+  <div class="sum-card">
+    <div class="num num-red">3</div>
+    <div class="lbl">Completely empty</div>
+    <div class="sub">Auth · Upload · Comments</div>
+  </div>
+  <div class="sum-card">
+    <div class="num num-purple">15</div>
+    <div class="lbl">Stub screens</div>
+    <div class="sub">Routes wired; UI renders; no logic</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     MODULE A — SHORT VIDEO ENGINE
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module A — Short Video Engine
+  <span class="cov cov-mid">7 / 16 &nbsp;·&nbsp; 44%</span>
+</h2>
+<p class="module-desc">Vertical feed · HLS playback · AI-ranked feed · predictive prefetch · broken-video recovery · engagement overlays. Collections: <code>videos</code>, <code>videoEvents</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Vertical PageView feed</td><td><code>video_feed_screen.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>PageView.builder with vertical scroll physics; currentIndex tracked via <code>VideoFeedController</code>.</td></tr>
+    <tr><td>HLS video playback</td><td><code>video_player_widget.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>VideoPlayerController.networkUrl</code> with 7-second timeout; skip button shown on stall.</td></tr>
+    <tr><td>Video data model</td><td><code>video_model.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>fromMap()</code> factory; <code>isPlayable</code> getter (.m3u8 check); supports <code>hlsUrl</code> and <code>hlsPath</code> fields.</td></tr>
+    <tr><td>Firestore video repository</td><td><code>video_repository.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Queries <code>videos</code> where <code>status='live'</code>; cursor pagination (<code>startAfterDocument</code>); filters to <code>isPlayable</code>.</td></tr>
+    <tr><td>AI-ranked feed (client-side)</td><td><code>video_ranking_service.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Ranks by views, likes, tag match, and freshness. Blueprint also requires backend-assisted ranking; this is client-only.</td></tr>
+    <tr><td>Predictive prefetch</td><td><code>video_prefetch_service.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Scroll-velocity based: prefetches 3 items at rest, up to 10 at high velocity.</td></tr>
+    <tr><td>Feed controller (ChangeNotifier)</td><td><code>video_feed_controller.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Manages loading, videos list, currentIndex; integrates repo + prefetch + ranking services.</td></tr>
+    <tr><td>Like / bookmark / view overlay</td><td><code>video_overlay_widget.dart</code></td><td><span class="s s-part">⚠ Partial</span></td><td>Buttons render with icons but tap handlers call <code>VideoInteractionService</code> — verify Firestore writes actually persist.</td></tr>
+    <tr><td>Broken video auto-hide</td><td><code>video_repository.dart</code></td><td><span class="s s-part">⚠ Partial</span></td><td><code>markVideoAsBroken()</code> exists but is never called automatically on playback error — manual integration needed.</td></tr>
+    <tr><td>Following feed tab</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Blueprint requires a Following feed. Only one For-You feed exists.</td></tr>
+    <tr><td>Nearby / local feed</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No geolocation query or location-based feed.</td></tr>
+    <tr><td>Trending feed</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Ranking service sorts by engagement but there is no dedicated trending tab.</td></tr>
+    <tr><td>Niche / category feeds</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No category filtering in feed screen or repository.</td></tr>
+    <tr><td>Offline pre-cache</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Prefetch downloads to memory only; no persistent offline cache.</td></tr>
+    <tr><td>Duets / stitches</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No duet or stitch logic anywhere in the codebase.</td></tr>
+    <tr><td>Poll / shop / affiliate overlays on video</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Overlay widget shows engagement buttons only; no poll, shop, or affiliate button injection.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE B — AUTHENTICATION
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module B — Authentication &amp; Onboarding
+  <span class="cov cov-low">1 / 8 &nbsp;·&nbsp; 12%</span>
+</h2>
+<p class="module-desc">Sign-up · sign-in · phone/OTP · profile creation · session management. Collections: <code>users</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Firebase Auth SDK declared</td><td><code>pubspec.yaml</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>firebase_auth: ^5.3.1</code> in dependencies; firebase_options.dart generated for Android.</td></tr>
+    <tr><td>Auth screen (sign-in / sign-up)</td><td><code>features/auth/screens/</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Folder exists but is completely empty. No LoginScreen, SignUpScreen, or PhoneAuthScreen.</td></tr>
+    <tr><td>Email / password sign-in</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No <code>signInWithEmailAndPassword</code> call anywhere in the codebase.</td></tr>
+    <tr><td>Phone / OTP auth</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>User model / Firestore write on registration</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No <code>users</code> collection write after auth.</td></tr>
+    <tr><td>Auth state listener / route guard</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Router has no auth guard. All routes are accessible without signing in.</td></tr>
+    <tr><td>Onboarding flow (interests, username, avatar)</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>iOS Firebase configuration</td><td><code>firebase_options.dart</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Only Android platform configured. iOS, macOS, and Web entries are absent.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE C — VIDEO UPLOAD
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module C — Video Upload &amp; Processing
+  <span class="cov cov-zero">0 / 7 &nbsp;·&nbsp; 0%</span>
+</h2>
+<p class="module-desc">Camera / gallery pick · upload to Firebase Storage · trigger HLS transcoding · Firestore document creation. Collections: <code>videos</code>, <code>aiVideoJobs</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Video upload screen</td><td><code>features/video_upload/</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Folder and sub-folders exist but contain no files whatsoever.</td></tr>
+    <tr><td>Camera / gallery picker</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No image_picker or camera dependency in pubspec.yaml.</td></tr>
+    <tr><td>Firebase Storage upload</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td><code>firebase_storage: ^12.3.3</code> declared but never imported in any file.</td></tr>
+    <tr><td>Firestore video document creation</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No code path that writes to <code>videos</code> collection on upload.</td></tr>
+    <tr><td>Upload progress UI</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>HLS transcoding trigger (Cloud Function call)</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No HTTP call to a transcoding worker after upload.</td></tr>
+    <tr><td>Route registered for upload screen</td><td><code>router.dart</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No <code>/upload</code> route. The bottom nav "Create" tab has no destination.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE D — COMMENTS
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module D — Comments &amp; Reactions
+  <span class="cov cov-zero">0 / 6 &nbsp;·&nbsp; 0%</span>
+</h2>
+<p class="module-desc">Comment threads · replies · reactions · report comment. Collections: <code>comments</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Comment model</td><td><code>features/comments/models/</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Folder exists; completely empty.</td></tr>
+    <tr><td>Comment repository</td><td><code>features/comments/repositories/</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Folder exists; completely empty.</td></tr>
+    <tr><td>Comments bottom sheet / screen</td><td><code>features/comments/widgets/</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Folder exists; completely empty.</td></tr>
+    <tr><td>Reply threading</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>Comment button in video overlay</td><td><code>video_overlay_widget.dart</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Button icon shown in overlay but tap handler does nothing (no bottom sheet open).</td></tr>
+    <tr><td>Reactions (emoji) on comments</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE E — AI VIDEO & PHOTO EDITING
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module E — AI Video &amp; Photo Editing Suite
+  <span class="cov cov-low">3 / 14 &nbsp;·&nbsp; 21%</span>
+</h2>
+<p class="module-desc">AI captions · thumbnails · hooks · hashtags · translation · trimming · viral score · one-click edits. Collections: <code>aiVideoJobs</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>AI job model</td><td><code>ai_video_job.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Data class for AI job records — type, status, videoId, resultUrl fields.</td></tr>
+    <tr><td>AI video job repository</td><td><code>ai_video_repository.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Reads/writes <code>aiVideoJobs</code> collection; submits job documents.</td></tr>
+    <tr><td>AI caption service</td><td><code>ai_caption_service.dart</code></td><td><span class="s s-part">⚠ Partial</span></td><td>File exists and defines the service class; verify whether it calls a real AI endpoint or is a stub body.</td></tr>
+    <tr><td>AI hook generator service</td><td><code>ai_hook_service.dart</code></td><td><span class="s s-part">⚠ Partial</span></td><td>File exists; same caveat — confirm HTTP call to AI backend is wired.</td></tr>
+    <tr><td>AI thumbnail service</td><td><code>ai_thumbnail_service.dart</code></td><td><span class="s s-part">⚠ Partial</span></td><td>File exists; same caveat.</td></tr>
+    <tr><td>AI translation service</td><td><code>ai_translation_service.dart</code></td><td><span class="s s-part">⚠ Partial</span></td><td>File exists; same caveat.</td></tr>
+    <tr><td>AI editor screen (UI)</td><td><code>ai_editor_screen.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Route <code>/ai-editor</code> registered; screen renders but has no service calls wired to the UI.</td></tr>
+    <tr><td>AI hashtag generator</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No ai_hashtag_service.dart. Blueprint lists this as a key AI feature.</td></tr>
+    <tr><td>AI auto-trim</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>AI background removal</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>AI beautify filter</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>AI viral score</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Blueprint flags this as a core pre-publish signal; not implemented.</td></tr>
+    <tr><td>AI music recommendation</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>AI scene detection / product tagging</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE F — CREATOR PROFILE
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module F — Creator Profile
+  <span class="cov cov-low">3 / 9 &nbsp;·&nbsp; 33%</span>
+</h2>
+<p class="module-desc">Creator bio · stats card · follow/unfollow · earnings eligibility. Collections: <code>creatorProfiles</code>, <code>follows</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Creator profile model</td><td><code>creator_profile_model.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Data class with userId, displayName, followerCount, videoCount, eligibilityScore.</td></tr>
+    <tr><td>Creator profile repository</td><td><code>creator_profile_repository.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Reads/writes <code>creatorProfiles</code>; <code>getCreatorProfile(uid)</code> and <code>updateProfile()</code>.</td></tr>
+    <tr><td>Creator stats card widget</td><td><code>creator_stats_card.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Displays follower count, video count, eligibility score.</td></tr>
+    <tr><td>Creator profile screen</td><td><code>creator_profile_screen.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Route <code>/creator-profile</code> registered; screen renders; no service calls or follow button wired.</td></tr>
+    <tr><td>Follow / unfollow action</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No <code>follows</code> collection write. No follow button interaction in profile screen.</td></tr>
+    <tr><td>Follower count live update</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No Firestore stream subscription on follower count.</td></tr>
+    <tr><td>Creator profile link from video overlay</td><td><code>video_overlay_widget.dart</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Video overlay has no avatar tap or creator name link to <code>/creator-profile</code>.</td></tr>
+    <tr><td>Creator dashboard (video analytics)</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No dedicated creator analytics page (watch time, completion rate, reach).</td></tr>
+    <tr><td>Profile edit screen</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No edit profile screen or avatar upload.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE G — LIVE STREAMING
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module G — Live Streaming
+  <span class="cov cov-low">3 / 12 &nbsp;·&nbsp; 25%</span>
+</h2>
+<p class="module-desc">Go live · RTMP ingest · HLS/WebRTC playback · live chat · gifts · recording · replay. Collections: <code>liveSessions</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Live session model</td><td><code>live_session_model.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Data class: sessionId, hostUid, title, status, viewerCount, giftTotal.</td></tr>
+    <tr><td>Live repository</td><td><code>live_repository.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>CRUD on <code>liveSessions</code> collection; <code>startSession()</code>, <code>endSession()</code>, <code>getActiveSessions()</code>.</td></tr>
+    <tr><td>Live stream service</td><td><code>live_stream_service.dart</code></td><td><span class="s s-part">⚠ Partial</span></td><td>File exists; confirm whether RTMP ingest URL generation or WebRTC signalling is actually implemented.</td></tr>
+    <tr><td>Go Live screen</td><td><code>go_live_screen.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Route <code>/go-live</code> registered; screen renders title/description form; no RTMP connection wired.</td></tr>
+    <tr><td>Live viewer screen</td><td><code>live_viewer_screen.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Route <code>/live-viewer</code> registered; renders placeholder; no HLS/WebRTC playback wired.</td></tr>
+    <tr><td>Live chat panel widget</td><td><code>live_chat_panel.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Widget file exists; no Firestore message stream wired.</td></tr>
+    <tr><td>Live gift panel widget</td><td><code>live_gift_panel.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Widget file exists; no gift send / wallet deduction wired.</td></tr>
+    <tr><td>RTMP ingest connection</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No RTMP client library in pubspec.yaml. No ingest server URL configuration.</td></tr>
+    <tr><td>Live polls overlay</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not wired into live viewer screen.</td></tr>
+    <tr><td>Live shopping / product links</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>Live recording &amp; replay</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No recording trigger or replay feed integration.</td></tr>
+    <tr><td>Live battles / co-hosting</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE H — MULTI-STREAMING
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module H — Multi-Streaming
+  <span class="cov cov-low">2 / 7 &nbsp;·&nbsp; 29%</span>
+</h2>
+<p class="module-desc">Stream once to YohPal + YouTube + Facebook + TikTok + custom RTMP. Collections: <code>multistreamSessions</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Multistream destination model</td><td><code>multistream_destination.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>platform, rtmpUrl, streamKey, isEnabled fields.</td></tr>
+    <tr><td>Multistream repository</td><td><code>multistream_repository.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Reads/writes <code>multistreamSessions</code>; saves destination list per session.</td></tr>
+    <tr><td>Multistream setup screen</td><td><code>multistream_setup_screen.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Route <code>/multistream</code> registered; form renders; no RTMP forwarding logic wired.</td></tr>
+    <tr><td>Multistream service</td><td><code>multistream_service.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>File exists; confirm whether it sends RTMP forward commands to a Cloud Run worker.</td></tr>
+    <tr><td>YouTube / Facebook RTMP forwarding</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No platform-specific RTMP targets wired to the service.</td></tr>
+    <tr><td>Per-platform analytics collection</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Blueprint requires centralised analytics across forwarded platforms; not implemented.</td></tr>
+    <tr><td>Stream health / forwarding status UI</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No live status indicator for each destination in the setup screen.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE I — MONETISATION ENGINE
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module I — Monetisation Engine
+  <span class="cov cov-low">3 / 11 &nbsp;·&nbsp; 27%</span>
+</h2>
+<p class="module-desc">Ad revenue share · creator gifts · tipping · subscriptions · boosts · affiliate earnings · payouts. Collections: <code>creatorEarnings</code>, <code>walletSessions</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Creator earning model</td><td><code>creator_earning.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>earningId, creatorUid, amount, type (ad/gift/affiliate/subscription), timestamp.</td></tr>
+    <tr><td>Watch ledger model</td><td><code>watch_ledger.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Tracks watch time per video per user for ad revenue attribution.</td></tr>
+    <tr><td>Monetisation repository</td><td><code>monetisation_repository.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Reads <code>creatorEarnings</code>; <code>getEarningsSummary(uid)</code> and <code>recordEarning()</code>.</td></tr>
+    <tr><td>Creator earnings screen</td><td><code>creator_earnings_screen.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Route <code>/earnings</code> registered; screen renders; no repository call wired.</td></tr>
+    <tr><td>Monetisation service</td><td><code>monetisation_service.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>File exists; no ad impression attribution or gift processing logic wired.</td></tr>
+    <tr><td>Ad revenue attribution</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Watch ledger model exists but nothing reads it to calculate revenue share.</td></tr>
+    <tr><td>Live gifts / tipping flow</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>LiveGiftPanel is a stub; no gift send → wallet deduct → creator credit flow.</td></tr>
+    <tr><td>Paid subscriptions</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>Boosted video purchase</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>Payout request from app</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Blueprint specifies payouts go through web wallet; no web wallet redirect from earnings screen.</td></tr>
+    <tr><td>Eligibility score display</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Field exists in creator model but not shown anywhere in the earnings screen.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE J — CONTACTS GROWTH ENGINE
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module J — Contacts &amp; User Acquisition Engine
+  <span class="cov cov-low">2 / 8 &nbsp;·&nbsp; 25%</span>
+</h2>
+<p class="module-desc">Phone contacts import · AI invite ranking · WhatsApp share cards · referral tracking · viral squads. Collections: <code>users</code>, affiliate attribution.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Contact invite model</td><td><code>contact_invite_model.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>phoneNumber, name, inviteStatus, referralCode fields.</td></tr>
+    <tr><td>Contact growth repository</td><td><code>contact_growth_repository.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Records invite attempts and conversion status in Firestore.</td></tr>
+    <tr><td>flutter_contacts declared</td><td><code>pubspec.yaml</code></td><td><span class="s s-part">⚠ Partial</span></td><td><code>flutter_contacts: ^1.1.9</code> and <code>permission_handler: ^11.3.1</code> declared — not yet called in code.</td></tr>
+    <tr><td>Contact import service</td><td><code>contact_import_service.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>File exists; confirm whether it calls <code>FlutterContacts.getContacts()</code> with permission check.</td></tr>
+    <tr><td>AI invite ranker</td><td><code>ai_invite_ranker.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>File exists; confirm scoring logic is implemented, not a placeholder.</td></tr>
+    <tr><td>Invite contacts screen</td><td><code>invite_contacts_screen.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Route <code>/invite</code> registered; screen renders; no contact list, no invite button wired.</td></tr>
+    <tr><td>WhatsApp / SMS share card</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td><code>url_launcher</code> declared but no WhatsApp deep link or share card generated.</td></tr>
+    <tr><td>Referral conversion tracking</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Repository schema exists but nothing records a conversion event on signup.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE K — SEARCH ENGINE
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module K — Search Engine
+  <span class="cov cov-low">2 / 8 &nbsp;·&nbsp; 25%</span>
+</h2>
+<p class="module-desc">Video · creator · live · poll · product search; BM25 + vector; AI intent detection. Collections: global index.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Search result model</td><td><code>search_result.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>type (video/creator/live/poll/product), id, title, thumbnailUrl, relevanceScore.</td></tr>
+    <tr><td>Search repository</td><td><code>search_repository.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Firestore-based search; note: Firestore text search is limited — full-text needs OpenSearch/Algolia.</td></tr>
+    <tr><td>Search screen</td><td><code>search_screen.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Route <code>/search</code> registered (bottom nav tab 2); screen renders a text field; no query wired.</td></tr>
+    <tr><td>Search service</td><td><code>search_service.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>File exists; confirm whether it delegates to repository or is an empty class.</td></tr>
+    <tr><td>BM25 / full-text search backend</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Blueprint requires BM25 + vector search; Firestore cannot do this. No OpenSearch/Algolia integration.</td></tr>
+    <tr><td>AI intent detection</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>Nearby trends search</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No geolocation in search. Not implemented.</td></tr>
+    <tr><td>Search across all content types</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Repository likely only queries <code>videos</code>; no cross-collection federated search.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE L — AFFILIATE MARKETING
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module L — Affiliate Marketing Engine
+  <span class="cov cov-low">3 / 8 &nbsp;·&nbsp; 38%</span>
+</h2>
+<p class="module-desc">Affiliate links · attribution · commission calculation · fraud checks. Collections: <code>affiliateLinks</code>, <code>affiliateAttributions</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Affiliate link model</td><td><code>affiliate_link.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>linkId, creatorUid, targetType, targetId, commissionRate fields.</td></tr>
+    <tr><td>Affiliate attribution model</td><td><code>affiliate_attribution.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>attributionId, linkId, referredUid, event, amount, convertedAt.</td></tr>
+    <tr><td>Affiliate repository</td><td><code>affiliate_repository.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Reads/writes <code>affiliateLinks</code> and <code>affiliateAttributions</code>; <code>recordAttribution()</code>.</td></tr>
+    <tr><td>Affiliate dashboard screen</td><td><code>affiliate_dashboard_screen.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Route <code>/affiliate</code> registered; screen renders; no repository call, no earnings display.</td></tr>
+    <tr><td>Affiliate service</td><td><code>affiliate_service.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>File exists; commission calculation and fraud check logic likely not implemented.</td></tr>
+    <tr><td>Signup / purchase attribution trigger</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Nothing calls <code>recordAttribution()</code> on user signup or course purchase.</td></tr>
+    <tr><td>Fraud / anti-pyramid detection</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Blueprint mandates fraud checks; not implemented.</td></tr>
+    <tr><td>Affiliate link generation UI</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No create-link screen or share card generator.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE M — INFINITY POLLS
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module M — Infinity Polls
+  <span class="cov cov-low">3 / 10 &nbsp;·&nbsp; 30%</span>
+</h2>
+<p class="module-desc">Poll inside video · poll battles · long-running polls · fraud-resistant voting · AI summaries. Collections: <code>polls</code>, <code>pollVotes</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Poll model</td><td><code>poll_model.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>pollId, question, options[], creatorUid, expiresAt, isFraudHold, isSponsored fields.</td></tr>
+    <tr><td>Poll vote model</td><td><code>poll_vote.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>voteId, pollId, voterUid, optionIndex, timestamp.</td></tr>
+    <tr><td>Poll repository</td><td><code>poll_repository.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>CRUD on <code>polls</code> and <code>pollVotes</code>; <code>submitVote()</code> with duplicate-vote guard.</td></tr>
+    <tr><td>Poll detail screen</td><td><code>poll_detail_screen.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Route <code>/poll</code> registered; screen renders; no repository call or vote submission wired.</td></tr>
+    <tr><td>Poll service</td><td><code>poll_service.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>File exists; fraud check and AI summary logic likely empty.</td></tr>
+    <tr><td>Video poll overlay widget</td><td><code>video_poll_overlay.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Widget exists; not injected into <code>video_overlay_widget.dart</code>.</td></tr>
+    <tr><td>Poll overlay on video feed</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Blueprint requires poll overlays on short videos; video overlay widget does not show polls.</td></tr>
+    <tr><td>Poll battles</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>Fraud-resistant voting (server-side)</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Duplicate guard in repository but no server-side rate limiting or Firestore rules enforcement.</td></tr>
+    <tr><td>AI poll summary / trend chart</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE N — ADS ENGINE
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module N — Ads Engine
+  <span class="cov cov-low">3 / 9 &nbsp;·&nbsp; 33%</span>
+</h2>
+<p class="module-desc">In-feed video ads · boosted videos · live ads · targeting · billing (web-only). Collections: <code>adCampaigns</code>, <code>adImpressions</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Ad campaign model</td><td><code>ad_campaign.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>campaignId, advertiserId, adType, targetingTags, budget, status fields.</td></tr>
+    <tr><td>Ad impression model</td><td><code>ad_impression.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>impressionId, campaignId, viewerUid, videoId, watchedSeconds, timestamp.</td></tr>
+    <tr><td>Ad repository</td><td><code>ad_repository.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Fetches eligible campaigns for viewer; records impressions to <code>adImpressions</code>.</td></tr>
+    <tr><td>In-feed ad widget</td><td><code>in_feed_ad_widget.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Widget file exists; not injected into the video feed PageView.</td></tr>
+    <tr><td>Ad delivery service</td><td><code>ad_delivery_service.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>File exists; ad selection / frequency capping logic likely not implemented.</td></tr>
+    <tr><td>Advertiser dashboard screen</td><td><code>advertiser_dashboard_screen.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Route <code>/ads</code> registered; screen renders; no repository call wired.</td></tr>
+    <tr><td>Ad injection into video feed</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>InFeedAdWidget not inserted into feed PageView at configured intervals.</td></tr>
+    <tr><td>Targeting (interest / location / behavior)</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Campaign model has targetingTags but delivery service does not apply them to viewer selection.</td></tr>
+    <tr><td>Web-based ad billing (app store bypass)</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Blueprint mandates billing happens on web to avoid app store fees; no web redirect implemented.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE O — WEB WALLET
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module O — Web-Based Wallet
+  <span class="cov cov-low">1 / 7 &nbsp;·&nbsp; 14%</span>
+</h2>
+<p class="module-desc">Wallet status view in app · web redirect for payments · gifts · tips · subscriptions. Collections: <code>walletSessions</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Wallet launcher service</td><td><code>wallet_launcher_service.dart</code></td><td><span class="s s-part">⚠ Partial</span></td><td>File exists; confirm whether it calls <code>url_launcher</code> with the web wallet URL.</td></tr>
+    <tr><td>Wallet status screen</td><td><code>wallet_status_screen.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Route <code>/wallet</code> registered; screen renders; no balance query or web redirect button wired.</td></tr>
+    <tr><td>Firestore wallet balance read</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No <code>walletSessions</code> read; screen shows nothing.</td></tr>
+    <tr><td>Web wallet launch (url_launcher)</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td><code>url_launcher</code> declared but wallet screen has no launch button wired.</td></tr>
+    <tr><td>Gift send flow (in-app → web)</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Live gift panel is stub; no gift → wallet deduction path.</td></tr>
+    <tr><td>Subscription payment redirect</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>Top-up flow</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE P — CHAT ENGINE
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module P — Chat Engine
+  <span class="cov cov-low">2 / 10 &nbsp;·&nbsp; 20%</span>
+</h2>
+<p class="module-desc">Creator-to-fan · buyer-to-seller · group chats · replies · reactions · presence · push. Collections: <code>chatConversations</code>, <code>chatMessages</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Chat preview model</td><td><code>chat_preview_model.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>conversationId, participantUids, lastMessage, lastMessageAt, unreadCount.</td></tr>
+    <tr><td>Chat SDK adapter</td><td><code>chat_sdk_adapter.dart</code></td><td><span class="s s-ok">✅ Built</span></td><td>Wraps Firestore stream for <code>chatConversations</code> and <code>chatMessages</code>.</td></tr>
+    <tr><td>Chat list screen</td><td><code>chat_list_screen.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Route <code>/chat</code> registered; screen renders; no Firestore stream subscription shown.</td></tr>
+    <tr><td>Chat room screen</td><td><code>chat_room_screen.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Route <code>/chat-room</code> registered; renders empty; no message stream or send input wired.</td></tr>
+    <tr><td>Message bubble widget</td><td><code>message_bubble.dart</code></td><td><span class="s s-stub">🔳 Stub</span></td><td>Widget file exists; not used in chat room screen.</td></tr>
+    <tr><td>Send message (Firestore write)</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No <code>chatMessages</code> write path. Chat room has no send button or text input wired.</td></tr>
+    <tr><td>Real-time message stream</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>SDK adapter defines the stream but chat room screen does not subscribe.</td></tr>
+    <tr><td>Typing / presence indicators</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>Reply threading / reactions</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>Push notification on new message</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td><code>firebase_messaging</code> declared but FCM handler not wired to chat notifications.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     MODULE Q — PUSH NOTIFICATIONS
+════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module Q — Push Notifications
+  <span class="cov cov-low">1 / 5 &nbsp;·&nbsp; 20%</span>
+</h2>
+<p class="module-desc">FCM token registration · foreground / background handlers · deep link routing. Collections: <code>notifications</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:210px">Feature</th><th style="width:130px">File</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>firebase_messaging declared</td><td><code>pubspec.yaml</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>firebase_messaging: ^15.1.3</code> in dependencies.</td></tr>
+    <tr><td>FCM token registration</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No <code>FirebaseMessaging.instance.getToken()</code> call. Token never saved to Firestore.</td></tr>
+    <tr><td>Foreground message handler</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td><code>FirebaseMessaging.onMessage</code> listener not registered anywhere.</td></tr>
+    <tr><td>Background / terminated handler</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No <code>FirebaseMessaging.onBackgroundMessage</code> top-level handler.</td></tr>
+    <tr><td>Deep link routing from notification tap</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>No notification-tap handler navigating to video, live, chat, or poll routes.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     ARCHITECTURE & SECURITY
+════════════════════════════════════════ -->
+<h2 class="sec-title">Architecture &amp; Security Findings</h2>
+<table class="sec-table">
+  <thead><tr><th style="width:200px">Area</th><th style="width:110px">Verdict</th><th>Detail</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Authentication guard</td>
+      <td><span class="s s-miss">❌ Missing</span></td>
+      <td>Router has no auth guard. All 15 routes are accessible without a signed-in user. The <code>features/auth/screens/</code> folder is empty — no LoginScreen exists. The app cannot sign in anyone.</td>
+    </tr>
+    <tr>
+      <td>Firebase configuration (iOS)</td>
+      <td><span class="s s-miss">❌ Missing</span></td>
+      <td><code>firebase_options.dart</code> only contains the Android configuration. iOS and macOS entries are absent — the app will crash on iOS without them.</td>
+    </tr>
+    <tr>
+      <td>Firestore security rules</td>
+      <td><span class="s s-miss">❌ Missing</span></td>
+      <td>No <code>firestore.rules</code> file in the mobile or root directory. All collections are open by default. Must be set before any user data is written.</td>
+    </tr>
+    <tr>
+      <td>State management architecture</td>
+      <td><span class="s s-part">⚠ Partial</span></td>
+      <td>Only <code>VideoFeedController</code> uses Provider. All other features have no state management layer — stub screens call nothing. Inconsistent: some features may need Bloc or Riverpod for stream-based features (chat, live).</td>
+    </tr>
+    <tr>
+      <td>Error handling in services</td>
+      <td><span class="s s-miss">❌ Missing</span></td>
+      <td>No try/catch patterns seen in stub services. Repository calls should wrap Firestore operations in try/catch and return typed <code>Result</code> or <code>Either</code> objects.</td>
+    </tr>
+    <tr>
+      <td>Video upload security</td>
+      <td><span class="s s-miss">❌ Missing</span></td>
+      <td>Firebase Storage rules not configured. No file-type validation or size limits on upload. Upload feature is entirely missing (see Module C).</td>
+    </tr>
+    <tr>
+      <td>Analytics service</td>
+      <td><span class="s s-ok">✅ Good</span></td>
+      <td><code>analytics_service.dart</code> records events with server timestamp to Firestore <code>videoEvents</code>. Used by <code>VideoInteractionService</code>. Pattern is correct — extend to all other event types.</td>
+    </tr>
+    <tr>
+      <td>Dependency injection</td>
+      <td><span class="s s-part">⚠ Partial</span></td>
+      <td>Services and repositories accept constructor arguments — good for testability. But Provider is only wired for <code>VideoFeedController</code>; no other services are in the widget tree.</td>
+    </tr>
+    <tr>
+      <td>image_picker / camera dependency</td>
+      <td><span class="s s-miss">❌ Missing</span></td>
+      <td><code>image_picker</code> is not in <code>pubspec.yaml</code>. Video upload (the core creator action) is impossible without it.</td>
+    </tr>
+    <tr>
+      <td>HLS player library</td>
+      <td><span class="s s-part">⚠ Partial</span></td>
+      <td><code>video_player</code> package is used. Note: <code>video_player</code> on Android requires a format-compatible ExoPlayer; HLS works but some edge cases may need <code>better_player</code> or <code>media_kit</code> for buffering control.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     SCORECARD
+════════════════════════════════════════ -->
+<h2 class="score-title">Full Scorecard — All Modules</h2>
+<table class="score-table">
+  <thead>
+    <tr>
+      <th style="width:200px">Module</th>
+      <th style="width:70px">✅ Done</th>
+      <th style="width:70px">⚠ Partial</th>
+      <th style="width:70px">🔳 Stub</th>
+      <th style="width:70px">❌ Missing</th>
+      <th style="width:80px">Total</th>
+      <th>Coverage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>A — Short Video Engine</td><td class="td-ok">7</td><td class="td-part">2</td><td class="td-stub">0</td><td class="td-miss">7</td><td class="td-ctr">16</td><td><div style="font-size:11px;color:#854d0e;font-weight:700">44%</div><div class="bar-wrap"><div class="bar-fill amber" style="width:44%"></div></div></td></tr>
+    <tr><td>B — Authentication &amp; Onboarding</td><td class="td-ok">1</td><td class="td-part">0</td><td class="td-stub">0</td><td class="td-miss">7</td><td class="td-ctr">8</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">12%</div><div class="bar-wrap"><div class="bar-fill red" style="width:12%"></div></div></td></tr>
+    <tr><td>C — Video Upload &amp; Processing</td><td class="td-ok">0</td><td class="td-part">0</td><td class="td-stub">0</td><td class="td-miss">7</td><td class="td-ctr">7</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">0%</div><div class="bar-wrap"><div class="bar-fill red" style="width:0%"></div></div></td></tr>
+    <tr><td>D — Comments &amp; Reactions</td><td class="td-ok">0</td><td class="td-part">0</td><td class="td-stub">0</td><td class="td-miss">6</td><td class="td-ctr">6</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">0%</div><div class="bar-wrap"><div class="bar-fill red" style="width:0%"></div></div></td></tr>
+    <tr><td>E — AI Video &amp; Photo Editing</td><td class="td-ok">2</td><td class="td-part">4</td><td class="td-stub">1</td><td class="td-miss">7</td><td class="td-ctr">14</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">21%</div><div class="bar-wrap"><div class="bar-fill red" style="width:21%"></div></div></td></tr>
+    <tr><td>F — Creator Profile</td><td class="td-ok">3</td><td class="td-part">0</td><td class="td-stub">1</td><td class="td-miss">5</td><td class="td-ctr">9</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">33%</div><div class="bar-wrap"><div class="bar-fill red" style="width:33%"></div></div></td></tr>
+    <tr><td>G — Live Streaming</td><td class="td-ok">2</td><td class="td-part">1</td><td class="td-stub">4</td><td class="td-miss">5</td><td class="td-ctr">12</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">25%</div><div class="bar-wrap"><div class="bar-fill red" style="width:25%"></div></div></td></tr>
+    <tr><td>H — Multi-Streaming</td><td class="td-ok">2</td><td class="td-part">0</td><td class="td-stub">2</td><td class="td-miss">3</td><td class="td-ctr">7</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">29%</div><div class="bar-wrap"><div class="bar-fill red" style="width:29%"></div></div></td></tr>
+    <tr><td>I — Monetisation Engine</td><td class="td-ok">3</td><td class="td-part">0</td><td class="td-stub">2</td><td class="td-miss">6</td><td class="td-ctr">11</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">27%</div><div class="bar-wrap"><div class="bar-fill red" style="width:27%"></div></div></td></tr>
+    <tr><td>J — Contacts &amp; Growth Engine</td><td class="td-ok">2</td><td class="td-part">1</td><td class="td-stub">3</td><td class="td-miss">2</td><td class="td-ctr">8</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">25%</div><div class="bar-wrap"><div class="bar-fill red" style="width:25%"></div></div></td></tr>
+    <tr><td>K — Search Engine</td><td class="td-ok">2</td><td class="td-part">0</td><td class="td-stub">2</td><td class="td-miss">4</td><td class="td-ctr">8</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">25%</div><div class="bar-wrap"><div class="bar-fill red" style="width:25%"></div></div></td></tr>
+    <tr><td>L — Affiliate Marketing</td><td class="td-ok">3</td><td class="td-part">0</td><td class="td-stub">2</td><td class="td-miss">3</td><td class="td-ctr">8</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">38%</div><div class="bar-wrap"><div class="bar-fill red" style="width:38%"></div></div></td></tr>
+    <tr><td>M — Infinity Polls</td><td class="td-ok">3</td><td class="td-part">0</td><td class="td-stub">3</td><td class="td-miss">4</td><td class="td-ctr">10</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">30%</div><div class="bar-wrap"><div class="bar-fill red" style="width:30%"></div></div></td></tr>
+    <tr><td>N — Ads Engine</td><td class="td-ok">3</td><td class="td-part">0</td><td class="td-stub">3</td><td class="td-miss">3</td><td class="td-ctr">9</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">33%</div><div class="bar-wrap"><div class="bar-fill red" style="width:33%"></div></div></td></tr>
+    <tr><td>O — Web-Based Wallet</td><td class="td-ok">0</td><td class="td-part">1</td><td class="td-stub">1</td><td class="td-miss">5</td><td class="td-ctr">7</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">14%</div><div class="bar-wrap"><div class="bar-fill red" style="width:14%"></div></div></td></tr>
+    <tr><td>P — Chat Engine</td><td class="td-ok">2</td><td class="td-part">0</td><td class="td-stub">3</td><td class="td-miss">5</td><td class="td-ctr">10</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">20%</div><div class="bar-wrap"><div class="bar-fill red" style="width:20%"></div></div></td></tr>
+    <tr><td>Q — Push Notifications</td><td class="td-ok">1</td><td class="td-part">0</td><td class="td-stub">0</td><td class="td-miss">4</td><td class="td-ctr">5</td><td><div style="font-size:11px;color:#b91c1c;font-weight:700">20%</div><div class="bar-wrap"><div class="bar-fill red" style="width:20%"></div></div></td></tr>
+    <tr style="background:#f8fafc;font-weight:800">
+      <td>TOTALS</td>
+      <td class="td-ok">36</td>
+      <td class="td-part">9</td>
+      <td class="td-stub">27</td>
+      <td class="td-miss">83</td>
+      <td class="td-ctr">155</td>
+      <td><div style="font-size:12px;font-weight:800;color:#92400e">~22% overall</div><div class="bar-wrap"><div class="bar-fill amber" style="width:22%"></div></div></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════
+     PHASE ROADMAP
+════════════════════════════════════════ -->
+<h2 class="phase-title">Blueprint MVP Phase Roadmap — Current vs Target</h2>
+<div class="phase-grid">
+
+  <div class="phase-card part">
+    <span class="ph-badge">Phase 1</span>
+    <h4>Stable Video Foundation</h4>
+    <ul>
+      <li>Video feed ✅ PageView, HLS, prefetch</li>
+      <li>Video ranking ✅ client-side</li>
+      <li>Likes / bookmarks / views ⚠ partially wired</li>
+      <li>Creator profiles ⚠ stub screen</li>
+      <li>Video upload ❌ completely missing</li>
+      <li>Comments ❌ completely missing</li>
+      <li>Auth / sign-in ❌ completely missing</li>
+      <li>Broken video auto-hide ⚠ not automatic</li>
+    </ul>
+    <div class="ph-cov">Coverage: ~55% — feed works, upload+auth+comments block shipping</div>
+  </div>
+
+  <div class="phase-card next">
+    <span class="ph-badge">Phase 2</span>
+    <h4>AI Creator Studio</h4>
+    <ul>
+      <li>AI caption service ⚠ file exists</li>
+      <li>AI hooks / thumbnails ⚠ files exist</li>
+      <li>AI translation ⚠ file exists</li>
+      <li>AI editor screen 🔳 stub only</li>
+      <li>AI hashtags ❌ missing</li>
+      <li>AI trim / beautify / viral score ❌</li>
+    </ul>
+    <div class="ph-cov">Coverage: ~15% — scaffolded, not wired to UI</div>
+  </div>
+
+  <div class="phase-card next">
+    <span class="ph-badge">Phase 3</span>
+    <h4>Live + Multistream</h4>
+    <ul>
+      <li>Live session model + repo ✅</li>
+      <li>Go Live / Viewer screens 🔳 stub</li>
+      <li>Live chat panel 🔳 stub</li>
+      <li>Live gift panel 🔳 stub</li>
+      <li>RTMP ingest ❌ no SDK</li>
+      <li>Live recording / replay ❌</li>
+      <li>Multistream model + repo ✅</li>
+      <li>RTMP forwarding ❌</li>
+    </ul>
+    <div class="ph-cov">Coverage: ~20% — data layer ready, streaming not connected</div>
+  </div>
+
+  <div class="phase-card next">
+    <span class="ph-badge">Phase 4</span>
+    <h4>Growth Engine</h4>
+    <ul>
+      <li>Contacts model + repo ✅</li>
+      <li>flutter_contacts declared ⚠</li>
+      <li>Contact import service 🔳 stub</li>
+      <li>Invite screen 🔳 stub</li>
+      <li>AI invite ranker 🔳 stub</li>
+      <li>WhatsApp / SMS share ❌</li>
+      <li>Referral conversion trigger ❌</li>
+    </ul>
+    <div class="ph-cov">Coverage: ~20% — scaffolded, permission not requested</div>
+  </div>
+
+  <div class="phase-card next">
+    <span class="ph-badge">Phase 5</span>
+    <h4>Monetisation</h4>
+    <ul>
+      <li>Earning + ledger models ✅</li>
+      <li>Monetisation repo ✅</li>
+      <li>Earnings screen 🔳 stub</li>
+      <li>Ad repository + models ✅</li>
+      <li>Ad injection into feed ❌</li>
+      <li>Wallet screen 🔳 stub</li>
+      <li>M-Pesa / gift flow ❌</li>
+      <li>Subscriptions ❌</li>
+    </ul>
+    <div class="ph-cov">Coverage: ~18% — data models ready, no real money flow</div>
+  </div>
+
+  <div class="phase-card next">
+    <span class="ph-badge">Phase 6</span>
+    <h4>Ecosystem Integration</h4>
+    <ul>
+      <li>Affiliate models + repo ✅</li>
+      <li>Polls models + repo ✅</li>
+      <li>Chat model + adapter ✅</li>
+      <li>Search model + repo ✅</li>
+      <li>All module screens 🔳 stubs</li>
+      <li>Poll overlay on video ❌</li>
+      <li>FCM wired ❌</li>
+      <li>Full-text search backend ❌</li>
+    </ul>
+    <div class="ph-cov">Coverage: ~15% — data layer scaffolded, no UI logic</div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════
+     PRIORITY FIXES
+════════════════════════════════════════ -->
+<h2 class="phase-title" style="background:#fff1f2;border-left-color:#dc2626">Immediate Priority — Must Fix to Ship Phase 1</h2>
+<div class="phase-grid">
+
+  <div class="phase-card" style="border-color:#fca5a5;background:#fff1f2">
+    <span class="ph-badge" style="background:#dc2626;color:#fff">🔴 Blocker 1</span>
+    <h4>Add Authentication</h4>
+    <ul>
+      <li>Create <code>LoginScreen</code> in <code>features/auth/screens/</code></li>
+      <li>Call <code>signInWithEmailAndPassword()</code></li>
+      <li>Add auth state listener in <code>app.dart</code></li>
+      <li>Redirect unauthenticated users to login</li>
+      <li>Write user doc to <code>users</code> on signup</li>
+    </ul>
+  </div>
+
+  <div class="phase-card" style="border-color:#fca5a5;background:#fff1f2">
+    <span class="ph-badge" style="background:#dc2626;color:#fff">🔴 Blocker 2</span>
+    <h4>Add Video Upload</h4>
+    <ul>
+      <li>Add <code>image_picker</code> to pubspec.yaml</li>
+      <li>Build <code>video_upload/screens/upload_screen.dart</code></li>
+      <li>Upload to Firebase Storage</li>
+      <li>Write <code>videos</code> Firestore document</li>
+      <li>Call HLS transcoding worker</li>
+      <li>Register <code>/upload</code> route + wire Create tab</li>
+    </ul>
+  </div>
+
+  <div class="phase-card" style="border-color:#fca5a5;background:#fff1f2">
+    <span class="ph-badge" style="background:#dc2626;color:#fff">🔴 Blocker 3</span>
+    <h4>Add Comments</h4>
+    <ul>
+      <li>Create <code>CommentModel</code> + repository</li>
+      <li>Build comments bottom sheet widget</li>
+      <li>Wire comment button in video overlay</li>
+      <li>Implement reply threading</li>
+      <li>Add Firestore rules for comments</li>
+    </ul>
+  </div>
+
+  <div class="phase-card" style="border-color:#fca5a5;background:#fff1f2">
+    <span class="ph-badge" style="background:#dc2626;color:#fff">🔴 Blocker 4</span>
+    <h4>Fix Firebase iOS Config</h4>
+    <ul>
+      <li>Run <code>flutterfire configure</code> for iOS target</li>
+      <li>Add iOS entry to <code>firebase_options.dart</code></li>
+      <li>Add <code>GoogleService-Info.plist</code></li>
+      <li>Add Firestore + Storage security rules</li>
+    </ul>
+  </div>
+
+  <div class="phase-card" style="border-color:#fca5a5;background:#fff1f2">
+    <span class="ph-badge" style="background:#dc2626;color:#fff">🔴 Blocker 5</span>
+    <h4>Wire Push Notifications</h4>
+    <ul>
+      <li>Register FCM token on login</li>
+      <li>Save token to <code>users/{uid}/fcmToken</code></li>
+      <li>Handle foreground / background messages</li>
+      <li>Route notification taps to correct screen</li>
+    </ul>
+  </div>
+
+  <div class="phase-card" style="border-color:#fca5a5;background:#fff1f2">
+    <span class="ph-badge" style="background:#dc2626;color:#fff">🔴 Blocker 6</span>
+    <h4>Add Firestore Security Rules</h4>
+    <ul>
+      <li>Create <code>firestore.rules</code> at project root</li>
+      <li>Lock <code>videos</code> writes to authenticated users</li>
+      <li>Lock <code>users</code> writes to owner only</li>
+      <li>Lock <code>pollVotes</code> to one vote per user</li>
+      <li>Deploy via <code>firebase deploy --only firestore:rules</code></li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════ -->
+<div class="report-footer">
+  <strong>Report:</strong> YohPal Mobile Flutter — Blueprint Gap Report &nbsp;·&nbsp;
+  <strong>Generated:</strong> 2026-06-15 &nbsp;·&nbsp;
+  <strong>Scope:</strong> apps/mobile_flutter/ only &nbsp;·&nbsp;
+  <strong>Branch:</strong> yohpaladmin &nbsp;·&nbsp;
+  <strong>Overall coverage:</strong> ~22% (Phase 1: ~55% | Phases 2–6: ~15–20% scaffold only) &nbsp;·&nbsp;
+  <strong>Next audit:</strong> After auth + upload + comments complete (Phase 1 shipped)
+</div>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+ M ../../apps/mobile_flutter/ios/Runner/GeneratedPluginRegistrant.h
+ M ../../apps/mobile_flutter/ios/Runner/GeneratedPluginRegistrant.m
+ M ../../apps/mobile_flutter/linux/flutter/generated_plugin_registrant.cc
+ M ../../apps/mobile_flutter/linux/flutter/generated_plugin_registrant.h
+ M ../../apps/mobile_flutter/linux/flutter/generated_plugins.cmake
+ M ../../apps/mobile_flutter/macos/Flutter/GeneratedPluginRegistrant.swift
+ M ../../apps/yohpal_live/.dart_tool/package_config.json
+ M ../../apps/yohpal_live/.dart_tool/package_graph.json
+ M ../../apps/yohpal_live/.flutter-plugins-dependencies
+ M ../../apps/yohpal_live/ios/Runner/GeneratedPluginRegistrant.h
+ M ../../apps/yohpal_live/ios/Runner/GeneratedPluginRegistrant.m
+ M flutter/.flutter-plugins-dependencies
+?? ../../docs/architecture/
+?? flutter/test/ui/
+?? release-evidence/
+?? scripts/freeze_ls2a_candidate.sh
+?? scripts/validate_ls2a.sh
+?? ../../release-evidence/

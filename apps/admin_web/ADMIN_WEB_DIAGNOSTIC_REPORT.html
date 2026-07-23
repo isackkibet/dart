@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>YohPal Admin Web — Blueprint Gap Report v4</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13px;line-height:1.55;color:#0f172a;background:#f8fafc;padding:28px}
+@media print{body{background:#fff;padding:0}.no-print{display:none}}
+
+/* ── Header ── */
+.report-header{border-bottom:3px solid #0f172a;padding-bottom:14px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end}
+.report-header h1{font-size:20px;font-weight:800;letter-spacing:-.3px}
+.report-header .meta{font-size:11.5px;color:#64748b;text-align:right;line-height:1.7}
+button.print-btn{background:#0f172a;color:#fff;border:none;padding:6px 14px;border-radius:5px;cursor:pointer;font-size:11.5px}
+
+/* ── Summary bar ── */
+.summary-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:22px}
+.sum-card{background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:13px 14px}
+.sum-card .num{font-size:26px;font-weight:900;line-height:1}
+.sum-card .lbl{font-size:11px;color:#64748b;font-weight:600;margin-top:3px;text-transform:uppercase;letter-spacing:.3px}
+.sum-card .sub{font-size:10.5px;color:#94a3b8;margin-top:2px}
+.num-green{color:#15803d}.num-blue{color:#1d4ed8}.num-red{color:#b91c1c}.num-yellow{color:#92400e}.num-purple{color:#6d28d9}
+
+/* ── Section headings ── */
+h2.module-title{font-size:14px;font-weight:800;color:#0f172a;margin:24px 0 3px;padding:9px 13px;background:#f1f5f9;border-left:4px solid #0f172a;border-radius:0 5px 5px 0;display:flex;justify-content:space-between;align-items:center}
+h2.module-title .cov{font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px}
+.cov-good{background:#dcfce7;color:#15803d}
+.cov-mid{background:#fef9c3;color:#854d0e}
+.cov-low{background:#fee2e2;color:#b91c1c}
+.cov-zero{background:#f1f5f9;color:#475569}
+.module-desc{font-size:12px;color:#475569;margin-bottom:8px;padding:0 2px}
+
+/* ── Gap tables ── */
+table.gap-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;margin-bottom:6px;font-size:12px}
+.gap-table th{background:#f8fafc;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:#475569;padding:8px 11px;text-align:left;border-bottom:1px solid #e2e8f0}
+.gap-table td{padding:8px 11px;border-bottom:1px solid #f8fafc;vertical-align:top}
+.gap-table tr:last-child td{border-bottom:none}
+.gap-table tr:hover td{background:#fafafa}
+
+/* ── Status pills ── */
+.s{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.s-ok   {background:#dcfce7;color:#15803d}
+.s-part {background:#fef9c3;color:#854d0e}
+.s-stub {background:#e0e7ff;color:#3730a3}
+.s-miss {background:#fee2e2;color:#b91c1c}
+
+/* ── Security table ── */
+h2.sec-title{font-size:14px;font-weight:800;color:#0f172a;margin:28px 0 8px;padding:9px 13px;background:#f0fdf4;border-left:4px solid #15803d;border-radius:0 5px 5px 0}
+table.sec-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;margin-bottom:10px;font-size:12px}
+.sec-table th{background:#f8fafc;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#475569;padding:8px 11px;text-align:left;border-bottom:1px solid #e2e8f0}
+.sec-table td{padding:8px 11px;border-bottom:1px solid #f8fafc;vertical-align:top}
+.sec-table tr:last-child td{border-bottom:none}
+
+/* ── Phase roadmap ── */
+h2.phase-title{font-size:14px;font-weight:800;color:#0f172a;margin:28px 0 8px;padding:9px 13px;background:#eff6ff;border-left:4px solid #1d4ed8;border-radius:0 5px 5px 0}
+.phase-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.phase-card{background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:13px 14px}
+.phase-card.done{border-color:#86efac;background:#f0fdf4}
+.phase-card.next{border-color:#93c5fd;background:#eff6ff}
+.phase-card .ph-badge{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:999px;margin-bottom:6px}
+.phase-card.done .ph-badge{background:#15803d;color:#fff}
+.phase-card.next .ph-badge{background:#1d4ed8;color:#fff}
+.phase-card .ph-badge.future{background:#e2e8f0;color:#475569}
+.phase-card h4{font-size:12.5px;font-weight:700;margin-bottom:5px}
+.phase-card ul{padding-left:14px;font-size:11.5px;color:#475569;list-style:disc}
+.phase-card li{margin-bottom:2px}
+.phase-card .ph-cov{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+
+/* ── Footer ── */
+.report-footer{margin-top:28px;padding:11px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;font-size:11px;color:#64748b}
+
+code{font-family:'Courier New',monospace;font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;color:#4f46e5}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="report-header">
+  <div>
+    <h1>YohPal Admin Web — Blueprint Gap Report v4</h1>
+    <div style="font-size:12px;color:#475569;margin-top:3px">Static analysis against YOHPAL LIVE MASTER BLUEPRINT &nbsp;·&nbsp; Post Phase 1 completion</div>
+  </div>
+  <div class="meta">
+    2026-06-08 &nbsp;·&nbsp; Branch: yohpaladmin &nbsp;·&nbsp; 34 source files<br>
+    TypeScript: 0 errors &nbsp;·&nbsp; Dev server: localhost:3000 ✓<br>
+    <button class="print-btn no-print" onclick="window.print()">Print / Save PDF</button>
+  </div>
+</div>
+
+<!-- ═══ SUMMARY BAR ═══ -->
+<div class="summary-bar">
+  <div class="sum-card">
+    <div class="num num-blue">26%</div>
+    <div class="lbl">Blueprint Coverage</div>
+    <div class="sub">+2% since v3 (Phase 1)</div>
+  </div>
+  <div class="sum-card">
+    <div class="num num-green">94<span style="font-size:16px">/100</span></div>
+    <div class="lbl">Security Foundation</div>
+    <div class="sub">+16 pts since v2</div>
+  </div>
+  <div class="sum-card">
+    <div class="num num-green">3</div>
+    <div class="lbl">Modules with coverage</div>
+    <div class="sub">Finance · Moderation · Polls</div>
+  </div>
+  <div class="sum-card">
+    <div class="num num-red">10</div>
+    <div class="lbl">Modules at 0%</div>
+    <div class="sub">Video · Creators · Live · +7</div>
+  </div>
+  <div class="sum-card">
+    <div class="num num-yellow">5</div>
+    <div class="lbl">Phases remaining</div>
+    <div class="sub">Phase 1 complete ✓</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     MODULE 1 — SHORT VIDEO MANAGEMENT
+════════════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module 1 — Short Video Management
+  <span class="cov cov-low">1 / 10 &nbsp;·&nbsp; 10%</span>
+</h2>
+<p class="module-desc">Admin browse, filter, hide/unhide/restrict/delete videos; broken HLS dashboard; failed AI job recovery. Collections: <code>videos</code>, <code>aiVideoJobs</code>, <code>videoReports</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:220px">Feature</th><th style="width:140px">Firestore Collection</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Video count KPI on dashboard</td><td><code>videos</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>getDashboardMetrics()</code> runs <code>count()</code> on <code>videos</code> collection. Shown on dashboard page.</td></tr>
+    <tr><td>Video browse / search page</td><td><code>videos</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No <code>/videos</code> admin page. No <code>videoRepository.ts</code>. No query or table UI.</td></tr>
+    <tr><td>Filter by status (processing / live / broken / hidden)</td><td><code>videos</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Depends on /videos page. Not started.</td></tr>
+    <tr><td>Hide video action</td><td><code>videos</code>, <code>videoAuditLogs</code></td><td><span class="s s-part">⚠️ Partial</span></td><td>Moderation hide route writes <code>visibility:'hidden'</code> to <code>videos</code> as a side-effect of closing a report. No direct <code>POST /api/admin/videos/[id]/hide</code> route.</td></tr>
+    <tr><td>Unhide / restrict / delete video</td><td><code>videos</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No admin routes for unhide, restrict, or delete.</td></tr>
+    <tr><td>Broken / failed HLS dashboard</td><td><code>videos</code>, <code>aiVideoJobs</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No <code>/videos/broken</code> page. No query for <code>hlsStatus != 'ready'</code>.</td></tr>
+    <tr><td>Failed AI job recovery (requeue)</td><td><code>aiVideoJobs</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No route to reset <code>aiVideoJob.status</code> to <code>'pending'</code> for retry.</td></tr>
+    <tr><td>Video analytics (views, likes, shares)</td><td><code>videoStats</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No analytics page or repository function.</td></tr>
+    <tr><td>Trending / featured video management</td><td><code>videos</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No promoted content tooling.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════════════
+     MODULE 2 — CREATOR MANAGEMENT
+════════════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module 2 — Creator Management
+  <span class="cov cov-zero">0.5 / 10 &nbsp;·&nbsp; 5%</span>
+</h2>
+<p class="module-desc">Admin search, view, suspend, ban creators; trust score adjustment; earnings summary. Collections: <code>creatorProfiles</code>, <code>creatorEarnings</code>, <code>creatorAuditLogs</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:220px">Feature</th><th style="width:140px">Firestore Collection</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Creator count KPI on dashboard</td><td><code>creatorProfiles</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>getDashboardMetrics()</code> counts <code>creatorProfiles</code>. Shown on dashboard page.</td></tr>
+    <tr><td>Creator search (name / email / phone)</td><td><code>creatorProfiles</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No <code>/creators</code> page, no <code>creatorRepository.ts</code>, no search query.</td></tr>
+    <tr><td>View full creator profile + stats</td><td><code>creatorProfiles</code>, <code>creatorEarnings</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Not started.</td></tr>
+    <tr><td>Suspend creator</td><td><code>creatorProfiles</code>, <code>creatorAuditLogs</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No <code>POST /api/admin/creators/[id]/suspend</code> route.</td></tr>
+    <tr><td>Ban creator</td><td><code>creatorProfiles</code>, <code>creatorAuditLogs</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No <code>POST /api/admin/creators/[id]/ban</code> route.</td></tr>
+    <tr><td>Trust score adjustment</td><td><code>creatorProfiles</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No route or UI for manual trust score override.</td></tr>
+    <tr><td>creator_manager RBAC role</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td><code>AdminRole</code> type has 7 roles — <code>creator_manager</code> is not one of them. No <code>creator:read</code> / <code>creator:write</code> permissions defined.</td></tr>
+    <tr><td>Creator earnings summary</td><td><code>creatorEarnings</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Count KPI exists in <code>getFinanceMetrics()</code> but no detail view.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════════════
+     MODULE 3 — LIVE STREAMING ADMIN
+════════════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module 3 — Live Streaming Admin
+  <span class="cov cov-zero">0.5 / 10 &nbsp;·&nbsp; 5%</span>
+</h2>
+<p class="module-desc">Browse active/past sessions, force-end a session, review live reports, monitor tips revenue. Collections: <code>liveSessions</code>, <code>liveReports</code>, <code>liveTips</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:220px">Feature</th><th style="width:140px">Firestore Collection</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Active live session count KPI</td><td><code>liveSessions</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>getDashboardMetrics()</code> counts where <code>status=='active'</code>.</td></tr>
+    <tr><td>Live session browser</td><td><code>liveSessions</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No <code>/live</code> admin page or repository function.</td></tr>
+    <tr><td>Force-end a live session</td><td><code>liveSessions</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No admin route to forcibly terminate a stream.</td></tr>
+    <tr><td>Live content reports queue</td><td><code>liveReports</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Moderation queue only covers <code>moderationReports</code>, not live-specific <code>liveReports</code>.</td></tr>
+    <tr><td>Tips / revenue during live</td><td><code>liveTips</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No analytics or audit for live tips.</td></tr>
+    <tr><td>RTMP stream key management</td><td><code>liveSessions</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No admin tooling for RTMP key revocation or rotation.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════════════
+     MODULE 4 — MULTI-STREAMING ADMIN
+════════════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module 4 — Multi-Streaming Admin
+  <span class="cov cov-zero">0 / 10 &nbsp;·&nbsp; 0%</span>
+</h2>
+<p class="module-desc">Manage multi-destination RTMP sessions, platform keys, analytics. Collections: <code>multistreamSessions</code>, <code>multistreamDestinations</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:220px">Feature</th><th style="width:140px">Firestore Collection</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>All multi-streaming admin features</td><td><code>multistreamSessions</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Zero coverage. No page, no repository, no KPI, no API routes. Not referenced anywhere in the codebase.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════════════
+     MODULE 5 — FINANCE / WALLET ADMIN
+════════════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module 5 — Finance / Wallet Admin
+  <span class="cov cov-good">7 / 10 &nbsp;·&nbsp; 70% &nbsp;&#9650; +5% since v3</span>
+</h2>
+<p class="module-desc">Payout review queue, approve/hold/reject with M-Pesa B2C, wallet ledger, reconciliation, risk reviews, audit logs. Collections: <code>walletPayouts</code>, <code>walletLedger</code>, <code>walletBalances</code>, <code>walletReconciliation</code>, <code>financeAuditLogs</code>, <code>riskReviews</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:220px">Feature</th><th style="width:140px">Firestore Collection</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Finance KPI dashboard</td><td><code>walletPayouts</code>, <code>walletLedger</code>, <code>financeAuditLogs</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>getFinanceMetrics()</code> — 7 live <code>count()</code> queries. Shown on <code>/finance</code> page.</td></tr>
+    <tr><td>Payout review queue</td><td><code>walletPayouts</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>getPendingPayouts()</code> where <code>status=='pending'</code>. DataTable with creator, amount, risk score, status columns.</td></tr>
+    <tr><td>RBAC page guard on /finance/payouts</td><td>—</td><td><span class="s s-ok">✅ Built</span></td><td><code>requirePageAdmin('finance:approve')</code> as first call. Phase 1 addition.</td></tr>
+    <tr><td>Approve payout (with M-Pesa stub)</td><td><code>walletPayouts</code>, <code>financeAuditLogs</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>POST /api/admin/payouts/[id]/approve</code> → <code>approvePayout()</code> → <code>sendMpesaB2C()</code> stub. Sets <code>approved_pending_disbursement</code> when not configured. Writes <code>mpesaB2CStatus</code> to audit log.</td></tr>
+    <tr><td>Hold payout</td><td><code>walletPayouts</code>, <code>financeAuditLogs</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>POST /api/admin/payouts/[id]/hold</code> → <code>updatePayoutStatus({status:'held'})</code>. Reason forwarded and stored.</td></tr>
+    <tr><td>Reject payout with reason</td><td><code>walletPayouts</code>, <code>financeAuditLogs</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>POST /api/admin/payouts/[id]/reject</code>. Reason textarea in <code>PayoutActions.tsx</code>. Phase 1 addition.</td></tr>
+    <tr><td>Finance audit log trail</td><td><code>financeAuditLogs</code></td><td><span class="s s-ok">✅ Built</span></td><td>Every approve/hold/reject writes to <code>financeAuditLogs</code> via Firestore transaction with real admin UID, reason, and <code>mpesaB2CStatus</code>.</td></tr>
+    <tr><td>Wallet ledger view</td><td><code>walletLedger</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>getWalletLedger()</code> returns top 50 records.</td></tr>
+    <tr><td>M-Pesa B2C production disbursement</td><td>—</td><td><span class="s s-stub">⚠️ Stub only</span></td><td><code>lib/mpesaB2C.ts</code> is a safe stub — throws if env vars absent, returns <code>{status:'not_configured'}</code> otherwise. Safaricom OAuth + actual B2C call not yet implemented. Phase 3 item.</td></tr>
+    <tr><td>PayoutRow phoneNumber field</td><td><code>walletPayouts</code></td><td><span class="s s-part">⚠️ Gap</span></td><td><code>PayoutRow</code> type does not include <code>phoneNumber</code>. <code>approvePayout()</code> reads <code>payout.phoneNumber || ''</code> directly from raw Firestore data. Silent failure risk when M-Pesa B2C is wired.</td></tr>
+    <tr><td>Pagination on payout queue</td><td><code>walletPayouts</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Hard-coded <code>.limit(100)</code>. No cursor, no load-more.</td></tr>
+    <tr><td>Wallet reconciliation actions</td><td><code>walletReconciliation</code></td><td><span class="s s-miss">❌ Missing</span></td><td>KPI count shown. No action routes to resolve reconciliation items.</td></tr>
+    <tr><td>Risk review queue</td><td><code>riskReviews</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Count KPI only. No dedicated page, table, or action routes.</td></tr>
+    <tr><td>Chargebacks / disputes</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td>Not referenced anywhere in the admin web codebase.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════════════
+     MODULE 6 — CONTENT MODERATION
+════════════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module 6 — Content Moderation
+  <span class="cov cov-mid">6 / 10 &nbsp;·&nbsp; 60% &nbsp;&#9650; +5% since v3</span>
+</h2>
+<p class="module-desc">User-submitted report queue, hide/approve/reject with real admin UID and audit trail, live and chat moderation. Collections: <code>moderationReports</code>, <code>moderationAuditLogs</code>, <code>videos</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:220px">Feature</th><th style="width:140px">Firestore Collection</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Moderation queue (open reports)</td><td><code>moderationReports</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>getModerationReports()</code> where <code>status=='open'</code>. DataTable with targetType, targetId, reason, reporter, status columns.</td></tr>
+    <tr><td>RBAC page guard on /moderation</td><td>—</td><td><span class="s s-ok">✅ Built</span></td><td><code>requirePageAdmin('moderation:read')</code> as first call. Phase 1 addition.</td></tr>
+    <tr><td>Hide content action</td><td><code>moderationReports</code>, <code>videos</code>, <code>moderationAuditLogs</code></td><td><span class="s s-ok">✅ Built</span></td><td>Firestore transaction: closes report + writes <code>visibility:'hidden'</code> to linked <code>videos</code> doc + audit log. Real admin UID.</td></tr>
+    <tr><td>Approve report action</td><td><code>moderationReports</code>, <code>moderationAuditLogs</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>POST /api/admin/moderation/[id]/approve</code> — closes report, writes audit log. Real admin UID.</td></tr>
+    <tr><td>Reject report action</td><td><code>moderationReports</code>, <code>moderationAuditLogs</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>POST /api/admin/moderation/[id]/reject</code> — closes report, writes audit log. Real admin UID.</td></tr>
+    <tr><td>Moderation audit trail</td><td><code>moderationAuditLogs</code></td><td><span class="s s-ok">✅ Built</span></td><td>Every action writes <code>reportId</code>, <code>targetType</code>, <code>targetId</code>, <code>action</code>, <code>actorUserId</code>, <code>createdAt</code>.</td></tr>
+    <tr><td>Reason textarea on moderation actions</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td><code>ModerationActions.tsx</code> has no reason field, unlike <code>PayoutActions.tsx</code>. Audit log has no reason text for moderation decisions.</td></tr>
+    <tr><td>router.refresh() on moderation success</td><td>—</td><td><span class="s s-miss">❌ Missing</span></td><td><code>ModerationActions.tsx</code> does not call <code>router.refresh()</code> after a successful action. Table row does not update without a full page reload.</td></tr>
+    <tr><td>Pagination on moderation queue</td><td><code>moderationReports</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Hard-coded <code>.limit(100)</code>. No cursor or load-more.</td></tr>
+    <tr><td>Live stream report moderation</td><td><code>liveReports</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Queue only queries <code>moderationReports</code>. Live-specific reports in <code>liveReports</code> are not surfaced.</td></tr>
+    <tr><td>Chat message moderation</td><td><code>chatMessages</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No chat moderation tooling in the admin web.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════════════
+     MODULE 7 — ADS ENGINE ADMIN
+════════════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module 7 — Ads Engine Admin
+  <span class="cov cov-low">2 / 10 &nbsp;·&nbsp; 20%</span>
+</h2>
+<p class="module-desc">Campaign management, approve/reject campaigns, budget and billing oversight, ad revenue analytics. Collections: <code>adCampaigns</code>, <code>adRevenueShare</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:220px">Feature</th><th style="width:140px">Firestore Collection</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Advertiser KPI page (4 counts)</td><td><code>adCampaigns</code>, <code>adRevenueShare</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>getAdvertiserMetrics()</code> — campaigns, adRevenueShare, activeCampaigns, sponsoredPolls counts. Shown on <code>/advertiser</code> page.</td></tr>
+    <tr><td>RBAC: advertiser role + ads:read</td><td>—</td><td><span class="s s-ok">✅ Built</span></td><td>Role and permission exist in <code>lib/auth.ts</code>. <code>requirePageAdmin('ads:read')</code> guards the page.</td></tr>
+    <tr><td>Campaign list / browse table</td><td><code>adCampaigns</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No campaign DataTable — count KPIs only.</td></tr>
+    <tr><td>Approve / reject campaign</td><td><code>adCampaigns</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No action routes for campaign approval workflow.</td></tr>
+    <tr><td>Campaign budget / billing detail</td><td><code>adCampaigns</code>, <code>adRevenueShare</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Not implemented.</td></tr>
+    <tr><td>Ad revenue analytics</td><td><code>adRevenueShare</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Count only. No time-series or breakdown.</td></tr>
+    <tr><td>Sponsored poll management via ads</td><td><code>polls</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Count KPI visible. No ability to manage sponsored polls from the ads module.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════════════
+     MODULE 8 — INFINITY POLLS ADMIN
+════════════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module 8 — Infinity Polls Admin
+  <span class="cov cov-mid">5.5 / 10 &nbsp;·&nbsp; 55%</span>
+</h2>
+<p class="module-desc">Poll management, vote fraud review, sponsored poll analytics, demographic breakdowns. Collections: <code>polls</code>, <code>pollVotes</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:220px">Feature</th><th style="width:140px">Firestore Collection</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Polls KPI page (4 counts)</td><td><code>polls</code>, <code>pollVotes</code></td><td><span class="s s-ok">✅ Built</span></td><td><code>getPollMetrics()</code> — polls, activePolls, fraudHolds, sponsoredPolls counts. Shown on <code>/polls</code> page.</td></tr>
+    <tr><td>RBAC: polls role + polls:read/write</td><td>—</td><td><span class="s s-ok">✅ Built</span></td><td>Role and permissions defined. <code>requirePageAdmin('polls:read')</code> guards the page.</td></tr>
+    <tr><td>Poll list / browse table</td><td><code>polls</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No DataTable of polls — count KPIs only.</td></tr>
+    <tr><td>Fraud vote review queue</td><td><code>pollVotes</code></td><td><span class="s s-miss">❌ Missing</span></td><td><code>fraudHolds</code> count visible but no action routes to review or clear held votes.</td></tr>
+    <tr><td>Poll result analytics</td><td><code>polls</code>, <code>pollVotes</code></td><td><span class="s s-miss">❌ Missing</span></td><td>No analytics, demographic breakdown, or vote velocity charts.</td></tr>
+    <tr><td>Sponsored poll management</td><td><code>polls</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Count KPI only. No ability to manage or configure sponsored polls.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════════════
+     MODULE 9 — AI JOBS / VIDEO PROCESSING
+════════════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module 9 — AI Jobs / Video Processing
+  <span class="cov cov-zero">0 / 10 &nbsp;·&nbsp; 0%</span>
+</h2>
+<p class="module-desc">AI job queue monitoring, failed job recovery, processing time analytics. Collections: <code>aiVideoJobs</code>, <code>aiJobLogs</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:220px">Feature</th><th style="width:140px">Firestore Collection</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>All AI Jobs admin features</td><td><code>aiVideoJobs</code>, <code>aiJobLogs</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Zero coverage. No page, no repository, no API routes. Neither collection is queried anywhere in the admin web. Failed job requeue is Phase 2.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════════════
+     MODULE 10 — AFFILIATE ENGINE
+════════════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module 10 — Affiliate Engine Admin
+  <span class="cov cov-zero">0 / 10 &nbsp;·&nbsp; 0%</span>
+</h2>
+<p class="module-desc">Affiliate program management, referral tracking, affiliate payouts. Collections: <code>affiliatePrograms</code>, <code>affiliateEarnings</code>, <code>referrals</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:220px">Feature</th><th style="width:140px">Firestore Collection</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>All affiliate admin features</td><td><code>affiliatePrograms</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Zero coverage. No page, no repository, no RBAC role. None of the affiliate collections are referenced in the admin web.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════════════
+     MODULE 11 — CHAT / SUPPORT ADMIN
+════════════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module 11 — Chat / Support Admin
+  <span class="cov cov-zero">0 / 10 &nbsp;·&nbsp; 0%</span>
+</h2>
+<p class="module-desc">Chat message moderation, support ticket management, user-flagged message review. Collections: <code>chatMessages</code>, <code>supportTickets</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:220px">Feature</th><th style="width:140px">Firestore Collection</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>All chat / support admin features</td><td><code>chatMessages</code>, <code>supportTickets</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Zero coverage. <code>support</code> RBAC role exists with <code>['dashboard:read','moderation:read']</code> but no chat or ticket tooling is built. Phase 5.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════════════
+     MODULE 12 — SEARCH / DISCOVERY ADMIN
+════════════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module 12 — Search / Discovery Admin
+  <span class="cov cov-zero">0 / 10 &nbsp;·&nbsp; 0%</span>
+</h2>
+<p class="module-desc">Featured content curation, trending topic management, search analytics. Collections: <code>featuredContent</code>, <code>trendingTopics</code>, <code>searchLogs</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:220px">Feature</th><th style="width:140px">Firestore Collection</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>All search / discovery admin features</td><td><code>featuredContent</code>, <code>trendingTopics</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Zero coverage. No page, no repository, no tooling. Phase 5.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════════════
+     MODULE 13 — CONTACTS / USER GROWTH
+════════════════════════════════════════════════ -->
+<h2 class="module-title">
+  Module 13 — Contacts / User Growth Admin
+  <span class="cov cov-zero">0 / 10 &nbsp;·&nbsp; 0%</span>
+</h2>
+<p class="module-desc">User growth analytics, contact management, notification campaigns. Collections: <code>userProfiles</code>, <code>contacts</code>, <code>notifications</code>.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:220px">Feature</th><th style="width:140px">Firestore Collection</th><th style="width:110px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>All contacts / user growth features</td><td><code>userProfiles</code>, <code>contacts</code></td><td><span class="s s-miss">❌ Missing</span></td><td>Zero coverage. No page, no repository, no RBAC. Phase 6.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════════════
+     SECURITY FOUNDATION AUDIT
+════════════════════════════════════════════════ -->
+<h2 class="sec-title">Security Foundation Audit — 94 / 100 (+16 since v2)</h2>
+<table class="sec-table">
+  <thead><tr><th style="width:220px">Area</th><th style="width:80px">Score</th><th style="width:110px">Status</th><th>Detail</th></tr></thead>
+  <tbody>
+    <tr><td>Firebase Auth — ID token + session cookie</td><td>20 / 20</td><td><span class="s s-ok">✅ Complete</span></td><td><code>auth.verifyIdToken()</code> in login route. <code>auth.verifySessionCookie()</code> in <code>getCurrentAdmin()</code>. Two-layer: middleware (fast Edge cookie check) + layout (cryptographic Firebase verify). 5-day <code>httpOnly</code> cookie, <code>secure</code> in prod, <code>sameSite:'lax'</code>. Cleared with <code>maxAge:0</code> on logout.</td></tr>
+    <tr><td>Admin-only Firestore gate on login</td><td>— (Auth)</td><td><span class="s s-ok">✅ Complete</span></td><td>Login route checks <code>db.collection('admins').doc(uid).get()</code> before issuing cookie. Firebase Auth user without an admin document gets 403.</td></tr>
+    <tr><td>Route protection (middleware)</td><td>15 / 15</td><td><span class="s s-ok">✅ Complete</span></td><td>5 route groups protected. <code>?next=</code> preserved for post-login redirect. <code>matcher</code> covers all sub-paths.</td></tr>
+    <tr><td>RBAC — page-level guards (Phase 1)</td><td>13 / 15</td><td><span class="s s-ok">✅ Complete</span></td><td>All 6 admin pages call <code>requirePageAdmin('permission')</code> as first line. Partial: nav items not filtered by role; no <code>/403</code> page (wrong-role redirects to <code>/login</code>).</td></tr>
+    <tr><td>RBAC — API route guards</td><td>— (RBAC)</td><td><span class="s s-ok">✅ Complete</span></td><td>All 6 action routes use <code>requireAdmin('permission')</code>. Returns 401/403 structured response.</td></tr>
+    <tr><td>POST-only mutations + real admin UID</td><td>15 / 15</td><td><span class="s s-ok">✅ Complete</span></td><td>All mutation routes export only <code>async function POST()</code>. Every route passes <code>result.admin.uid</code> to repository. Written to all audit log collections.</td></tr>
+    <tr><td>Payout workflow completeness (Phase 1)</td><td>9 / 10</td><td><span class="s s-ok">✅ Complete</span></td><td>Reason textarea, Hold/Approve/Reject, M-Pesa stub wired, <code>approved_pending_disbursement</code> status, Firestore transaction audit. Gap: <code>phoneNumber</code> not typed in <code>PayoutRow</code>; B2C stub only.</td></tr>
+    <tr><td>Moderation workflow completeness</td><td>— (Workflow)</td><td><span class="s s-part">⚠️ Partial</span></td><td>Hide/Approve/Reject built with audit. No reason textarea. No <code>router.refresh()</code> on success.</td></tr>
+    <tr><td>Loading states + error boundaries (Phase 1)</td><td>3 / 5</td><td><span class="s s-ok">✅ Complete</span></td><td><code>app/(admin)/loading.tsx</code> — 4-card shimmer skeleton. <code>app/(admin)/error.tsx</code> — <code>'use client'</code>, Retry button. Gap: pagination still missing.</td></tr>
+    <tr><td>Login / logout audit trail</td><td>— (Hardening)</td><td><span class="s s-miss">❌ Missing</span></td><td>No <code>adminSessionLogs</code> writes on login or logout.</td></tr>
+    <tr><td>Nav role filtering in AdminShell</td><td>— (RBAC)</td><td><span class="s s-miss">❌ Missing</span></td><td>All 6 nav links rendered for all roles. A <code>viewer</code> admin sees Finance and Moderation links.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════════════
+     FIRESTORE COLLECTION COVERAGE MAP
+════════════════════════════════════════════════ -->
+<h2 class="sec-title" style="background:#f8fafc;border-color:#475569">Firestore Collection Coverage Map</h2>
+<table class="sec-table">
+  <thead><tr><th style="width:220px">Collection</th><th style="width:120px">Admin Coverage</th><th>Used By</th></tr></thead>
+  <tbody>
+    <tr><td><code>admins</code></td><td><span class="s s-ok">Read</span></td><td>Login gate + <code>getCurrentAdmin()</code> role/permissions lookup</td></tr>
+    <tr><td><code>walletPayouts</code></td><td><span class="s s-ok">Read + Write</span></td><td><code>getPendingPayouts()</code>, <code>approvePayout()</code>, <code>updatePayoutStatus()</code></td></tr>
+    <tr><td><code>walletLedger</code></td><td><span class="s s-ok">Read</span></td><td><code>getWalletLedger()</code></td></tr>
+    <tr><td><code>financeAuditLogs</code></td><td><span class="s s-ok">Read + Write</span></td><td>Every payout action writes an audit entry with real UID + reason + <code>mpesaB2CStatus</code></td></tr>
+    <tr><td><code>moderationReports</code></td><td><span class="s s-ok">Read + Write</span></td><td><code>getModerationReports()</code>, <code>resolveModerationReport()</code></td></tr>
+    <tr><td><code>moderationAuditLogs</code></td><td><span class="s s-ok">Write</span></td><td>Every moderation action writes audit entry with real UID</td></tr>
+    <tr><td><code>videos</code></td><td><span class="s s-part">Count + side-effect</span></td><td>Dashboard count KPI. Hide side-effect via moderation route. No direct video admin queries.</td></tr>
+    <tr><td><code>creatorProfiles</code></td><td><span class="s s-part">Count only</span></td><td>Dashboard count KPI only. No search, no write.</td></tr>
+    <tr><td><code>liveSessions</code></td><td><span class="s s-part">Count only</span></td><td>Dashboard active count KPI only.</td></tr>
+    <tr><td><code>adCampaigns</code></td><td><span class="s s-part">Count only</span></td><td>Advertiser KPI counts only.</td></tr>
+    <tr><td><code>adRevenueShare</code></td><td><span class="s s-part">Count only</span></td><td>Advertiser KPI count only.</td></tr>
+    <tr><td><code>polls</code></td><td><span class="s s-part">Count only</span></td><td>Polls KPI counts only. No browse, no actions.</td></tr>
+    <tr><td><code>pollVotes</code></td><td><span class="s s-part">Count only</span></td><td>fraudHolds count KPI only. No review actions.</td></tr>
+    <tr><td><code>walletBalances</code></td><td><span class="s s-part">Count only</span></td><td>Finance KPI count only.</td></tr>
+    <tr><td><code>walletReconciliation</code></td><td><span class="s s-part">Count only</span></td><td>Finance KPI count. No action routes.</td></tr>
+    <tr><td><code>creatorEarnings</code></td><td><span class="s s-part">Count only</span></td><td>Finance KPI count. No detail view.</td></tr>
+    <tr><td><code>riskReviews</code></td><td><span class="s s-part">Count only</span></td><td>Finance KPI count. No action routes.</td></tr>
+    <tr><td><code>aiVideoJobs</code></td><td><span class="s s-miss">Not referenced</span></td><td>Not queried anywhere in the admin web.</td></tr>
+    <tr><td><code>aiJobLogs</code></td><td><span class="s s-miss">Not referenced</span></td><td>Not queried anywhere in the admin web.</td></tr>
+    <tr><td><code>liveReports</code></td><td><span class="s s-miss">Not referenced</span></td><td>Not queried anywhere in the admin web.</td></tr>
+    <tr><td><code>liveTips</code></td><td><span class="s s-miss">Not referenced</span></td><td>Not queried anywhere in the admin web.</td></tr>
+    <tr><td><code>affiliatePrograms</code></td><td><span class="s s-miss">Not referenced</span></td><td>Not queried anywhere in the admin web.</td></tr>
+    <tr><td><code>affiliateEarnings</code></td><td><span class="s s-miss">Not referenced</span></td><td>Not queried anywhere in the admin web.</td></tr>
+    <tr><td><code>chatMessages</code></td><td><span class="s s-miss">Not referenced</span></td><td>Not queried anywhere in the admin web.</td></tr>
+    <tr><td><code>supportTickets</code></td><td><span class="s s-miss">Not referenced</span></td><td>Not queried anywhere in the admin web.</td></tr>
+    <tr><td><code>featuredContent</code></td><td><span class="s s-miss">Not referenced</span></td><td>Not queried anywhere in the admin web.</td></tr>
+    <tr><td><code>multistreamSessions</code></td><td><span class="s s-miss">Not referenced</span></td><td>Not queried anywhere in the admin web.</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════════════
+     6-PHASE BUILD ROADMAP
+════════════════════════════════════════════════ -->
+<h2 class="phase-title">6-Phase Build Roadmap</h2>
+<div class="phase-grid">
+
+  <div class="phase-card done">
+    <span class="ph-badge">Phase 1 ✓ Done</span>
+    <h4>Platform Security Completions</h4>
+    <ul>
+      <li>requirePageAdmin() on all 6 pages</li>
+      <li>loading.tsx + error.tsx</li>
+      <li>Reason textarea on PayoutActions</li>
+      <li>M-Pesa B2C safe stub wired</li>
+      <li>approvePayout / updatePayoutStatus split</li>
+      <li>--danger / .btn.danger / .btn.secondary</li>
+    </ul>
+    <div class="ph-cov">Coverage after: 26% &nbsp;·&nbsp; Security: 94/100</div>
+  </div>
+
+  <div class="phase-card next">
+    <span class="ph-badge">Phase 2 — Next</span>
+    <h4>Video &amp; Creator Governance</h4>
+    <ul>
+      <li>videoRepository.ts + /videos page</li>
+      <li>Direct video hide/unhide/restrict routes</li>
+      <li>Broken HLS queue + failed job requeue</li>
+      <li>creatorRepository.ts + /creators page</li>
+      <li>suspend/ban/trust-score routes</li>
+      <li>creator_manager RBAC role</li>
+      <li>Fix: reason + router.refresh() on ModerationActions</li>
+      <li>Fix: nav filtering by admin.permissions</li>
+      <li>Fix: cursor pagination on all queues</li>
+    </ul>
+    <div class="ph-cov">Projected coverage after: ~40%</div>
+  </div>
+
+  <div class="phase-card">
+    <span class="ph-badge future">Phase 3</span>
+    <h4>Finance Production</h4>
+    <ul>
+      <li>Safaricom OAuth + B2C endpoint</li>
+      <li>M-Pesa webhook handler</li>
+      <li>Wallet reconciliation actions</li>
+      <li>Risk review queue + actions</li>
+      <li>Add phoneNumber to PayoutRow type</li>
+      <li>Login / logout audit trail</li>
+    </ul>
+    <div class="ph-cov">Projected coverage after: ~52%</div>
+  </div>
+
+  <div class="phase-card">
+    <span class="ph-badge future">Phase 4</span>
+    <h4>Live &amp; Multi-Stream Admin</h4>
+    <ul>
+      <li>Live session browser + force-end</li>
+      <li>liveReports moderation queue</li>
+      <li>Live tips / revenue analytics</li>
+      <li>RTMP key revocation</li>
+      <li>Multi-stream session manager</li>
+    </ul>
+    <div class="ph-cov">Projected coverage after: ~63%</div>
+  </div>
+
+  <div class="phase-card">
+    <span class="ph-badge future">Phase 5</span>
+    <h4>Ads, Polls, AI Jobs, Affiliate</h4>
+    <ul>
+      <li>Campaign list + approve/reject routes</li>
+      <li>Poll table + fraud vote review</li>
+      <li>AI job queue + requeue action</li>
+      <li>Affiliate program management</li>
+      <li>/403 forbidden page</li>
+    </ul>
+    <div class="ph-cov">Projected coverage after: ~80%</div>
+  </div>
+
+  <div class="phase-card">
+    <span class="ph-badge future">Phase 6</span>
+    <h4>Chat, Search, Contacts, Growth</h4>
+    <ul>
+      <li>Chat message moderation</li>
+      <li>Support ticket management</li>
+      <li>Featured content curation</li>
+      <li>Search analytics dashboard</li>
+      <li>User growth analytics</li>
+      <li>Notification campaign tooling</li>
+    </ul>
+    <div class="ph-cov">Projected coverage after: ~95%</div>
+  </div>
+
+</div>
+
+<div class="report-footer">
+  Generated by Claude Code static analysis &nbsp;·&nbsp; apps/admin_web &nbsp;·&nbsp; 2026-06-08 &nbsp;·&nbsp; 34 source files read &nbsp;·&nbsp;
+  TypeScript: 0 errors &nbsp;·&nbsp; Dev server: confirmed running &nbsp;·&nbsp;
+  Blueprint coverage: 26% (+2% since v3) &nbsp;·&nbsp; Security foundation: 94/100 (+16 since v2) &nbsp;·&nbsp;
+  Phase 1 complete &nbsp;·&nbsp; Phase 2 next: Video &amp; Creator Governance
+</div>
+
+</body>
+</html>

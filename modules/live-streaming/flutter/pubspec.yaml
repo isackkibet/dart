@@ -1,0 +1,27 @@
+name: yohpal_live_streaming
+description: YohPal Live Streaming Flutter client module.
+version: 1.0.0
+publish_to: none
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+  flutter: '>=3.22.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_webrtc: ^0.12.12+hotfix.1
+  web_socket_channel: ^3.0.1
+  json_annotation: ^4.9.0
+  collection: ^1.18.0
+  meta: ^1.15.0
+  cloud_firestore: ^5.6.0
+  firebase_auth: ^5.4.0
+  cloud_functions: ^5.6.2
+  http: ^1.2.2
+  socket_io_client: ^3.0.2
+  mobile_scanner: ^6.0.2
+  permission_handler: ^11.3.1
+  qr_flutter: ^4.1.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0

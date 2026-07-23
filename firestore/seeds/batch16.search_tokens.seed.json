@@ -1,0 +1,50 @@
+{
+  "creatorProfiles": [
+    {
+      "uid": "creator_dance_01",
+      "displayName": "Sarah Dance Queen",
+      "handle": "sarah_dance",
+      "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb",
+      "followerCount": 12500,
+      "verificationStatus": "verified",
+      "category": "dance",
+      "bio": "Learn how to dance with me! Daily live classes and tutorials.",
+      "searchTokens": ["sa", "sar", "sara", "sarah", "da", "dan", "danc", "dance", "qu", "que", "quee", "queen"]
+    },
+    {
+      "uid": "creator_gamer_99",
+      "displayName": "Pixel Warrior",
+      "handle": "pixel_warrior",
+      "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
+      "followerCount": 4200,
+      "verificationStatus": "pending",
+      "category": "gaming",
+      "bio": "Professional Esports player. Catch my live streams every night.",
+      "searchTokens": ["pi", "pix", "pixe", "pixel", "wa", "war", "warr", "warri", "warrio", "warrior"]
+    }
+  ],
+  "videos": [
+    {
+      "id": "video_dance_tutorial",
+      "userId": "creator_dance_01",
+      "creatorName": "Sarah Dance Queen",
+      "title": "Beginner Hip Hop Dance Tutorial",
+      "thumbnailUrl": "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad",
+      "viewCount": 5400,
+      "durationSeconds": 650,
+      "createdAt": "2026-07-01T12:00:00Z",
+      "searchTokens": ["be", "beg", "begi", "begin", "beginn", "beginne", "beginner", "hi", "hip", "ho", "hop", "da", "dan", "danc", "dance", "tu", "tut", "tuto", "tutor", "tutori", "tutoria", "tutorial"]
+    },
+    {
+      "id": "video_apex_legends",
+      "userId": "creator_gamer_99",
+      "creatorName": "Pixel Warrior",
+      "title": "Apex Legends Ranked Carry to Predator",
+      "thumbnailUrl": "https://images.unsplash.com/photo-1542751371-adc38448a05e",
+      "viewCount": 1820,
+      "durationSeconds": 1420,
+      "createdAt": "2026-07-02T18:30:00Z",
+      "searchTokens": ["ap", "ape", "apex", "le", "leg", "lege", "legen", "legend", "legends", "ra", "ran", "rank", "ranke", "ranked", "ca", "car", "carr", "carry", "pr", "pre", "pred", "preda", "predat", "predato", "predator"]
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "giftEvents": [
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "senderId": "REPLACE_WITH_VIEWER_UID",
+      "giftType": "starter_support",
+      "amount": 100,
+      "currency": "KES",
+      "platformFee": 10,
+      "creatorAmount": 90,
+      "createdBy": "REPLACE_WITH_VIEWER_UID"
+    }
+  ],
+  "paidMessages": [
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "senderId": "REPLACE_WITH_VIEWER_UID",
+      "message": "Great live session!",
+      "amount": 50,
+      "currency": "KES",
+      "platformFee": 5,
+      "creatorAmount": 45,
+      "priorityRank": 50,
+      "createdBy": "REPLACE_WITH_VIEWER_UID"
+    }
+  ],
+  "ledgerEntries": [
+    {
+      "ownerType": "creator",
+      "ownerId": "REPLACE_WITH_CREATOR_UID",
+      "entryType": "gift_credit",
+      "direction": "credit",
+      "referenceType": "gift",
+      "referenceId": "REPLACE_WITH_GIFT_ID",
+      "amount": 90,
+      "currency": "KES",
+      "createdBy": "REPLACE_WITH_VIEWER_UID"
+    }
+  ]
+}

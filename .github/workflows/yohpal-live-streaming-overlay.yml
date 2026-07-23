@@ -1,0 +1,61 @@
+name: YohPal Live Streaming Overlay
+
+on:
+  pull_request:
+    paths:
+      - "modules/live-streaming/**"
+      - ".github/workflows/yohpal-live-streaming-overlay.yml"
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "modules/live-streaming/**"
+      - ".github/workflows/yohpal-live-streaming-overlay.yml"
+
+jobs:
+  streaming-overlay-guardrails:
+    name: Streaming Overlay Guardrails
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: modules/live-streaming
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate required files
+        run: bash scripts/ci/validate-required-files.sh
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Install mediasoup server dependencies
+        run: npm install
+        working-directory: modules/live-streaming/server/mediasoup
+
+      - name: Run Node server smoke tests
+        run: |
+          cd server/mediasoup
+          npm run test:smoke
+          npm run test:contract
+
+      - name: Prepare env
+        run: cp .env.example .env
+
+      - name: Generate TURN config
+        run: npm run turn:config
+
+      - name: Validate Docker Compose config
+        run: docker compose -f docker/docker-compose.yml --env-file .env config
+
+      - name: Flutter static overlay check
+        run: bash scripts/flutter-static-check.sh
+
+      - name: Merge safety check
+        run: bash scripts/ci/merge-safety-check.sh

@@ -1,0 +1,22 @@
+{
+  "release": "YohPal Live 1.0G-RC1",
+  "branch": "release/yohpal-live-1.0g-rc1",
+  "commitHash": "0b8ac7646be61d393e67acf14b41117d7f6ebd30",
+  "implementationCommit": "14760ff760139f1698626c950f46194074851eea",
+  "tag": "yohpal-live-v1.0.0-rc1",
+  "ciRun": "local-2026-07-11T13:27:45Z",
+  "ciGates": {
+    "format": "FAIL \u2014 75 files require dart format (no code changes made during freeze; pre-freeze formatting debt)",
+    "analyze": "FAIL \u2014 2 warnings: unused_field (_lastVideoId), unused_import (yohpal_crash_reporter.dart in main.dart)",
+    "unitTests": "PASS \u2014 90 tests passed, 0 failed",
+    "coverage": "RECORDED \u2014 line coverage 2.9% (184/6398 lines; thin coverage is a known High finding)",
+    "routeIntegrity": "PASS \u2014 58 statically-resolvable pushed routes verified",
+    "functionsBuild": "PASS \u2014 tsc compiled with 0 errors",
+    "functionsTests": "PASS \u2014 36 tests passed across 4 suites"
+  },
+  "androidReport": "release-evidence/yohpal-live-1.0g-rc1/android/report.json",
+  "iosReport": "release-evidence/yohpal-live-1.0g-rc1/ios/report.json",
+  "crashlyticsProof": "release-evidence/yohpal-live-1.0g-rc1/observability/",
+  "securityReport": "release-evidence/yohpal-live-1.0g-rc1/security/security-report.md",
+  "rrbResolution": "release-evidence/yohpal-live-1.0g-rc1/governance/rrb-resolution.md"
+}

@@ -1,0 +1,33 @@
+name: YohPal Live CI
+on:
+  push:
+    branches: [main, flutter_app, yohpal-search]
+  pull_request:
+    branches: [main, flutter_app, yohpal-search]
+jobs:
+  flutter:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/yohpal_live
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.0"
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+  functions:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/firebase_functions
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install
+      - run: npm run build
+      - run: npm test

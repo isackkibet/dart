@@ -1,0 +1,256 @@
+# Prompt: Complete Creator Studio Publish Flow Using Existing `videos` Firestore and `videos_raw` Storage
+
+Update the creator upload/publish flow to use the existing Firebase architecture:
+
+* Firebase Storage path: `videos_raw/{userId}/{fileName}`
+* Firestore collection: `videos/{projectId}`
+
+Do not create or use `creatorProjects`.
+Do not create or use `videos-rendered`.
+
+Keep the implementation aligned with the existing video processing pipeline.
+
+## Client Changes
+
+1. Update `CreatorPublishService`:
+
+* Upload rendered output to:
+
+```
+videos_raw/{userId}/{projectId}.mp4
+```
+
+* Store the uploaded Storage path in:
+
+```
+uploadObjectPath
+```
+
+* Store the same path in:
+
+```
+rawPath
+```
+
+if required by the existing video processing pipeline.
+
+2. Write the creator video document to:
+
+```
+videos/{projectId}
+```
+
+This document is the canonical record.
+
+Required fields:
+
+```json
+{
+  "userId": "owner uid",
+  "projectId": "project id",
+
+  "rawPath": "videos_raw/{userId}/{projectId}.mp4",
+  "uploadObjectPath": "videos_raw/{userId}/{projectId}.mp4",
+
+  "renderedSha256": "checksum",
+  "outputValidated": true,
+
+  "clipCount": number,
+  "timelineDurationMs": number,
+
+  "source": "creator-studio",
+  "status": "uploaded",
+
+  "title": "",
+  "caption": "",
+  "tags": []
+}
+```
+
+3. Remove all client references to:
+
+```
+creatorProjects
+videos-rendered
+```
+
+4. Keep the existing flow:
+
+```
+Capture
+ ↓
+Edit (optional)
+ ↓
+Render
+ ↓
+Validate
+ ↓
+Upload
+ ↓
+Publish callable
+ ↓
+pending_moderation
+```
+
+Do not add a raw upload bypass.
+
+---
+
+## Backend Changes Documentation
+
+Create:
+
+```
+BACKEND_CHANGES_REQUIRED.md
+```
+
+Document backend-only changes that still need deployment.
+
+Include:
+
+### Cloud Function
+
+Update:
+
+```
+backend/firebase_functions/src/creatorStudio/publishCreatorVideo.ts
+```
+
+Change:
+
+Before:
+
+```
+creatorProjects/{projectId}
+        ↓
+videos/{randomVideoId}
+```
+
+After:
+
+```
+videos/{projectId}
+        ↓
+videos/{projectId}
+```
+
+The callable should:
+
+1. Read:
+
+```
+videos/{projectId}
+```
+
+2. Validate using the existing publication gate.
+
+3. Update the same document:
+
+```ts
+transaction.update(videoRef, {
+  status: "pending_moderation",
+  publishedAt: FieldValue.serverTimestamp()
+});
+```
+
+4. Return:
+
+```json
+{
+  "videoId": projectId,
+  "status": "pending_moderation"
+}
+```
+
+---
+
+## Firebase Storage Rules
+
+Add support for:
+
+```
+videos_raw/{userId}/{fileName}
+```
+
+Add this rule:
+
+```javascript
+match /videos_raw/{userId}/{fileName} {
+
+  allow read: if signedIn()
+    && request.auth.uid == userId;
+
+  allow write: if signedIn()
+    && request.auth.uid == userId
+    && request.resource.size < 500 * 1024 * 1024
+    && request.resource.contentType == 'video/mp4';
+}
+```
+
+Keep existing Storage rules unchanged.
+
+---
+
+## Firestore Rules
+
+Review existing:
+
+```
+videos/{videoId}
+```
+
+rules.
+
+Ensure:
+
+* Users can create their own video documents.
+* Users can update only their own unpublished documents.
+* Users cannot modify moderation state after submission.
+* Cloud Functions remain responsible for:
+
+  * `pending_moderation`
+  * approval
+  * rejection
+  * publishing transitions
+
+---
+
+## Validation
+
+After implementation verify:
+
+1. Upload creates:
+
+```
+Storage:
+videos_raw/{uid}/{projectId}.mp4
+```
+
+2. Firestore creates:
+
+```
+videos/{projectId}
+```
+
+3. Callable reads the same document.
+
+4. Successful publish changes:
+
+```
+status: uploaded
+```
+
+to:
+
+```
+status: pending_moderation
+```
+
+5. No references remain to:
+
+```
+creatorProjects
+videos-rendered
+```
+
+Keep changes minimal and avoid unrelated refactoring.

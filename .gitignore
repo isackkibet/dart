@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js build output
+.next/
+out/
+
+# Production build
+build/
+dist/
+
+# Environment variables — never commit real secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+service-account*.json
+firebase-admin*.json
+google-application-credentials*.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts
+
+# Testing
+coverage/
+
+# Turbo
+.turbo/
+
+# Flutter build artifacts — never commit
+**/.dart_tool/
+**/.gradle/
+**/GeneratedPluginRegistrant.java
+**/*.iml
+**/local.properties
+full_ui_patch/
+ui_patch/

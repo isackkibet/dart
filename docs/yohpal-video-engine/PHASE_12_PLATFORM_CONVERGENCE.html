@@ -1,0 +1,673 @@
+<title>YohPal Phase 12 — Platform Convergence Architecture</title>
+<style>
+  :root {
+    --gold:      #c9a227;
+    --gold-2:    #a88420;
+    --gold-text: #7a5e0f;
+    --gold-dim:  rgba(201,162,39,.10);
+    --ink:       #0d0f0e;
+    --ink-2:     #3a3d3b;
+    --ink-3:     #6b706d;
+    --paper:     #f5f4ef;
+    --paper-2:   #eceae3;
+    --paper-3:   #dedad0;
+    --pass:      #1b5e20;
+    --pass-bg:   #e8f5e9;
+    --info:      #0d47a1;
+    --info-bg:   #e8eef7;
+    --mono:      'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+    --radius:    2px;
+    --doc-max:   900px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --gold:      #d4ac30;
+      --gold-2:    #b8921e;
+      --gold-text: #d4ac30;
+      --gold-dim:  rgba(212,172,48,.08);
+      --ink:       #eceae3;
+      --ink-2:     #c4c1b8;
+      --ink-3:     #8a8780;
+      --paper:     #111310;
+      --paper-2:   #1c1f1c;
+      --paper-3:   #272b27;
+      --pass:      #4caf50;
+      --pass-bg:   #1b2e1c;
+      --info:      #90caf9;
+      --info-bg:   #0d1e33;
+    }
+  }
+  :root[data-theme="light"] {
+    --gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);
+    --ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;
+    --paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;
+    --pass:#1b5e20;--pass-bg:#e8f5e9;--info:#0d47a1;--info-bg:#e8eef7;
+  }
+  :root[data-theme="dark"] {
+    --gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);
+    --ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;
+    --paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;
+    --pass:#4caf50;--pass-bg:#1b2e1c;--info:#90caf9;--info-bg:#0d1e33;
+  }
+
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 13.5px; line-height: 1.65;
+    background: var(--paper); color: var(--ink);
+    padding-bottom: 5rem;
+  }
+
+  /* ── Print bar ── */
+  .print-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--paper-2); border-bottom: 1px solid var(--paper-3);
+    padding: .45rem 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
+    font-size: 11px; color: var(--ink-3);
+  }
+  .print-bar .brand { font-weight: 700; color: var(--gold-text); letter-spacing: .06em; font-size: 12px; }
+  .print-bar .spacer { flex: 1; }
+  .print-bar .badge {
+    font-weight: 700; font-size: 10px; letter-spacing: .08em;
+    padding: .2rem .65rem; border-radius: var(--radius);
+    background: var(--gold-dim); color: var(--gold-text);
+    border: 1px solid var(--gold); text-transform: uppercase;
+  }
+  .dl-btn {
+    background: var(--gold); color: #fff; border: none;
+    padding: .3rem 1rem; border-radius: var(--radius);
+    font-size: 11px; font-weight: 700; letter-spacing: .06em;
+    cursor: pointer; text-transform: uppercase;
+  }
+  .dl-btn:hover { background: var(--gold-2); }
+
+  .doc { max-width: var(--doc-max); margin: 0 auto; padding: 2.5rem 1.5rem 0; }
+
+  /* ── Masthead ── */
+  .masthead {
+    border-top: 3px solid var(--gold); border-bottom: 3px solid var(--gold);
+    padding: 1.1rem 0 1rem; margin-bottom: 1.75rem; position: relative;
+  }
+  .masthead::after {
+    content: ''; display: block; height: 1px; background: var(--gold);
+    position: absolute; bottom: 5px; left: 0; right: 0; opacity: .35;
+  }
+  .masthead .eyebrow {
+    font-size: 9.5px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--gold-text); margin-bottom: .3rem;
+  }
+  .masthead h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.6rem; font-weight: 700; color: var(--ink);
+    line-height: 1.15; margin-bottom: .65rem; text-wrap: balance;
+  }
+  .meta-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: .25rem .75rem; font-size: 11.5px; color: var(--ink-3);
+  }
+  .meta-grid .m { display: flex; gap: .3rem; }
+  .meta-grid strong { color: var(--ink-2); }
+
+  /* ── Section headers ── */
+  .section { margin-bottom: 1.75rem; }
+  .sh {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: .95rem; font-weight: 700; color: var(--ink);
+    padding-bottom: .35rem; border-bottom: 1px solid var(--gold);
+    margin-bottom: .85rem; display: flex; align-items: center; gap: .5rem;
+  }
+  .sh .sn {
+    background: var(--gold); color: #fff; font-size: 10px; font-weight: 700;
+    width: 18px; height: 18px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-family: system-ui, sans-serif;
+  }
+
+  /* ── Architecture Diagram ── */
+  .arch-diagram {
+    border: 2px solid var(--gold); border-radius: var(--radius);
+    overflow: hidden; margin-bottom: 1.75rem;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  .arch-layer {
+    padding: .9rem 1.25rem;
+    border-bottom: 1px solid var(--paper-3);
+  }
+  .arch-layer:last-child { border-bottom: none; }
+  .arch-layer-label {
+    font-size: 9px; font-weight: 700; letter-spacing: .13em;
+    text-transform: uppercase; margin-bottom: .5rem;
+  }
+  /* Platform layer — top */
+  .arch-platform {
+    background: var(--gold-dim);
+    border-bottom: 2px solid var(--gold);
+  }
+  .arch-platform .arch-layer-label { color: var(--gold-text); }
+  .arch-platform .arch-title {
+    font-size: 1.05rem; font-weight: 700; color: var(--ink);
+    letter-spacing: .04em; margin-bottom: .55rem; text-align: center;
+  }
+  .arch-services {
+    display: flex; flex-wrap: wrap; gap: .4rem; justify-content: center;
+  }
+  .arch-svc {
+    font-size: 11.5px; font-family: system-ui, sans-serif;
+    background: var(--paper); border: 1px solid var(--gold);
+    border-radius: var(--radius); padding: .25rem .7rem;
+    color: var(--ink); font-weight: 500;
+  }
+  /* Module layer — middle */
+  .arch-modules { background: var(--paper-2); }
+  .arch-modules .arch-layer-label { color: var(--ink-3); }
+  .arch-module-row {
+    display: flex; gap: 0;
+    border: 1px solid var(--paper-3); border-radius: var(--radius); overflow: hidden;
+  }
+  .arch-module {
+    flex: 1; text-align: center; padding: .55rem .25rem;
+    font-size: 11px; font-weight: 700; letter-spacing: .06em;
+    color: var(--ink); border-right: 1px solid var(--paper-3);
+    font-family: system-ui, sans-serif;
+  }
+  .arch-module:last-child { border-right: none; }
+  /* Infra layer — bottom */
+  .arch-infra { background: var(--paper-3); }
+  .arch-infra .arch-layer-label { color: var(--ink-3); }
+  .arch-infra-row {
+    display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center;
+  }
+  .arch-infra-chip {
+    font-size: 11px; font-family: var(--mono);
+    color: var(--ink-3); padding: .2rem .55rem;
+    background: var(--paper-2); border: 1px solid var(--paper-3);
+    border-radius: var(--radius);
+  }
+  /* Connector arrow between layers */
+  .arch-connector {
+    display: flex; justify-content: center; align-items: center;
+    padding: .3rem 0; background: var(--paper-2);
+    border-bottom: 1px solid var(--paper-3); gap: 1rem;
+    font-size: 10px; color: var(--ink-3); letter-spacing: .05em;
+    font-family: system-ui, sans-serif;
+  }
+  .arch-connector .arr { color: var(--gold); font-size: 14px; }
+
+  /* ── Before / After comparison ── */
+  .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+  .ba-card { border: 1px solid var(--paper-3); border-radius: var(--radius); overflow: hidden; }
+  .ba-header {
+    padding: .5rem .85rem;
+    font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+  }
+  .ba-card.before .ba-header { background: var(--paper-3); color: var(--ink-3); }
+  .ba-card.after  .ba-header { background: var(--gold-dim); color: var(--gold-text); border-bottom: 1px solid var(--gold); }
+  .ba-body { padding: .65rem .85rem; background: var(--paper-2); }
+  .ba-item {
+    font-size: 12px; color: var(--ink-2); padding: .25rem 0;
+    border-bottom: 1px solid var(--paper-3);
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .ba-item:last-child { border-bottom: none; }
+  .ba-item .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .ba-card.before .dot { background: var(--ink-3); }
+  .ba-card.after  .dot { background: var(--gold); }
+
+  /* ── Service cards ── */
+  .svc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: .75rem; }
+  .svc-card {
+    border: 1px solid var(--paper-3); border-radius: var(--radius);
+    padding: .8rem 1rem; background: var(--paper-2);
+  }
+  .svc-card .sc-num {
+    font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--gold-text); margin-bottom: .15rem;
+  }
+  .svc-card .sc-name { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: .45rem; font-family: Georgia, serif; }
+  .svc-card ul { list-style: none; padding: 0; }
+  .svc-card ul li {
+    font-size: 12px; color: var(--ink-2); padding: .15rem 0;
+    display: flex; align-items: flex-start; gap: .45rem;
+  }
+  .svc-card ul li::before { content: '·'; color: var(--gold); font-weight: 700; flex-shrink: 0; }
+  .svc-card .sc-sub {
+    font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--ink-3); margin: .5rem 0 .25rem;
+  }
+  .svc-card .dl-list { list-style: none; padding: 0; }
+  .svc-card .dl-list li {
+    font-family: var(--mono); font-size: 10.5px; color: var(--info);
+    padding: .1rem 0;
+  }
+
+  /* ── Code block ── */
+  .code-block {
+    font-family: var(--mono); font-size: 11.5px;
+    background: var(--paper-2); border-left: 3px solid var(--gold);
+    padding: .75rem 1rem; border-radius: 0 var(--radius) var(--radius) 0;
+    color: var(--ink-2); line-height: 1.6; overflow-x: auto;
+    white-space: pre; margin-bottom: .75rem;
+  }
+  .code-block .kw  { color: var(--info); font-weight: 600; }
+  .code-block .cls { color: var(--gold-text); font-weight: 600; }
+  .code-block .cmt { color: var(--ink-3); font-style: italic; }
+
+  /* ── Tables ── */
+  .ev { width: 100%; border-collapse: collapse; margin-bottom: .75rem; }
+  .ev th {
+    background: var(--paper-2); font-size: 9px; font-weight: 700;
+    letter-spacing: .09em; text-transform: uppercase; color: var(--ink-3);
+    padding: .4rem .75rem; text-align: left; border: 1px solid var(--paper-3);
+  }
+  .ev td {
+    padding: .5rem .75rem; border: 1px solid var(--paper-3);
+    vertical-align: top; font-size: 12.5px; color: var(--ink-2);
+  }
+  .ev td:first-child { color: var(--ink); font-weight: 500; background: var(--paper-2); }
+  .ev td.center { text-align: center; }
+
+  /* ── Chips ── */
+  .chip {
+    display: inline-flex; align-items: center; padding: .15rem .5rem;
+    border-radius: var(--radius); font-size: 9.5px; font-weight: 700;
+    letter-spacing: .07em; text-transform: uppercase;
+  }
+  .chip.pass { background: var(--pass-bg); color: var(--pass); border: 1px solid var(--pass); }
+  .chip.gold { background: var(--gold-dim); color: var(--gold-text); border: 1px solid var(--gold); }
+
+  /* ── Folder structure ── */
+  .folder-block {
+    font-family: var(--mono); font-size: 12px;
+    background: var(--paper-2); border: 1px solid var(--paper-3);
+    border-radius: var(--radius); padding: 1rem 1.25rem;
+    color: var(--ink-2); line-height: 1.8; margin-bottom: .75rem;
+    overflow-x: auto;
+  }
+  .folder-block .dir  { color: var(--gold-text); font-weight: 600; }
+  .folder-block .file { color: var(--ink-2); }
+  .folder-block .cmt  { color: var(--ink-3); }
+
+  /* ── Recommendation & Phase 13 box ── */
+  .rec-box {
+    background: var(--info-bg); border: 1px solid var(--info);
+    border-left: 4px solid var(--info);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: .85rem 1rem; margin-bottom: 1.5rem;
+  }
+  .rec-box h3 { font-size: 11px; font-weight: 700; color: var(--info); letter-spacing: .05em; text-transform: uppercase; margin-bottom: .4rem; }
+  .rec-box p { font-size: 12.5px; color: var(--ink-2); line-height: 1.7; }
+
+  .next-phase {
+    border: 2px solid var(--gold); border-radius: var(--radius);
+    padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
+    background: var(--gold-dim);
+  }
+  .next-phase .np-eyebrow {
+    font-size: 9px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--gold-text); margin-bottom: .3rem;
+  }
+  .next-phase h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.1rem; font-weight: 700; color: var(--ink); margin-bottom: .85rem;
+  }
+  .np-scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-bottom: .85rem; }
+  .np-scope-item {
+    font-size: 12px; color: var(--ink-2);
+    display: flex; gap: .5rem; align-items: flex-start;
+  }
+  .np-scope-item::before { content: '→'; color: var(--gold); font-weight: 700; flex-shrink: 0; }
+  .success-box {
+    background: var(--pass-bg); border: 1px solid var(--pass);
+    border-left: 4px solid var(--pass);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: .75rem 1rem;
+  }
+  .success-box h3 { font-size: 10px; font-weight: 700; color: var(--pass); letter-spacing: .07em; text-transform: uppercase; margin-bottom: .35rem; }
+  .success-box ul { list-style: none; padding: 0; }
+  .success-box ul li { font-size: 12px; color: var(--ink-2); padding: .15rem 0; display: flex; gap: .5rem; }
+  .success-box ul li::before { content: '✓'; color: var(--pass); font-weight: 700; }
+
+  .footer-rule { border: none; border-top: 2px solid var(--gold); margin: 2rem 0 0; opacity: .5; }
+
+  /* ── Flag chips ── */
+  .flag-grid { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .75rem; }
+  .flag-chip {
+    font-size: 11.5px; background: var(--paper-2); border: 1px solid var(--paper-3);
+    border-radius: var(--radius); padding: .2rem .6rem; color: var(--ink-2);
+  }
+
+  @media (max-width: 640px) {
+    .meta-grid     { grid-template-columns: 1fr 1fr; }
+    .ba-grid       { grid-template-columns: 1fr; }
+    .svc-grid      { grid-template-columns: 1fr; }
+    .np-scope-grid { grid-template-columns: 1fr; }
+    .arch-module   { font-size: 9px; }
+  }
+  @media print {
+    .print-bar { display: none; }
+    body { font-size: 12px; padding-bottom: 0; }
+    .doc { padding: 1rem .75rem 0; }
+    .masthead h1 { font-size: 1.3rem; }
+    .section { break-inside: avoid; }
+    @page { margin: 1.5cm; }
+  }
+</style>
+
+<div class="print-bar">
+  <span class="brand">YohPal Platform</span>
+  <span class="badge">Phase 12 — Enterprise Architecture Programme</span>
+  <span class="spacer"></span>
+  <button class="dl-btn" onclick="window.print()">Download PDF</button>
+</div>
+
+<div class="doc">
+
+  <div class="masthead">
+    <div class="eyebrow">Enterprise Architecture Programme — Ecosystem Convergence</div>
+    <h1>YohPal Phase 12 — Platform Convergence Architecture</h1>
+    <div class="meta-grid">
+      <div class="m"><strong>Version:</strong> 1.0</div>
+      <div class="m"><strong>Date:</strong> 2026-07-08</div>
+      <div class="m"><strong>Type:</strong> Enterprise Architecture Programme</div>
+      <div class="m"><strong>Follows:</strong> Phase 11 Continuous Improvement</div>
+      <div class="m"><strong>Delivers:</strong> YohPal Platform Layer</div>
+      <div class="m"><strong>Next:</strong> Phase 13 — Shared Platform Foundation</div>
+    </div>
+  </div>
+
+  <!-- Architecture Diagram -->
+  <div class="section">
+    <div class="sh"><span class="sn">◈</span>Target Platform Architecture</div>
+
+    <div class="arch-diagram">
+      <!-- Platform layer -->
+      <div class="arch-layer arch-platform">
+        <div class="arch-layer-label">Platform Layer — Single Source of Truth</div>
+        <div class="arch-title">YOHPAL PLATFORM</div>
+        <div class="arch-services">
+          <span class="arch-svc">Identity</span>
+          <span class="arch-svc">Wallet</span>
+          <span class="arch-svc">Brain (AI)</span>
+          <span class="arch-svc">Search</span>
+          <span class="arch-svc">Notifications</span>
+          <span class="arch-svc">Settings</span>
+          <span class="arch-svc">Analytics</span>
+          <span class="arch-svc">Routing &amp; Deep Links</span>
+        </div>
+      </div>
+
+      <!-- Connector -->
+      <div class="arch-connector">
+        <span class="arr">↕</span>
+        <span>Shared service contracts · Abstract interfaces · Single API surface</span>
+        <span class="arr">↕</span>
+      </div>
+
+      <!-- Module layer -->
+      <div class="arch-layer arch-modules">
+        <div class="arch-layer-label">Application Modules</div>
+        <div class="arch-module-row">
+          <div class="arch-module">LIVE</div>
+          <div class="arch-module">JOBS</div>
+          <div class="arch-module">HUSTLE</div>
+          <div class="arch-module">MARKET</div>
+          <div class="arch-module">YCIOS</div>
+        </div>
+      </div>
+
+      <!-- Connector -->
+      <div class="arch-connector">
+        <span class="arr">↕</span>
+        <span>Firebase Admin SDK · Cloud Run · REST / gRPC</span>
+        <span class="arr">↕</span>
+      </div>
+
+      <!-- Infrastructure layer -->
+      <div class="arch-layer arch-infra">
+        <div class="arch-layer-label">Infrastructure</div>
+        <div class="arch-infra-row">
+          <span class="arch-infra-chip">Firebase</span>
+          <span class="arch-infra-chip">Firestore</span>
+          <span class="arch-infra-chip">Cloud Run</span>
+          <span class="arch-infra-chip">Firebase Storage</span>
+          <span class="arch-infra-chip">Cloud Functions</span>
+          <span class="arch-infra-chip">APIs</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Before / After -->
+  <div class="section">
+    <div class="sh"><span class="sn">0</span>Strategic Rationale — Before vs After</div>
+    <div class="ba-grid">
+      <div class="ba-card before">
+        <div class="ba-header">Before — Fragmented Modules</div>
+        <div class="ba-body">
+          <div class="ba-item"><span class="dot"></span>YohPal Live (own auth, own wallet, own notifications)</div>
+          <div class="ba-item"><span class="dot"></span>YohPal Hustle (own auth, own wallet, own AI)</div>
+          <div class="ba-item"><span class="dot"></span>YohPal Jobs (own auth, own search)</div>
+          <div class="ba-item"><span class="dot"></span>YohPal Market (own auth, own payments)</div>
+          <div class="ba-item"><span class="dot"></span>YCIOS (own AI, own identity)</div>
+          <div class="ba-item"><span class="dot"></span>Duplicate code across 5+ modules</div>
+          <div class="ba-item"><span class="dot"></span>Inconsistent user experience</div>
+          <div class="ba-item"><span class="dot"></span>Multiple wallets, multiple AI systems</div>
+        </div>
+      </div>
+      <div class="ba-card after">
+        <div class="ba-header">After — Unified Platform</div>
+        <div class="ba-body">
+          <div class="ba-item"><span class="dot"></span>One identity — SSO across all modules</div>
+          <div class="ba-item"><span class="dot"></span>One wallet — single ledger, single reconciliation</div>
+          <div class="ba-item"><span class="dot"></span>One AI gateway — all modules are Brain clients</div>
+          <div class="ba-item"><span class="dot"></span>One notification hub — push, email, SMS, in-app</div>
+          <div class="ba-item"><span class="dot"></span>One search service — creators, jobs, products, streams</div>
+          <div class="ba-item"><span class="dot"></span>One navigation layer — universal deep links</div>
+          <div class="ba-item"><span class="dot"></span>One design system</div>
+          <div class="ba-item"><span class="dot"></span>One analytics layer</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 Platform Services -->
+  <div class="section">
+    <div class="sh"><span class="sn">1</span>Platform Services — Detail</div>
+    <div class="svc-grid">
+
+      <div class="svc-card">
+        <div class="sc-num">Service 1</div>
+        <div class="sc-name">Unified Identity</div>
+        <ul>
+          <li>Single Sign-On (SSO) across all modules</li>
+          <li>Universal Profile — one account, all apps</li>
+          <li>Creator Identity &amp; Business Identity</li>
+          <li>Role-Based Access Control (RBAC)</li>
+          <li>Device Trust &amp; Session Management</li>
+        </ul>
+      </div>
+
+      <div class="svc-card">
+        <div class="sc-num">Service 2</div>
+        <div class="sc-name">Unified Wallet</div>
+        <ul>
+          <li>Single ledger across Live, Hustle, Jobs, Market</li>
+          <li>Live gifts · Hustle earnings · Jobs income</li>
+          <li>Market payments · Creator payouts</li>
+          <li>Single reconciliation surface</li>
+          <li>M-Pesa, card, and transfer support</li>
+        </ul>
+      </div>
+
+      <div class="svc-card">
+        <div class="sc-num">Service 3</div>
+        <div class="sc-name">Notification Hub</div>
+        <ul>
+          <li>Push — FCM / APNS</li>
+          <li>Email — transactional &amp; marketing</li>
+          <li>SMS — critical alerts</li>
+          <li>In-App — activity feed</li>
+          <li>AI summaries — digest &amp; smart batching</li>
+        </ul>
+      </div>
+
+      <div class="svc-card">
+        <div class="sc-num">Service 4</div>
+        <div class="sc-name">Unified Search</div>
+        <ul>
+          <li>Creators</li>
+          <li>Jobs &amp; services</li>
+          <li>Videos &amp; live streams</li>
+          <li>Products &amp; marketplace listings</li>
+          <li>One search index — one query surface</li>
+        </ul>
+      </div>
+
+      <div class="svc-card">
+        <div class="sc-num">Service 5</div>
+        <div class="sc-name">YohPal Brain — AI Gateway</div>
+        <ul>
+          <li>All modules are AI clients, not AI hosts</li>
+          <li>Shared model access, prompt management</li>
+          <li>Unified moderation pipeline</li>
+          <li>AI usage tracked across the ecosystem</li>
+          <li>Single latency and quality SLA</li>
+        </ul>
+      </div>
+
+      <div class="svc-card">
+        <div class="sc-num">Service 6</div>
+        <div class="sc-name">Cross-Module Navigation</div>
+        <ul>
+          <li>Universal deep link scheme</li>
+          <li>In-app routing between all modules</li>
+          <li>Share sheet integration</li>
+        </ul>
+        <div class="sc-sub">Deep link examples</div>
+        <ul class="dl-list">
+          <li>yohpal://live/creator/123</li>
+          <li>yohpal://jobs/job/987</li>
+          <li>yohpal://market/product/44</li>
+          <li>yohpal://wallet</li>
+          <li>yohpal://hustle/provider/22</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Flutter Codebase Structure -->
+  <div class="section">
+    <div class="sh"><span class="sn">2</span>Flutter Platform Layer — Codebase Structure</div>
+
+    <div class="folder-block"><span class="dir">lib/platform/</span>
+├── <span class="dir">identity/</span>        <span class="cmt"># SSO, profiles, RBAC, sessions</span>
+├── <span class="dir">wallet/</span>          <span class="cmt"># unified ledger, transfers, payouts</span>
+├── <span class="dir">notifications/</span>   <span class="cmt"># push, email, SMS, in-app hub</span>
+├── <span class="dir">search/</span>          <span class="cmt"># cross-module search service</span>
+├── <span class="dir">brain/</span>           <span class="cmt"># AI gateway — all modules route here</span>
+├── <span class="dir">routing/</span>         <span class="cmt"># cross-module navigation layer</span>
+├── <span class="dir">analytics/</span>       <span class="cmt"># unified event tracking</span>
+└── <span class="dir">deep_links/</span>      <span class="cmt"># yohpal:// URI scheme handler</span></div>
+
+    <p style="font-size:11.5px;color:var(--ink-3);margin-bottom:.65rem">Platform service contracts — abstract interfaces all modules implement against:</p>
+
+<div class="code-block"><span class="kw">abstract class</span> <span class="cls">YohPalPlatformService</span> {
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; initialize();
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; login();
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; logout();
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; refreshSession();
+}
+
+<span class="kw">class</span> <span class="cls">YohPalIdentity</span> {
+  <span class="kw">final</span> <span class="cls">String</span> uid;
+  <span class="kw">final</span> <span class="cls">String</span> role;          <span class="cmt">// 'viewer' | 'creator' | 'business' | 'admin'</span>
+  <span class="kw">final</span> <span class="cls">String</span> displayName;
+  <span class="kw">final</span> <span class="cls">String</span>? creatorId;
+  <span class="kw">final</span> <span class="cls">bool</span> verified;
+
+  <span class="kw">const</span> <span class="cls">YohPalIdentity</span>({
+    required <span class="kw">this</span>.uid,
+    required <span class="kw">this</span>.role,
+    required <span class="kw">this</span>.displayName,
+    <span class="kw">this</span>.creatorId,
+    <span class="kw">this</span>.verified = <span class="kw">false</span>,
+  });
+}
+
+<span class="kw">abstract class</span> <span class="cls">YohPalWalletService</span> {
+  <span class="cls">Future</span>&lt;<span class="kw">double</span>&gt; getBalance();
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; transfer({required <span class="cls">String</span> toUid, required <span class="kw">double</span> amount});
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; withdraw({required <span class="kw">double</span> amount});
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; deposit({required <span class="kw">double</span> amount});
+}
+
+<span class="kw">abstract class</span> <span class="cls">NotificationHub</span> {
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; push({required <span class="cls">String</span> userId, required <span class="cls">String</span> title, required <span class="cls">String</span> body});
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; email({required <span class="cls">String</span> to, required <span class="cls">String</span> templateId});
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; sms({required <span class="cls">String</span> phone, required <span class="cls">String</span> message});
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; inApp({required <span class="cls">String</span> userId, required <span class="cls">Map</span>&lt;<span class="cls">String</span>, <span class="kw">dynamic</span>&gt; payload});
+}
+
+<span class="kw">abstract class</span> <span class="cls">YohPalBrainGateway</span> {
+  <span class="cmt">// Every module calls this — never calls AI providers directly</span>
+  <span class="cls">Future</span>&lt;<span class="kw">dynamic</span>&gt; execute({required <span class="cls">String</span> task, required <span class="cls">Map</span>&lt;<span class="cls">String</span>, <span class="kw">dynamic</span>&gt; params});
+}</div>
+  </div>
+
+  <!-- Convergence Validation -->
+  <div class="section">
+    <div class="sh"><span class="sn">3</span>Convergence Validation Checklist</div>
+    <table class="ev">
+      <thead><tr><th>Platform Service</th><th>Requirement</th><th class="center">Target</th></tr></thead>
+      <tbody>
+        <tr><td>Identity</td><td>All modules authenticate via YohPalIdentity — no module-local auth</td><td class="center"><span class="chip gold">Shared</span></td></tr>
+        <tr><td>Wallet</td><td>Single ledger across Live, Hustle, Jobs, Market — no module wallets</td><td class="center"><span class="chip gold">Shared</span></td></tr>
+        <tr><td>Notifications</td><td>All push/email/SMS routed through NotificationHub</td><td class="center"><span class="chip gold">Shared</span></td></tr>
+        <tr><td>Search</td><td>Unified search index — creators, jobs, products, videos</td><td class="center"><span class="chip gold">Shared</span></td></tr>
+        <tr><td>AI (Brain)</td><td>All AI calls via YohPalBrainGateway — no direct provider calls in modules</td><td class="center"><span class="chip gold">Shared</span></td></tr>
+        <tr><td>Design System</td><td>Gold/black brand tokens applied across all module UIs</td><td class="center"><span class="chip gold">Shared</span></td></tr>
+        <tr><td>Analytics</td><td>Unified event schema — one tracking layer</td><td class="center"><span class="chip gold">Shared</span></td></tr>
+        <tr><td>Routing</td><td>Cross-module navigation via platform routing layer</td><td class="center"><span class="chip gold">Shared</span></td></tr>
+        <tr><td>Deep Links</td><td>yohpal:// scheme resolves correctly across all modules</td><td class="center"><span class="chip gold">Working</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Strategic Recommendation -->
+  <div class="rec-box">
+    <h3>Strategic Recommendation</h3>
+    <p>Phase 12 is elevated to an <strong>enterprise architecture programme</strong>. Its deliverable is not a feature — it is the architectural foundation on which every current and future YohPal application runs. This eliminates duplication, reduces maintenance cost across the portfolio, and delivers a consistent user experience. Once the platform layer exists, adding a new YohPal module becomes a matter of consuming shared services rather than rebuilding core infrastructure.</p>
+  </div>
+
+  <!-- Phase 13 Next Smart Move -->
+  <div class="next-phase">
+    <div class="np-eyebrow">Next Smart Move</div>
+    <h2>YohPal Platform Phase 13 — Shared Platform Foundation</h2>
+
+    <div class="np-scope-grid">
+      <div class="np-scope-item">Create the <strong>lib/platform/</strong> layer with all 8 services</div>
+      <div class="np-scope-item">Refactor Live, Jobs, Hustle, Market, YCIOS to consume shared services</div>
+      <div class="np-scope-item">Produce Platform Architecture Blueprint &amp; Service Contract Specs</div>
+      <div class="np-scope-item">Produce Integration Guide and Ecosystem Governance Manual</div>
+      <div class="np-scope-item">Validate all modules use the common platform layer end-to-end</div>
+      <div class="np-scope-item">Remove all duplicate identity, wallet, and AI implementations</div>
+    </div>
+
+    <div class="success-box">
+      <h3>Success Criteria</h3>
+      <ul>
+        <li>No duplicate core services across any module</li>
+        <li>One shared identity — SSO verified across all apps</li>
+        <li>One shared wallet — single ledger, single reconciliation</li>
+        <li>One shared AI gateway — YohPalBrainGateway used everywhere</li>
+        <li>One shared design system — gold/black tokens applied universally</li>
+        <li>YohPal operates as a single unified platform, not a collection of apps</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="footer-rule">
+
+</div>

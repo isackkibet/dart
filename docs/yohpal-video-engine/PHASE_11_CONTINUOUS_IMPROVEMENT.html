@@ -1,0 +1,862 @@
+<title>YohPal Live — Phase 11: Post-Launch Continuous Improvement Program</title>
+<style>
+  :root {
+    --gold:      #c9a227;
+    --gold-2:    #a88420;
+    --gold-text: #7a5e0f;
+    --ink:       #0d0f0e;
+    --ink-2:     #3a3d3b;
+    --ink-3:     #6b706d;
+    --paper:     #f5f4ef;
+    --paper-2:   #eceae3;
+    --paper-3:   #dedad0;
+    --pass:      #1b5e20;
+    --pass-bg:   #e8f5e9;
+    --pend:      #78350f;
+    --pend-bg:   #fef3c7;
+    --info:      #0d47a1;
+    --info-bg:   #e8eef7;
+    --mono:      'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+    --radius:    2px;
+    --doc-max:   860px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --gold:      #d4ac30;
+      --gold-2:    #b8921e;
+      --gold-text: #d4ac30;
+      --ink:       #eceae3;
+      --ink-2:     #c4c1b8;
+      --ink-3:     #8a8780;
+      --paper:     #111310;
+      --paper-2:   #1c1f1c;
+      --paper-3:   #272b27;
+      --pass:      #4caf50;
+      --pass-bg:   #1b2e1c;
+      --pend:      #fbbf24;
+      --pend-bg:   #1f1600;
+      --info:      #90caf9;
+      --info-bg:   #0d1e33;
+    }
+  }
+  :root[data-theme="light"] {
+    --gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;
+    --ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;
+    --paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;
+    --pass:#1b5e20;--pass-bg:#e8f5e9;
+    --pend:#78350f;--pend-bg:#fef3c7;
+    --info:#0d47a1;--info-bg:#e8eef7;
+  }
+  :root[data-theme="dark"] {
+    --gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;
+    --ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;
+    --paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;
+    --pass:#4caf50;--pass-bg:#1b2e1c;
+    --pend:#fbbf24;--pend-bg:#1f1600;
+    --info:#90caf9;--info-bg:#0d1e33;
+  }
+
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.65;
+    background: var(--paper);
+    color: var(--ink);
+    padding-bottom: 5rem;
+  }
+
+  /* ── Print bar ── */
+  .print-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--paper-2);
+    border-bottom: 1px solid var(--paper-3);
+    padding: .45rem 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
+    font-size: 11px; color: var(--ink-3);
+  }
+  .print-bar .brand { font-weight: 700; color: var(--gold-text); letter-spacing: .06em; font-size: 12px; }
+  .print-bar .spacer { flex: 1; }
+  .print-bar .badge {
+    font-weight: 700; font-size: 10px; letter-spacing: .08em;
+    padding: .2rem .65rem; border-radius: var(--radius);
+    background: var(--info-bg); color: var(--info);
+    border: 1px solid var(--info);
+    text-transform: uppercase;
+  }
+  .dl-btn {
+    background: var(--gold); color: #fff; border: none;
+    padding: .3rem 1rem; border-radius: var(--radius);
+    font-size: 11px; font-weight: 700; letter-spacing: .06em;
+    cursor: pointer; text-transform: uppercase;
+  }
+  .dl-btn:hover { background: var(--gold-2); }
+
+  /* ── Document ── */
+  .doc { max-width: var(--doc-max); margin: 0 auto; padding: 2.5rem 1.5rem 0; }
+
+  /* ── Masthead ── */
+  .masthead {
+    border-top: 3px solid var(--gold);
+    border-bottom: 3px solid var(--gold);
+    padding: 1.1rem 0 1rem;
+    margin-bottom: 1.75rem;
+    position: relative;
+  }
+  .masthead::after {
+    content: ''; display: block; height: 1px;
+    background: var(--gold);
+    position: absolute; bottom: 5px; left: 0; right: 0; opacity: .35;
+  }
+  .masthead .eyebrow {
+    font-size: 9.5px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--gold-text); margin-bottom: .3rem;
+  }
+  .masthead h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.6rem; font-weight: 700; color: var(--ink);
+    line-height: 1.15; margin-bottom: .65rem; text-wrap: balance;
+  }
+  .meta-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: .25rem .75rem; font-size: 11.5px; color: var(--ink-3);
+  }
+  .meta-grid .m { display: flex; gap: .3rem; }
+  .meta-grid strong { color: var(--ink-2); }
+
+  /* ── Section headers ── */
+  .section { margin-bottom: 1.75rem; }
+  .sh {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: .95rem; font-weight: 700; color: var(--ink);
+    padding-bottom: .35rem;
+    border-bottom: 1px solid var(--gold);
+    margin-bottom: .85rem;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .sh .sn {
+    background: var(--gold); color: #fff;
+    font-size: 10px; font-weight: 700;
+    width: 18px; height: 18px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-family: system-ui, sans-serif;
+  }
+
+  /* ── Tables ── */
+  .ev { width: 100%; border-collapse: collapse; margin-bottom: .75rem; }
+  .ev th {
+    background: var(--paper-2);
+    font-size: 9px; font-weight: 700; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--ink-3);
+    padding: .4rem .75rem; text-align: left;
+    border: 1px solid var(--paper-3);
+  }
+  .ev td {
+    padding: .5rem .75rem; border: 1px solid var(--paper-3);
+    vertical-align: top; font-size: 12.5px; color: var(--ink-2);
+  }
+  .ev td:first-child { color: var(--ink); font-weight: 500; background: var(--paper-2); }
+  .ev td.mono { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .ev td.center { text-align: center; }
+  .ev td.num { font-variant-numeric: tabular-nums; font-family: var(--mono); font-size: 12px; }
+
+  /* ── Chips ── */
+  .chip {
+    display: inline-flex; align-items: center;
+    padding: .15rem .5rem; border-radius: var(--radius);
+    font-size: 9.5px; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase;
+  }
+  .chip.pass { background: var(--pass-bg); color: var(--pass); border: 1px solid var(--pass); }
+  .chip.pend { background: var(--pend-bg); color: var(--pend); border: 1px solid var(--pend); }
+  .chip.info { background: var(--info-bg); color: var(--info); border: 1px solid var(--info); }
+  .chip.gold { background: rgba(201,162,39,.12); color: var(--gold-text); border: 1px solid var(--gold); }
+
+  /* ── Objectives list ── */
+  .obj-list { list-style: none; padding: 0; }
+  .obj-list li {
+    display: flex; gap: .75rem; align-items: flex-start;
+    padding: .45rem 0; border-bottom: 1px solid var(--paper-3);
+    font-size: 13px; color: var(--ink-2);
+  }
+  .obj-list li:last-child { border-bottom: none; }
+  .obj-list .on {
+    flex-shrink: 0; width: 22px; height: 22px;
+    background: var(--paper-2); border: 1px solid var(--paper-3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: var(--gold-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Pipeline flow ── */
+  .pipeline { padding: .25rem 0; margin-bottom: .75rem; }
+  .pipeline-step {
+    display: flex; align-items: flex-start; gap: .75rem;
+    position: relative; padding-bottom: .1rem;
+  }
+  .pipeline-step + .pipeline-step { margin-top: 0; }
+  .pipeline-col { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+  .pipeline-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--paper-2); border: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: var(--gold-text);
+    font-variant-numeric: tabular-nums; flex-shrink: 0;
+  }
+  .pipeline-line {
+    width: 2px; flex: 1; min-height: 18px;
+    background: linear-gradient(to bottom, var(--gold) 0%, var(--paper-3) 100%);
+    margin: 2px 0;
+  }
+  .pipeline-step:last-child .pipeline-line { display: none; }
+  .pipeline-body { padding: .35rem 0 .6rem; }
+  .pipeline-body strong { color: var(--ink); font-size: 13px; display: block; }
+  .pipeline-body span { font-size: 11.5px; color: var(--ink-3); }
+
+  /* ── Two-column pipeline layout ── */
+  .pipeline-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: .75rem; }
+
+  /* ── Flag chips grid ── */
+  .flag-grid { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .75rem; }
+  .flag-chip {
+    font-family: var(--mono); font-size: 11px;
+    background: var(--paper-2); border: 1px solid var(--paper-3);
+    border-radius: var(--radius);
+    padding: .2rem .6rem; color: var(--ink-2);
+  }
+  .flag-chip.support { background: var(--info-bg); color: var(--info); border-color: var(--info); }
+
+  /* ── Health report grid ── */
+  .health-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .65rem; margin-bottom: .75rem; }
+  .health-card {
+    border: 1px solid var(--paper-3); border-radius: var(--radius);
+    padding: .65rem .85rem; background: var(--paper-2);
+  }
+  .health-card .hc-title {
+    font-size: 11px; font-weight: 700; color: var(--gold-text);
+    letter-spacing: .05em; text-transform: uppercase;
+    margin-bottom: .3rem; border-bottom: 1px solid var(--paper-3); padding-bottom: .25rem;
+  }
+  .health-card ul { list-style: none; padding: 0; }
+  .health-card ul li {
+    font-size: 11.5px; color: var(--ink-2);
+    padding: .1rem 0;
+    display: flex; align-items: center; gap: .4rem;
+  }
+  .health-card ul li::before { content: '·'; color: var(--gold); font-weight: 700; }
+
+  /* ── KPI pass targets ── */
+  .kpi-pass { color: var(--pass); font-weight: 700; font-family: var(--mono); font-size: 12px; }
+
+  /* ── Severity strip ── */
+  .sev-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--paper-3); border-radius: var(--radius); overflow: hidden; margin-bottom: .75rem; }
+  .sev-cell { padding: .65rem .75rem; border-right: 1px solid var(--paper-3); }
+  .sev-cell:last-child { border-right: none; }
+  .sev-cell .sv-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: .2rem; }
+  .sev-cell .sv-name  { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: .15rem; }
+  .sev-cell .sv-desc  { font-size: 11px; color: var(--ink-3); }
+  .sev-cell .sv-resp  { font-size: 11px; font-weight: 700; margin-top: .25rem; }
+  .sev-cell.p0 { background: var(--fail-bg, #fce4e4); }
+  .sev-cell.p0 .sv-label, .sev-cell.p0 .sv-resp { color: #b71c1c; }
+  .sev-cell.p1 { background: var(--pend-bg); }
+  .sev-cell.p1 .sv-label, .sev-cell.p1 .sv-resp { color: var(--pend); }
+  .sev-cell.p2 { background: var(--info-bg); }
+  .sev-cell.p2 .sv-label, .sev-cell.p2 .sv-resp { color: var(--info); }
+  .sev-cell.p3 { background: var(--paper-2); }
+  .sev-cell.p3 .sv-label, .sev-cell.p3 .sv-resp { color: var(--ink-3); }
+
+  /* ── Phase 12 teaser ── */
+  .next-phase {
+    border: 2px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    background: rgba(201,162,39,.04);
+  }
+  .next-phase .np-eyebrow {
+    font-size: 9px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--gold-text); margin-bottom: .3rem;
+  }
+  .next-phase h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.1rem; font-weight: 700; color: var(--ink);
+    margin-bottom: .75rem; text-wrap: balance;
+  }
+  .next-phase .np-scope { font-size: 12.5px; font-weight: 600; color: var(--ink-3); margin-bottom: .35rem; text-transform: uppercase; letter-spacing: .06em; }
+  .ecosystem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; margin-bottom: .85rem; }
+  .eco-chip {
+    background: var(--paper-2); border: 1px solid var(--paper-3);
+    border-radius: var(--radius); padding: .35rem .6rem;
+    font-size: 12px; font-weight: 600; color: var(--ink);
+    display: flex; align-items: center; gap: .4rem;
+  }
+  .eco-chip::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+  .integration-list { list-style: none; padding: 0; margin-bottom: .75rem; }
+  .integration-list li {
+    font-size: 12.5px; color: var(--ink-2);
+    padding: .3rem 0; border-bottom: 1px solid var(--paper-3);
+    display: flex; gap: .6rem;
+  }
+  .integration-list li:last-child { border-bottom: none; }
+  .integration-list li::before { content: '→'; color: var(--gold); font-weight: 700; flex-shrink: 0; }
+  .success-box {
+    background: var(--pass-bg); border: 1px solid var(--pass);
+    border-left: 4px solid var(--pass);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: .75rem 1rem; margin-top: .75rem;
+  }
+  .success-box h3 { font-size: 10px; font-weight: 700; color: var(--pass); letter-spacing: .07em; text-transform: uppercase; margin-bottom: .35rem; }
+  .success-box ul { list-style: none; padding: 0; }
+  .success-box ul li { font-size: 12px; color: var(--ink-2); padding: .15rem 0; display: flex; gap: .5rem; }
+  .success-box ul li::before { content: '✓'; color: var(--pass); font-weight: 700; }
+
+  /* ── Recommendation box ── */
+  .rec-box {
+    background: var(--info-bg); border: 1px solid var(--info);
+    border-left: 4px solid var(--info);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: .85rem 1rem; margin-bottom: 1.5rem;
+  }
+  .rec-box h3 { font-size: 11px; font-weight: 700; color: var(--info); letter-spacing: .05em; text-transform: uppercase; margin-bottom: .4rem; }
+  .rec-box p { font-size: 12.5px; color: var(--ink-2); line-height: 1.65; }
+
+  /* ── Utility ── */
+  .sub-label { font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-3); margin: .75rem 0 .35rem; }
+  .note { font-size: 11.5px; color: var(--ink-3); margin-top: .35rem; }
+  .footer-rule { border: none; border-top: 2px solid var(--gold); margin: 2rem 0 0; opacity: .5; }
+
+  @media (max-width: 640px) {
+    .meta-grid { grid-template-columns: 1fr 1fr; }
+    .pipeline-2col { grid-template-columns: 1fr; }
+    .health-grid { grid-template-columns: 1fr 1fr; }
+    .sev-strip { grid-template-columns: 1fr 1fr; }
+    .ecosystem-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 420px) {
+    .health-grid { grid-template-columns: 1fr; }
+    .ecosystem-grid { grid-template-columns: 1fr; }
+    .sev-strip { grid-template-columns: 1fr; }
+    .sev-cell { border-right: none; border-bottom: 1px solid var(--paper-3); }
+    .sev-cell:last-child { border-bottom: none; }
+  }
+  @media print {
+    .print-bar { display: none; }
+    body { font-size: 12px; padding-bottom: 0; }
+    .doc { padding: 1rem .75rem 0; }
+    .masthead h1 { font-size: 1.3rem; }
+    .section { break-inside: avoid; }
+    @page { margin: 1.5cm; }
+  }
+</style>
+
+<!-- Print bar -->
+<div class="print-bar">
+  <span class="brand">YohPal Live</span>
+  <span class="badge">Phase 11 — Post-Launch Operations</span>
+  <span class="spacer"></span>
+  <button class="dl-btn" onclick="window.print()">Download PDF</button>
+</div>
+
+<div class="doc">
+
+  <!-- Masthead -->
+  <div class="masthead">
+    <div class="eyebrow">Programme Governance Document — Production Operations &amp; Continuous Delivery</div>
+    <h1>YohPal Live Phase 11 — Post-Launch Continuous Improvement Program</h1>
+    <div class="meta-grid">
+      <div class="m"><strong>Version:</strong> 1.0</div>
+      <div class="m"><strong>Date:</strong> 2026-07-08</div>
+      <div class="m"><strong>Status:</strong> Permanent Operating Model</div>
+      <div class="m"><strong>Applies To:</strong> YohPal Live + YCIOS</div>
+      <div class="m"><strong>Supersedes:</strong> Phase 1–10 delivery cadence</div>
+      <div class="m"><strong>Next Phase:</strong> Phase 12 — Ecosystem Convergence</div>
+    </div>
+  </div>
+
+  <!-- Scope note -->
+  <div class="section">
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.5rem">This phase establishes the governance, engineering practices, and operational cadence for YohPal Live after production launch. It assumes the platform has successfully completed its controlled rollout and entered normal production operations.</p>
+    <div class="flag-grid">
+      <span class="flag-chip">YohPal Live</span>
+      <span class="flag-chip">YCIOS</span>
+      <span class="flag-chip">Live Streaming</span>
+      <span class="flag-chip">Multistreaming</span>
+      <span class="flag-chip">Wallet</span>
+      <span class="flag-chip">Rewards</span>
+      <span class="flag-chip">Chat</span>
+      <span class="flag-chip">Creator Marketplace</span>
+      <span class="flag-chip">Future YohPal modules</span>
+    </div>
+  </div>
+
+  <!-- 1. Programme Objectives -->
+  <div class="section">
+    <div class="sh"><span class="sn">1</span>Programme Objectives</div>
+    <ul class="obj-list">
+      <li><span class="on">1</span>Maintain production stability</li>
+      <li><span class="on">2</span>Deliver predictable feature releases</li>
+      <li><span class="on">3</span>Improve user experience through measured experimentation</li>
+      <li><span class="on">4</span>Ensure operational excellence</li>
+      <li><span class="on">5</span>Strengthen platform governance</li>
+    </ul>
+  </div>
+
+  <!-- 2. Quarterly Release Cadence -->
+  <div class="section">
+    <div class="sh"><span class="sn">2</span>Quarterly Release Cadence</div>
+    <table class="ev" style="margin-bottom:.75rem">
+      <thead><tr><th>Quarter</th><th>Release</th><th>Focus</th></tr></thead>
+      <tbody>
+        <tr><td>Q1</td><td class="mono">v1.x</td><td>Stability &amp; Performance</td></tr>
+        <tr><td>Q2</td><td class="mono">v2.x</td><td>Creator Growth &amp; Monetisation</td></tr>
+        <tr><td>Q3</td><td class="mono">v3.x</td><td>AI Expansion &amp; Automation</td></tr>
+        <tr><td>Q4</td><td class="mono">v4.x</td><td>Ecosystem Integration &amp; Scale</td></tr>
+      </tbody>
+    </table>
+    <p class="sub-label">Each quarterly release must include</p>
+    <div class="flag-grid">
+      <span class="flag-chip">Architecture review</span>
+      <span class="flag-chip">Security review</span>
+      <span class="flag-chip">Performance benchmarks</span>
+      <span class="flag-chip">Documentation updates</span>
+      <span class="flag-chip">Executive approval</span>
+    </div>
+  </div>
+
+  <!-- 3. Continuous Delivery Workflow -->
+  <div class="section">
+    <div class="sh"><span class="sn">3</span>Continuous Delivery Workflow</div>
+    <div class="pipeline-2col">
+      <div class="pipeline">
+        <div class="pipeline-step">
+          <div class="pipeline-col"><div class="pipeline-dot">1</div><div class="pipeline-line"></div></div>
+          <div class="pipeline-body"><strong>Backlog</strong><span>Prioritised work items</span></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-col"><div class="pipeline-dot">2</div><div class="pipeline-line"></div></div>
+          <div class="pipeline-body"><strong>Design Review</strong><span>UX &amp; product sign-off</span></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-col"><div class="pipeline-dot">3</div><div class="pipeline-line"></div></div>
+          <div class="pipeline-body"><strong>Architecture Review</strong><span>Technical design approved</span></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-col"><div class="pipeline-dot">4</div><div class="pipeline-line"></div></div>
+          <div class="pipeline-body"><strong>Development</strong><span>Feature implementation</span></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-col"><div class="pipeline-dot">5</div><div class="pipeline-line"></div></div>
+          <div class="pipeline-body"><strong>Code Review</strong><span>Peer review + security check</span></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-col"><div class="pipeline-dot">6</div></div>
+          <div class="pipeline-body"><strong>Automated Testing</strong><span>Unit · integration · E2E</span></div>
+        </div>
+      </div>
+      <div class="pipeline">
+        <div class="pipeline-step">
+          <div class="pipeline-col"><div class="pipeline-dot">7</div><div class="pipeline-line"></div></div>
+          <div class="pipeline-body"><strong>Staging</strong><span>Pre-production validation</span></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-col"><div class="pipeline-dot">8</div><div class="pipeline-line"></div></div>
+          <div class="pipeline-body"><strong>Controlled Rollout</strong><span>Feature flag gated %</span></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-col"><div class="pipeline-dot">9</div><div class="pipeline-line"></div></div>
+          <div class="pipeline-body"><strong>Production</strong><span>Full release</span></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-col"><div class="pipeline-dot">10</div><div class="pipeline-line"></div></div>
+          <div class="pipeline-body"><strong>Monitoring</strong><span>Dashboards · alerts · on-call</span></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-col"><div class="pipeline-dot">11</div></div>
+          <div class="pipeline-body"><strong>Retrospective</strong><span>Learning captured for next cycle</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Production Backlog Structure -->
+  <div class="section">
+    <div class="sh"><span class="sn">4</span>Production Backlog Structure</div>
+    <table class="ev">
+      <thead><tr><th>Priority</th><th>Categories</th><th>Examples</th><th>Target</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="chip" style="background:var(--fail-bg,#fce4e4);color:#b71c1c;border-color:#b71c1c">Critical</span></td>
+          <td>Security · Stability · Production incidents</td>
+          <td style="color:var(--ink-3);font-size:12px">Auth vulnerabilities, data loss, service outage</td>
+          <td class="num" style="color:#b71c1c">48 hours</td>
+        </tr>
+        <tr>
+          <td><span class="chip pend">High</span></td>
+          <td>Performance · Reliability · Major UX issues</td>
+          <td style="color:var(--ink-3);font-size:12px">Feed latency regressions, payment failures, crash spikes</td>
+          <td class="num" style="color:var(--pend)">1 sprint</td>
+        </tr>
+        <tr>
+          <td><span class="chip info">Medium</span></td>
+          <td>Feature improvements · Creator tools · AI enhancements</td>
+          <td style="color:var(--ink-3);font-size:12px">Engagement rail improvements, AI accuracy, new creator flows</td>
+          <td class="num" style="color:var(--info)">Quarterly</td>
+        </tr>
+        <tr>
+          <td><span class="chip" style="background:var(--paper-2);color:var(--ink-3);border-color:var(--paper-3)">Low</span></td>
+          <td>UI polish · Animation · Cosmetic improvements</td>
+          <td style="color:var(--ink-3);font-size:12px">Micro-interactions, copy tweaks, icon refinements</td>
+          <td class="num" style="color:var(--ink-3)">When capacity allows</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 5. Feature Flag Framework -->
+  <div class="section">
+    <div class="sh"><span class="sn">5</span>Feature Flag Framework</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.6rem">All new production features launch behind feature flags.</p>
+    <p class="sub-label">Example flags</p>
+    <div class="flag-grid">
+      <span class="flag-chip">enableAIStudio</span>
+      <span class="flag-chip">enableMultistreaming</span>
+      <span class="flag-chip">enableCreatorMarketplace</span>
+      <span class="flag-chip">enableWalletRewards</span>
+      <span class="flag-chip">enableExperimentalFeedRanking</span>
+      <span class="flag-chip">enableLiveCommerce</span>
+      <span class="flag-chip">enableContextActions</span>
+      <span class="flag-chip">enablePredictiveExperience</span>
+    </div>
+    <p class="sub-label">Flag capabilities</p>
+    <div class="flag-grid">
+      <span class="flag-chip support">Enable / Disable</span>
+      <span class="flag-chip support">Percentage rollout</span>
+      <span class="flag-chip support">Region targeting</span>
+      <span class="flag-chip support">Creator cohort targeting</span>
+      <span class="flag-chip support">Emergency kill switch</span>
+    </div>
+  </div>
+
+  <!-- 6. A/B Testing Framework -->
+  <div class="section">
+    <div class="sh"><span class="sn">6</span>A/B Testing Framework</div>
+    <table class="ev" style="margin-bottom:.75rem">
+      <thead><tr><th>Area</th><th>Experiments</th></tr></thead>
+      <tbody>
+        <tr><td>Feed</td><td>Ranking algorithm · Video preload strategy · Engagement rail</td></tr>
+        <tr><td>Onboarding</td><td>Welcome flow · Registration · Creator onboarding</td></tr>
+        <tr><td>Creator Tools</td><td>AI suggestions · Upload workflow · Thumbnail generation · Publishing guidance</td></tr>
+      </tbody>
+    </table>
+    <p class="sub-label">Each experiment must define</p>
+    <div class="flag-grid">
+      <span class="flag-chip">Hypothesis</span>
+      <span class="flag-chip">KPI</span>
+      <span class="flag-chip">Sample size</span>
+      <span class="flag-chip">Duration</span>
+      <span class="flag-chip">Success criteria</span>
+    </div>
+  </div>
+
+  <!-- 7. Monthly Executive Health Report -->
+  <div class="section">
+    <div class="sh"><span class="sn">7</span>Monthly Executive Health Report</div>
+    <div class="health-grid">
+      <div class="health-card">
+        <div class="hc-title">Reliability</div>
+        <ul>
+          <li>Uptime</li>
+          <li>Crash-free sessions</li>
+          <li>API availability</li>
+        </ul>
+      </div>
+      <div class="health-card">
+        <div class="hc-title">Performance</div>
+        <ul>
+          <li>Startup time</li>
+          <li>Feed latency</li>
+          <li>Live streaming latency</li>
+          <li>AI response time</li>
+        </ul>
+      </div>
+      <div class="health-card">
+        <div class="hc-title">Growth</div>
+        <ul>
+          <li>New users</li>
+          <li>Active users</li>
+          <li>Creators</li>
+          <li>Watch time</li>
+          <li>Retention</li>
+        </ul>
+      </div>
+      <div class="health-card">
+        <div class="hc-title">Monetisation</div>
+        <ul>
+          <li>Creator earnings</li>
+          <li>Gift revenue</li>
+          <li>Advertising revenue</li>
+          <li>Wallet activity</li>
+          <li>Marketplace revenue</li>
+        </ul>
+      </div>
+      <div class="health-card">
+        <div class="hc-title">AI Quality</div>
+        <ul>
+          <li>Task success rate</li>
+          <li>AI latency</li>
+          <li>Moderation accuracy</li>
+          <li>Usage trends</li>
+        </ul>
+      </div>
+      <div class="health-card">
+        <div class="hc-title">User Satisfaction</div>
+        <ul>
+          <li>App ratings</li>
+          <li>Support tickets</li>
+          <li>NPS</li>
+          <li>Feature adoption</li>
+          <li>Community sentiment</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Engineering Governance -->
+  <div class="section">
+    <div class="sh"><span class="sn">8</span>Engineering Governance</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.6rem">Monthly engineering review covers:</p>
+    <div class="flag-grid">
+      <span class="flag-chip">Technical debt</span>
+      <span class="flag-chip">Security vulnerabilities</span>
+      <span class="flag-chip">Dependency updates</span>
+      <span class="flag-chip">Architecture decisions</span>
+      <span class="flag-chip">Platform scalability</span>
+      <span class="flag-chip">Cloud costs</span>
+    </div>
+  </div>
+
+  <!-- 9. Operational KPIs -->
+  <div class="section">
+    <div class="sh"><span class="sn">9</span>Operational KPIs</div>
+    <table class="ev">
+      <thead><tr><th>KPI</th><th class="center">Target</th></tr></thead>
+      <tbody>
+        <tr><td>Platform availability</td><td class="center"><span class="kpi-pass">≥ 99.9%</span></td></tr>
+        <tr><td>Crash-free sessions</td><td class="center"><span class="kpi-pass">≥ 99.5%</span></td></tr>
+        <tr><td>Feed first frame</td><td class="center"><span class="kpi-pass">≤ 500 ms</span></td></tr>
+        <tr><td>Live join time</td><td class="center"><span class="kpi-pass">≤ 3 s</span></td></tr>
+        <tr><td>AI median response</td><td class="center"><span class="kpi-pass">≤ 2 s</span></td></tr>
+        <tr><td>FFmpeg success rate</td><td class="center"><span class="kpi-pass">≥ 99%</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 10. Incident Management -->
+  <div class="section">
+    <div class="sh"><span class="sn">10</span>Incident Management</div>
+    <div class="sev-strip">
+      <div class="sev-cell p0">
+        <div class="sv-label">P0</div>
+        <div class="sv-name">Critical Outage</div>
+        <div class="sv-desc">Platform unavailable</div>
+        <div class="sv-resp">Immediate response</div>
+      </div>
+      <div class="sev-cell p1">
+        <div class="sv-label">P1</div>
+        <div class="sv-name">Major Degradation</div>
+        <div class="sv-desc">Core feature broken</div>
+        <div class="sv-resp">Response: 15 min</div>
+      </div>
+      <div class="sev-cell p2">
+        <div class="sv-label">P2</div>
+        <div class="sv-name">Functional Issue</div>
+        <div class="sv-desc">Feature impaired</div>
+        <div class="sv-resp">Response: 4 hours</div>
+      </div>
+      <div class="sev-cell p3">
+        <div class="sv-label">P3</div>
+        <div class="sv-name">Minor Issue</div>
+        <div class="sv-desc">Low-impact defect</div>
+        <div class="sv-resp">Next planned release</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. Technical Debt Programme -->
+  <div class="section">
+    <div class="sh"><span class="sn">11</span>Technical Debt Programme</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.6rem">Every quarter:</p>
+    <div class="flag-grid">
+      <span class="flag-chip">Review deprecated APIs</span>
+      <span class="flag-chip">Remove unused code</span>
+      <span class="flag-chip">Upgrade dependencies</span>
+      <span class="flag-chip">Refactor critical modules</span>
+      <span class="flag-chip">Improve test coverage</span>
+    </div>
+  </div>
+
+  <!-- 12. Documentation Governance -->
+  <div class="section">
+    <div class="sh"><span class="sn">12</span>Documentation Governance</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.6rem">Every release must update:</p>
+    <div class="flag-grid">
+      <span class="flag-chip">Master Blueprint</span>
+      <span class="flag-chip">API documentation</span>
+      <span class="flag-chip">Deployment Runbook</span>
+      <span class="flag-chip">Environment Variable Matrix</span>
+      <span class="flag-chip">Developer Instructions</span>
+      <span class="flag-chip">User documentation</span>
+      <span class="flag-chip">Release notes</span>
+    </div>
+    <p class="note" style="margin-top:.6rem">No production release should leave documentation behind.</p>
+  </div>
+
+  <!-- 13. Innovation Pipeline -->
+  <div class="section">
+    <div class="sh"><span class="sn">13</span>Innovation Pipeline</div>
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <div class="pipeline-col"><div class="pipeline-dot">1</div><div class="pipeline-line"></div></div>
+        <div class="pipeline-body"><strong>Idea</strong></div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-col"><div class="pipeline-dot">2</div><div class="pipeline-line"></div></div>
+        <div class="pipeline-body"><strong>Architecture Review</strong></div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-col"><div class="pipeline-dot">3</div><div class="pipeline-line"></div></div>
+        <div class="pipeline-body"><strong>Prototype</strong></div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-col"><div class="pipeline-dot">4</div><div class="pipeline-line"></div></div>
+        <div class="pipeline-body"><strong>Feature Flag</strong></div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-col"><div class="pipeline-dot">5</div><div class="pipeline-line"></div></div>
+        <div class="pipeline-body"><strong>Internal Pilot</strong></div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-col"><div class="pipeline-dot">6</div><div class="pipeline-line"></div></div>
+        <div class="pipeline-body"><strong>Controlled Rollout</strong></div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-col"><div class="pipeline-dot">7</div></div>
+        <div class="pipeline-body"><strong>Production</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 14. Executive Governance Dashboard -->
+  <div class="section">
+    <div class="sh"><span class="sn">14</span>Executive Governance Dashboard</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.6rem">Mission Control displays:</p>
+    <div class="health-grid">
+      <div class="health-card">
+        <div class="hc-title">Core Health</div>
+        <ul><li>Reliability</li><li>Performance</li><li>Security</li><li>Active Incidents</li></ul>
+      </div>
+      <div class="health-card">
+        <div class="hc-title">Business</div>
+        <ul><li>Growth</li><li>Monetisation</li><li>AI Health</li><li>Wallet</li></ul>
+      </div>
+      <div class="health-card">
+        <div class="hc-title">Infrastructure</div>
+        <ul><li>Live Streaming</li><li>Multistreaming</li><li>Infrastructure</li><li>Release Status</li></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 15. Quarterly Executive Review -->
+  <div class="section">
+    <div class="sh"><span class="sn">15</span>Quarterly Executive Review</div>
+    <div class="flag-grid">
+      <span class="flag-chip">Review KPIs</span>
+      <span class="flag-chip">Review incidents</span>
+      <span class="flag-chip">Approve architecture changes</span>
+      <span class="flag-chip">Prioritise backlog</span>
+      <span class="flag-chip">Approve roadmap</span>
+      <span class="flag-chip">Review security posture</span>
+      <span class="flag-chip">Approve next quarterly release</span>
+    </div>
+  </div>
+
+  <!-- 16. Success Criteria -->
+  <div class="section">
+    <div class="sh"><span class="sn">16</span>Success Criteria</div>
+    <table class="ev">
+      <thead><tr><th>Criterion</th><th class="center">Status</th></tr></thead>
+      <tbody>
+        <tr><td>Production remains stable</td><td class="center"><span class="chip gold">Ongoing</span></td></tr>
+        <tr><td>Releases are predictable</td><td class="center"><span class="chip gold">Ongoing</span></td></tr>
+        <tr><td>New features introduced safely via feature flags</td><td class="center"><span class="chip gold">Ongoing</span></td></tr>
+        <tr><td>Executive visibility maintained</td><td class="center"><span class="chip gold">Ongoing</span></td></tr>
+        <tr><td>Documentation remains current</td><td class="center"><span class="chip gold">Ongoing</span></td></tr>
+        <tr><td>Technical debt remains under control</td><td class="center"><span class="chip gold">Ongoing</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 17. Outcome -->
+  <div class="section">
+    <div class="sh"><span class="sn">17</span>Outcome</div>
+    <p style="font-size:13px;color:var(--ink-2);line-height:1.75">YohPal Live transitions from a launch programme into a continuously evolving digital platform with disciplined engineering, governed operations, measurable innovation, and long-term sustainability.</p>
+  </div>
+
+  <!-- Revision History -->
+  <div class="section">
+    <div class="sh"><span class="sn">↻</span>Revision History</div>
+    <table class="ev">
+      <thead><tr><th>Version</th><th>Date</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1.0</td><td class="mono">2026-07-08</td><td>Initial Post-Launch Continuous Improvement Programme</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Strategic Recommendation -->
+  <div class="rec-box">
+    <h3>Strategic Recommendation</h3>
+    <p>Phase 11 becomes the <strong>permanent operating model</strong> for YohPal Live. Future work should flow through this governance process rather than adding large, unstructured implementation phases. This makes releases more predictable, reduces operational risk, and simplifies executive oversight.</p>
+  </div>
+
+  <!-- Phase 12 Next Smart Move -->
+  <div class="next-phase">
+    <div class="np-eyebrow">Next Smart Move</div>
+    <h2>YohPal Live Phase 12 — Ecosystem Convergence Program</h2>
+
+    <div class="np-scope">Scope</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.65rem">Integrate YohPal Live with the wider YohPal ecosystem:</p>
+
+    <div class="ecosystem-grid">
+      <div class="eco-chip">YohPal Hustle</div>
+      <div class="eco-chip">YohPal Jobs</div>
+      <div class="eco-chip">YohPal Market</div>
+      <div class="eco-chip">YohPal Wallet</div>
+      <div class="eco-chip">YohPal Brain</div>
+      <div class="eco-chip">YCIOS</div>
+    </div>
+
+    <ul class="integration-list">
+      <li>Establish a Unified Identity, Wallet, Notification, Search, and AI layer</li>
+      <li>Implement cross-module navigation and deep linking</li>
+      <li>Produce an Ecosystem Integration Blueprint and Convergence Validation Report</li>
+      <li>Apply common design system and AI platform across all modules</li>
+    </ul>
+
+    <div class="success-box">
+      <h3>Success Criteria</h3>
+      <ul>
+        <li>Shared identity across all modules</li>
+        <li>Unified wallet and notifications</li>
+        <li>Seamless navigation between YohPal applications</li>
+        <li>Common design system and AI platform</li>
+        <li>YohPal evolves from a collection of apps into a single integrated digital ecosystem</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="footer-rule">
+
+</div>

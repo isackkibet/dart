@@ -1,0 +1,333 @@
+<title>Gap Report V21 — YohPal Live</title>
+<style>
+  :root {
+    --ink:#0C0D10;--ink-2:#4A4D5C;--ink-3:#8A8D9E;
+    --paper:#F4F5F8;--surface:#FFFFFF;--surface-2:#ECEEF4;--border:#D8DAE5;
+    --accent:#B8890A;--accent-bg:#FDF6E3;
+    --pass:#1A6B3E;--pass-bg:#EAF5EE;--pass-stripe:#22A05B;
+    --warn:#B06000;--warn-bg:#FFF4E0;--warn-stripe:#E07A00;
+    --crit:#A8200E;--crit-bg:#FEECEB;--crit-stripe:#D93020;
+    --ops:#1A4F8A;--ops-bg:#EBF2FC;--ops-stripe:#2870C8;
+    --font-mono:ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;
+    --font-sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+    --r:4px;
+  }
+  @media (prefers-color-scheme: dark) { :root {
+    --ink:#E8EAF0;--ink-2:#9DA1B4;--ink-3:#5C6078;
+    --paper:#0C0D10;--surface:#14161F;--surface-2:#1C1F2C;--border:#252838;
+    --accent:#D4A20E;--accent-bg:#1C1700;
+    --pass:#3FCC7A;--pass-bg:#091A10;--pass-stripe:#22A05B;
+    --warn:#F0A030;--warn-bg:#1A1000;--warn-stripe:#E07A00;
+    --crit:#F06050;--crit-bg:#1A0800;--crit-stripe:#D93020;
+    --ops:#5AABF8;--ops-bg:#08101E;--ops-stripe:#2870C8;
+  }}
+  :root[data-theme="light"] {
+    --ink:#0C0D10;--ink-2:#4A4D5C;--ink-3:#8A8D9E;
+    --paper:#F4F5F8;--surface:#FFFFFF;--surface-2:#ECEEF4;--border:#D8DAE5;
+    --accent:#B8890A;--accent-bg:#FDF6E3;
+    --pass:#1A6B3E;--pass-bg:#EAF5EE;--pass-stripe:#22A05B;
+    --warn:#B06000;--warn-bg:#FFF4E0;--warn-stripe:#E07A00;
+    --crit:#A8200E;--crit-bg:#FEECEB;--crit-stripe:#D93020;
+    --ops:#1A4F8A;--ops-bg:#EBF2FC;--ops-stripe:#2870C8;
+  }
+  :root[data-theme="dark"] {
+    --ink:#E8EAF0;--ink-2:#9DA1B4;--ink-3:#5C6078;
+    --paper:#0C0D10;--surface:#14161F;--surface-2:#1C1F2C;--border:#252838;
+    --accent:#D4A20E;--accent-bg:#1C1700;
+    --pass:#3FCC7A;--pass-bg:#091A10;--pass-stripe:#22A05B;
+    --warn:#F0A030;--warn-bg:#1A1000;--warn-stripe:#E07A00;
+    --crit:#F06050;--crit-bg:#1A0800;--crit-stripe:#D93020;
+    --ops:#5AABF8;--ops-bg:#08101E;--ops-stripe:#2870C8;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font-sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6;min-height:100vh}
+  .top-bar{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .top-bar-left{display:flex;align-items:baseline;gap:12px}
+  .brand{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+  .report-id{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--ink);letter-spacing:.04em}
+  .verdict-chip{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:var(--r);background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass-stripe)}
+  .top-bar-right{display:flex;align-items:center;gap:10px}
+  .theme-btn,.dl-btn{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;border:1px solid var(--border);background:var(--surface-2);color:var(--ink-2);padding:5px 12px;border-radius:var(--r);cursor:pointer;text-transform:uppercase;transition:background .15s,color .15s}
+  .theme-btn:hover,.dl-btn:hover{background:var(--border);color:var(--ink)}
+  .dl-btn{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+  .dl-btn:hover{background:var(--accent);color:var(--surface)}
+  .page{max-width:960px;margin:0 auto;padding:40px 24px 80px}
+  .report-header{margin-bottom:36px}
+  .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+  .report-title{font-size:28px;font-weight:800;line-height:1.2;color:var(--ink);text-wrap:balance;margin-bottom:12px}
+  .report-meta{display:flex;flex-wrap:wrap;gap:6px 20px}
+  .meta-item{font-family:var(--font-mono);font-size:11px;color:var(--ink-3)}
+  .meta-item strong{color:var(--ink-2);font-weight:600}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:40px}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px 16px;display:flex;flex-direction:column;gap:6px}
+  .stat-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+  .stat-value{font-size:36px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+  .stat-sub{font-size:11px;color:var(--ink-3);line-height:1.4}
+  .stat-card.crit .stat-value{color:var(--crit)}
+  .stat-card.high .stat-value{color:var(--warn)}
+  .stat-card.done .stat-value{color:var(--pass)}
+  .stat-card.ops .stat-value{color:var(--ops)}
+  .section{margin-bottom:44px}
+  .section-title{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:16px}
+  .build-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .build-row{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--pass-stripe);border-radius:var(--r);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .build-cmd{font-family:var(--font-mono);font-size:12px;color:var(--ink)}
+  .build-result{font-family:var(--font-mono);font-size:11px;color:var(--pass);white-space:nowrap}
+  .gates{display:flex;flex-direction:column;gap:8px}
+  .gate-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--ops-stripe);border-radius:var(--r);padding:12px 16px}
+  .gate-num{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);flex-shrink:0;width:24px}
+  .gate-name{flex:1;font-weight:600;color:var(--ink);font-size:13px}
+  .gate-owner{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);white-space:nowrap}
+  .gate-status{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--ops);white-space:nowrap}
+  .evidence-list{display:flex;flex-direction:column;gap:6px}
+  .evidence-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 16px}
+  .evidence-num{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);flex-shrink:0;width:22px}
+  .evidence-name{flex:1;font-size:13px;color:var(--ink)}
+  .evidence-tag{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);border:1px solid var(--border);padding:2px 7px;border-radius:2px;white-space:nowrap}
+  .signoff-wrap{overflow-x:auto}
+  .signoff-table{width:100%;border-collapse:collapse;font-size:13px}
+  .signoff-table thead th{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--surface-2);white-space:nowrap}
+  .signoff-table tbody tr{border-bottom:1px solid var(--border);background:var(--surface)}
+  .signoff-table tbody tr:last-child{border-bottom:none}
+  .signoff-table tbody td{padding:10px 14px;font-size:13px;color:var(--ink)}
+  .signoff-table .role-cell{font-weight:600}
+  .signoff-table .blank-cell{color:var(--border);font-family:var(--font-mono);font-size:12px}
+  .report-footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .footer-text{font-family:var(--font-mono);font-size:11px;color:var(--ink-3)}
+  @media print{.top-bar{position:relative}.theme-btn,.dl-btn{display:none}body{background:white;color:black}}
+  @media (max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.build-grid{grid-template-columns:1fr}}
+</style>
+
+<div class="top-bar">
+  <div class="top-bar-left">
+    <span class="brand">YohPal Live</span>
+    <span class="report-id">Gap Report V21</span>
+    <span class="verdict-chip">Phase 10 · In Progress</span>
+  </div>
+  <div class="top-bar-right">
+    <button class="theme-btn" onclick="toggleTheme()">Toggle Theme</button>
+    <button class="dl-btn" onclick="window.print()">Download PDF</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="report-header">
+    <p class="eyebrow">Production Readiness Audit</p>
+    <h1 class="report-title">Gap Report V21 — YohPal Live</h1>
+    <div class="report-meta">
+      <span class="meta-item"><strong>Date</strong> 2026-07-03</span>
+      <span class="meta-item"><strong>Branch</strong> flutter_app</span>
+      <span class="meta-item"><strong>Commit</strong> 7c2881c</span>
+      <span class="meta-item"><strong>Phase</strong> 10 · Controlled Production Rollout</span>
+      <span class="meta-item"><strong>Analyst</strong> Claude Code</span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card crit">
+      <span class="stat-label">Critical Open</span>
+      <span class="stat-value">0</span>
+      <span class="stat-sub">No critical blockers</span>
+    </div>
+    <div class="stat-card high">
+      <span class="stat-label">High Open</span>
+      <span class="stat-value">0</span>
+      <span class="stat-sub">No high-severity blockers</span>
+    </div>
+    <div class="stat-card done">
+      <span class="stat-label">Gates Completed</span>
+      <span class="stat-value">5</span>
+      <span class="stat-sub">Of 15 Phase 10 certificate gates</span>
+    </div>
+    <div class="stat-card ops">
+      <span class="stat-label">Gates Remaining</span>
+      <span class="stat-value">10</span>
+      <span class="stat-sub">Phase 10 executive certificate</span>
+    </div>
+  </div>
+
+  <!-- Build evidence -->
+  <div class="section">
+    <h2 class="section-title">Build Certification — Verified 2026-07-03</h2>
+    <div class="build-grid">
+      <div class="build-row">
+        <span class="build-cmd">flutter analyze</span>
+        <span class="build-result">✓ No issues (6.8s)</span>
+      </div>
+      <div class="build-row">
+        <span class="build-cmd">flutter test</span>
+        <span class="build-result">✓ 25 passed, 0 failed</span>
+      </div>
+      <div class="build-row">
+        <span class="build-cmd">npm run build</span>
+        <span class="build-result">✓ TypeScript clean</span>
+      </div>
+      <div class="build-row">
+        <span class="build-cmd">npm test</span>
+        <span class="build-result">✓ 36 passed, 4 suites</span>
+      </div>
+      <div class="build-row">
+        <span class="build-cmd">flutter build appbundle --release</span>
+        <span class="build-result">✓ app-release.aab 65.8MB</span>
+      </div>
+      <div class="build-row">
+        <span class="build-cmd">flutter build web --release</span>
+        <span class="build-result">✓ build/web ready</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 10 gates -->
+  <div class="section">
+    <h2 class="section-title">Phase 10 Executive Certificate — 15 Gates</h2>
+    <div class="gates">
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">G1</span>
+        <span class="gate-name">Firestore indexes deployed</span>
+        <span class="gate-owner">Firebase Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row">
+        <span class="gate-num">G2</span>
+        <span class="gate-name">YCIOS assets query verified in-app</span>
+        <span class="gate-owner">QA Lead</span>
+        <span class="gate-status">PENDING</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--crit-stripe)">
+        <span class="gate-num">G3</span>
+        <span class="gate-name">AI secrets configured — YOHPAL_BRAIN_API_KEY &amp; YOHPAL_BRAIN_API_URL</span>
+        <span class="gate-owner">Backend Lead</span>
+        <span class="gate-status" style="color:var(--crit)">BLOCKED</span>
+      </div>
+      <div class="gate-row">
+        <span class="gate-num">G4</span>
+        <span class="gate-name">Cloud Functions redeployed</span>
+        <span class="gate-owner">DevOps Lead</span>
+        <span class="gate-status">PENDING</span>
+      </div>
+      <div class="gate-row">
+        <span class="gate-num">G5</span>
+        <span class="gate-name">All 5 AI Studio tasks verified in-app — Captions, Hooks, Hashtags, Viral Score, Thumbnail Ideas</span>
+        <span class="gate-owner">QA Lead</span>
+        <span class="gate-status">PENDING</span>
+      </div>
+      <div class="gate-row">
+        <span class="gate-num">G6</span>
+        <span class="gate-name">Android 50-swipe benchmark — no black frames, no OOM, no crash, adaptive switching confirmed</span>
+        <span class="gate-owner">QA Lead</span>
+        <span class="gate-status">PENDING</span>
+      </div>
+      <div class="gate-row">
+        <span class="gate-num">G7</span>
+        <span class="gate-name">iPhone 50-swipe benchmark — no black frames, no crash, adaptive switching confirmed</span>
+        <span class="gate-owner">QA Lead</span>
+        <span class="gate-status">PENDING</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">G8</span>
+        <span class="gate-name">flutter analyze — no issues (6.8s)</span>
+        <span class="gate-owner">Flutter Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">G9</span>
+        <span class="gate-name">flutter test — 25 passed, 0 failed</span>
+        <span class="gate-owner">Flutter Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">G10</span>
+        <span class="gate-name">npm run build — TypeScript clean</span>
+        <span class="gate-owner">Backend Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">G11</span>
+        <span class="gate-name">npm test — 36 passed, 4 suites</span>
+        <span class="gate-owner">Backend Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row">
+        <span class="gate-num">G12</span>
+        <span class="gate-name">Google Play Closed Testing submitted</span>
+        <span class="gate-owner">DevOps Lead</span>
+        <span class="gate-status">PENDING</span>
+      </div>
+      <div class="gate-row">
+        <span class="gate-num">G13</span>
+        <span class="gate-name">Apple TestFlight submitted</span>
+        <span class="gate-owner">DevOps Lead</span>
+        <span class="gate-status">PENDING</span>
+      </div>
+      <div class="gate-row">
+        <span class="gate-num">G14</span>
+        <span class="gate-name">Web deployed — flutter build web --release</span>
+        <span class="gate-owner">DevOps Lead</span>
+        <span class="gate-status">PENDING</span>
+      </div>
+      <div class="gate-row">
+        <span class="gate-num">G15</span>
+        <span class="gate-name">Mission Control active — all launch metric dashboards live</span>
+        <span class="gate-owner">DevOps Lead</span>
+        <span class="gate-status">PENDING</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 10A evidence -->
+  <div class="section">
+    <h2 class="section-title">Phase 10A — Validation Evidence</h2>
+    <div class="evidence-list">
+      <div class="evidence-row"><span class="evidence-num">1</span><span class="evidence-name">Git branch</span><span class="evidence-tag" style="color:var(--pass);border-color:var(--pass-stripe)">flutter_app</span></div>
+      <div class="evidence-row"><span class="evidence-num">2</span><span class="evidence-name">Commit hash</span><span class="evidence-tag" style="color:var(--pass);border-color:var(--pass-stripe)">7c2881c</span></div>
+      <div class="evidence-row"><span class="evidence-num">3</span><span class="evidence-name">Firestore index deploy proof</span><span class="evidence-tag" style="color:var(--pass);border-color:var(--pass-stripe)">✓ deployed</span></div>
+      <div class="evidence-row"><span class="evidence-num">4</span><span class="evidence-name">AI secrets confirmation — YOHPAL_BRAIN_API_KEY &amp; YOHPAL_BRAIN_API_URL</span><span class="evidence-tag" style="color:var(--crit);border-color:var(--crit-stripe)">not set</span></div>
+      <div class="evidence-row"><span class="evidence-num">5</span><span class="evidence-name">Cloud Functions deploy proof</span><span class="evidence-tag">awaiting</span></div>
+      <div class="evidence-row"><span class="evidence-num">6</span><span class="evidence-name">Android 50-swipe benchmark result</span><span class="evidence-tag">awaiting device</span></div>
+      <div class="evidence-row"><span class="evidence-num">7</span><span class="evidence-name">iPhone 50-swipe benchmark result</span><span class="evidence-tag">awaiting device</span></div>
+      <div class="evidence-row"><span class="evidence-num">8</span><span class="evidence-name">flutter analyze — No issues found (6.8s)</span><span class="evidence-tag" style="color:var(--pass);border-color:var(--pass-stripe)">✓ pass</span></div>
+      <div class="evidence-row"><span class="evidence-num">9</span><span class="evidence-name">flutter test — 25 passed, 0 failed</span><span class="evidence-tag" style="color:var(--pass);border-color:var(--pass-stripe)">✓ pass</span></div>
+      <div class="evidence-row"><span class="evidence-num">10</span><span class="evidence-name">npm run build — TypeScript clean</span><span class="evidence-tag" style="color:var(--pass);border-color:var(--pass-stripe)">✓ pass</span></div>
+      <div class="evidence-row"><span class="evidence-num">11</span><span class="evidence-name">npm test — 36 passed, 4 suites (5.9s)</span><span class="evidence-tag" style="color:var(--pass);border-color:var(--pass-stripe)">✓ pass</span></div>
+      <div class="evidence-row"><span class="evidence-num">12</span><span class="evidence-name">Executive Production Certificate — signed by all 7 roles</span><span class="evidence-tag">awaiting</span></div>
+    </div>
+  </div>
+
+  <!-- Executive sign-off -->
+  <div class="section">
+    <h2 class="section-title">Executive Sign-Off — 7 Roles Required</h2>
+    <div class="signoff-wrap">
+      <table class="signoff-table">
+        <thead>
+          <tr><th>Role</th><th>Name</th><th>Signature</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="role-cell">Flutter Lead</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td></tr>
+          <tr><td class="role-cell">Backend Lead</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td></tr>
+          <tr><td class="role-cell">Firebase Lead</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td></tr>
+          <tr><td class="role-cell">QA Lead</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td></tr>
+          <tr><td class="role-cell">DevOps Lead</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td></tr>
+          <tr><td class="role-cell">Product Owner</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td></tr>
+          <tr><td class="role-cell">Executive Sponsor</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="report-footer">
+    <span class="footer-text">Gap Report V21 · YohPal Live · Branch: flutter_app · 7c2881c · 2026-07-03</span>
+    <span class="footer-text">0 Critical · 0 High · 5 of 15 Phase 10 gates done · 1 blocked (AI secrets)</span>
+  </div>
+
+</div>
+
+<script>
+  function toggleTheme() {
+    const r = document.documentElement;
+    const cur = r.getAttribute('data-theme');
+    if (cur === 'dark') r.setAttribute('data-theme','light');
+    else if (cur === 'light') r.setAttribute('data-theme','dark');
+    else r.setAttribute('data-theme', window.matchMedia('(prefers-color-scheme:dark)').matches ? 'light' : 'dark');
+  }
+</script>

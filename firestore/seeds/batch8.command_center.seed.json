@@ -1,0 +1,63 @@
+{
+  "safeModeToggles": [
+    {
+      "key": "autonomy_execution",
+      "label": "Autonomy Execution",
+      "enabled": false,
+      "reason": "Default disabled until production approval.",
+      "updatedBy": "REPLACE_WITH_ADMIN_UID"
+    },
+    {
+      "key": "monetisation_triggers",
+      "label": "Monetisation Triggers",
+      "enabled": false,
+      "reason": "Default disabled until revenue flows are verified.",
+      "updatedBy": "REPLACE_WITH_ADMIN_UID"
+    },
+    {
+      "key": "external_multistreaming",
+      "label": "External Multistreaming",
+      "enabled": false,
+      "reason": "Default disabled until connector verification.",
+      "updatedBy": "REPLACE_WITH_ADMIN_UID"
+    }
+  ],
+  "commandCenterIncidents": [
+    {
+      "title": "Demo incident",
+      "description": "Demo command center incident for local verification.",
+      "severity": "p3",
+      "status": "open",
+      "source": "seed",
+      "affectedService": "demo",
+      "autoResponseTriggered": false,
+      "createdBy": "REPLACE_WITH_ADMIN_UID",
+      "updatedBy": "REPLACE_WITH_ADMIN_UID"
+    }
+  ],
+  "autoResponseRules": [
+    {
+      "name": "Open incident safe-mode warning",
+      "eventType": "incident.count.updated",
+      "conditionMetric": "openIncidents",
+      "conditionOperator": ">",
+      "conditionValue": 5,
+      "actionType": "notify_admin",
+      "enabled": true,
+      "requiresApproval": true,
+      "createdBy": "REPLACE_WITH_ADMIN_UID",
+      "updatedBy": "REPLACE_WITH_ADMIN_UID"
+    }
+  ],
+  "alertThresholds": [
+    {
+      "metric": "apiErrorRate",
+      "operator": ">",
+      "value": 5,
+      "severity": "p1",
+      "enabled": true,
+      "createdBy": "REPLACE_WITH_ADMIN_UID",
+      "updatedBy": "REPLACE_WITH_ADMIN_UID"
+    }
+  ]
+}

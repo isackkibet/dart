@@ -1,0 +1,19 @@
+=== Cloud Functions tests ===
+Command: npm test (backend/firebase_functions)
+Timestamp: 2026-07-11T13:36:42Z
+---
+
+> yohpal-firebase-functions@1.0.0 test
+> jest --testPathPattern='src/.*\.test\.ts$' --passWithNoTests
+
+PASS src/ads/adBillingCalculator.test.ts (10.105 s)
+PASS src/search/searchKeywordsGenerator.test.ts (10.177 s)
+PASS src/ads/creatorRevenueConfig.test.ts (10.404 s)
+PASS src/revenue/__tests__/revenue.test.ts (10.942 s)
+
+Test Suites: 4 passed, 4 total
+Tests:       36 passed, 36 total
+Snapshots:   0 total
+Time:        12.221 s
+Ran all test suites matching /src\/.*\.test\.ts$/i.
+Exit code: 0

@@ -1,0 +1,689 @@
+<title>YohPal Video Engine — Gap Report V1–V12</title>
+<style>
+  /* ── Tokens ── */
+  :root {
+    --ink:          #0d0f0e;
+    --ink-2:        #3a3d3b;
+    --ink-3:        #6b706d;
+    --paper:        #f5f4ef;
+    --paper-2:      #eceae3;
+    --paper-3:      #e0ddd4;
+    --gold:         #c9a227;
+    --gold-text:    #8a6b12;
+    --pass:         #1b5e20;
+    --pass-bg:      #e8f5e9;
+    --warn:         #e65100;
+    --warn-bg:      #fff3e0;
+    --crit:         #b71c1c;
+    --crit-bg:      #fce4e4;
+    --partial:      #1565c0;
+    --partial-bg:   #e3f2fd;
+    --stripe-w:     5px;
+    --radius:       3px;
+    --doc-max:      900px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink:        #eceae3;
+      --ink-2:      #c4c1b8;
+      --ink-3:      #8a8780;
+      --paper:      #111310;
+      --paper-2:    #1c1f1c;
+      --paper-3:    #252825;
+      --gold:       #d4ac30;
+      --gold-text:  #d4ac30;
+      --pass:       #4caf50;
+      --pass-bg:    #1b2e1c;
+      --warn:       #ff8f00;
+      --warn-bg:    #2d1f0a;
+      --crit:       #ef5350;
+      --crit-bg:    #2d1212;
+      --partial:    #42a5f5;
+      --partial-bg: #0d1e2e;
+    }
+  }
+  :root[data-theme="light"] {
+    --ink:          #0d0f0e;
+    --ink-2:        #3a3d3b;
+    --ink-3:        #6b706d;
+    --paper:        #f5f4ef;
+    --paper-2:      #eceae3;
+    --paper-3:      #e0ddd4;
+    --gold:         #c9a227;
+    --gold-text:    #8a6b12;
+    --pass:         #1b5e20;
+    --pass-bg:      #e8f5e9;
+    --warn:         #e65100;
+    --warn-bg:      #fff3e0;
+    --crit:         #b71c1c;
+    --crit-bg:      #fce4e4;
+    --partial:      #1565c0;
+    --partial-bg:   #e3f2fd;
+  }
+  :root[data-theme="dark"] {
+    --ink:        #eceae3;
+    --ink-2:      #c4c1b8;
+    --ink-3:      #8a8780;
+    --paper:      #111310;
+    --paper-2:    #1c1f1c;
+    --paper-3:    #252825;
+    --gold:       #d4ac30;
+    --gold-text:  #d4ac30;
+    --pass:       #4caf50;
+    --pass-bg:    #1b2e1c;
+    --warn:       #ff8f00;
+    --warn-bg:    #2d1f0a;
+    --crit:       #ef5350;
+    --crit-bg:    #2d1212;
+    --partial:    #42a5f5;
+    --partial-bg: #0d1e2e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 40px 20px 80px;
+  }
+
+  /* ── Document container ── */
+  .doc {
+    max-width: var(--doc-max);
+    margin: 0 auto;
+  }
+
+  /* ── Report header ── */
+  .report-header {
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 20px;
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .report-header__brand {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold-text);
+    margin-bottom: 6px;
+  }
+  .report-header__title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 28px;
+    font-weight: normal;
+    color: var(--ink);
+    text-wrap: balance;
+    line-height: 1.2;
+  }
+  .report-header__meta {
+    text-align: right;
+    font-size: 12px;
+    color: var(--ink-3);
+    line-height: 1.9;
+    font-variant-numeric: tabular-nums;
+  }
+  .report-header__meta strong {
+    color: var(--ink-2);
+    font-weight: 600;
+  }
+
+  /* ── Scorecard ── */
+  .scorecard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .score-tile {
+    background: var(--paper-2);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    border-top: 3px solid transparent;
+  }
+  .score-tile--pass  { border-top-color: var(--pass); }
+  .score-tile--warn  { border-top-color: var(--warn); }
+  .score-tile--crit  { border-top-color: var(--crit); }
+  .score-tile__num {
+    font-family: Georgia, serif;
+    font-size: 36px;
+    font-weight: normal;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 4px;
+  }
+  .score-tile--pass .score-tile__num { color: var(--pass); }
+  .score-tile--warn .score-tile__num { color: var(--warn); }
+  .score-tile--crit .score-tile__num { color: var(--crit); }
+  .score-tile__label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  /* ── Section headings ── */
+  .section-heading {
+    font-family: Georgia, serif;
+    font-size: 17px;
+    font-weight: normal;
+    color: var(--ink);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--paper-3);
+  }
+
+  /* ── Version table ── */
+  .version-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 48px;
+    border: 1px solid var(--paper-3);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .vrow {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    gap: 0;
+    border-left: var(--stripe-w) solid transparent;
+    border-bottom: 1px solid var(--paper-3);
+    transition: background 0.1s;
+  }
+  .vrow:last-child { border-bottom: none; }
+  .vrow:hover { background: var(--paper-2); }
+  .vrow--complete { border-left-color: var(--pass); }
+  .vrow--partial  { border-left-color: var(--partial); }
+  .vrow--blocked  { border-left-color: var(--crit); }
+
+  .vrow__ver {
+    padding: 14px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 16px;
+    font-variant-numeric: tabular-nums;
+    border-right: 1px solid var(--paper-3);
+  }
+  .vrow__body {
+    padding: 14px 16px;
+  }
+  .vrow__title {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+  .vrow__path {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-bottom: 6px;
+  }
+  .vrow__gaps {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 6px;
+  }
+  .gap-line {
+    font-size: 12px;
+    color: var(--ink-2);
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .gap-line::before {
+    content: '→';
+    color: var(--ink-3);
+    flex-shrink: 0;
+    font-size: 11px;
+  }
+  .vrow__status {
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 16px;
+  }
+  .chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .chip--complete { background: var(--pass-bg);    color: var(--pass);    }
+  .chip--partial  { background: var(--partial-bg); color: var(--partial); }
+  .chip--blocked  { background: var(--crit-bg);    color: var(--crit);    }
+
+  /* ── Gap register ── */
+  .gap-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 48px;
+    border: 1px solid var(--paper-3);
+    border-radius: var(--radius);
+  }
+  .gap-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .gap-table thead tr {
+    background: var(--paper-2);
+  }
+  .gap-table th {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border-bottom: 1px solid var(--paper-3);
+    white-space: nowrap;
+  }
+  .gap-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--paper-3);
+    vertical-align: top;
+    color: var(--ink-2);
+  }
+  .gap-table tr:last-child td { border-bottom: none; }
+  .gap-table tr:hover td { background: var(--paper-2); }
+  .gap-table td:first-child {
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .sev {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 2px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .sev--critical { background: var(--crit-bg);    color: var(--crit);    }
+  .sev--high     { background: var(--warn-bg);    color: var(--warn);    }
+  .sev--medium   { background: var(--partial-bg); color: var(--partial); }
+  .sev--low      { background: var(--paper-3);    color: var(--ink-3);   }
+
+  .gap-owner {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+
+  /* ── Footer ── */
+  .report-footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--paper-3);
+    font-size: 11px;
+    color: var(--ink-3);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .report-footer strong { color: var(--gold-text); }
+
+  /* ── Print button ── */
+  .print-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--gold);
+    color: #0d0f0e;
+    border: none;
+    padding: 9px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: var(--radius);
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: opacity 0.15s;
+  }
+  .print-btn:hover { opacity: 0.88; }
+  .print-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+  /* ── Print / PDF ── */
+  @media print {
+    body { background: #fff; color: #000; padding: 0; font-size: 12px; }
+    :root {
+      --ink: #000; --ink-2: #333; --ink-3: #666;
+      --paper: #fff; --paper-2: #f4f4f4; --paper-3: #ddd;
+      --gold: #8a6b12; --gold-text: #8a6b12;
+      --pass: #1b5e20; --pass-bg: #e8f5e9;
+      --warn: #e65100; --warn-bg: #fff3e0;
+      --crit: #b71c1c; --crit-bg: #fce4e4;
+      --partial: #1565c0; --partial-bg: #e3f2fd;
+    }
+    .print-btn { display: none; }
+    .vrow { break-inside: avoid; }
+    .gap-table tr { break-inside: avoid; }
+    .doc { max-width: 100%; }
+    .scorecard { grid-template-columns: repeat(3, 1fr); }
+    .version-list, .gap-table-wrap { border: 1px solid #ccc; }
+    a { color: inherit; text-decoration: none; }
+  }
+
+  @media (max-width: 600px) {
+    .scorecard { grid-template-columns: 1fr 1fr; }
+    .vrow { grid-template-columns: 48px 1fr; }
+    .vrow__status { display: none; }
+    .report-header { flex-direction: column; align-items: flex-start; }
+    .report-header__meta { text-align: left; }
+  }
+</style>
+
+<button class="print-btn" onclick="window.print()">Download PDF</button>
+
+<div class="doc">
+
+  <!-- Header -->
+  <header class="report-header">
+    <div>
+      <div class="report-header__brand">YohPal · Engineering</div>
+      <h1 class="report-header__title">Video Engine Gap Report<br>V1 – V12</h1>
+    </div>
+    <div class="report-header__meta">
+      <div><strong>Date</strong> 2026-07-07</div>
+      <div><strong>Branch</strong> yohpal-search</div>
+      <div><strong>Platform</strong> Android API 35 · Flutter 3.x</div>
+      <div><strong>Status</strong> Pre-Controlled-Pilot</div>
+    </div>
+  </header>
+
+  <!-- Scorecard -->
+  <div class="scorecard">
+    <div class="score-tile score-tile--pass">
+      <div class="score-tile__num">9</div>
+      <div class="score-tile__label">Versions Complete</div>
+    </div>
+    <div class="score-tile score-tile--warn">
+      <div class="score-tile__num">3</div>
+      <div class="score-tile__label">Versions Partial</div>
+    </div>
+    <div class="score-tile score-tile--crit">
+      <div class="score-tile__num">13</div>
+      <div class="score-tile__label">Open Gaps</div>
+    </div>
+  </div>
+
+  <!-- Version status -->
+  <h2 class="section-heading">Implementation Status by Version</h2>
+  <div class="version-list">
+
+    <div class="vrow vrow--complete">
+      <div class="vrow__ver">V1</div>
+      <div class="vrow__body">
+        <div class="vrow__title">Flutter Smart Video Abstraction</div>
+        <div class="vrow__path">apps/mobile_flutter/lib/core/video/</div>
+      </div>
+      <div class="vrow__status"><span class="chip chip--complete">Complete</span></div>
+    </div>
+
+    <div class="vrow vrow--partial">
+      <div class="vrow__ver">V2</div>
+      <div class="vrow__body">
+        <div class="vrow__title">Native Performance Bridge</div>
+        <div class="vrow__path">lib/core/video_native/ · Kotlin · Swift</div>
+        <div class="vrow__gaps">
+          <div class="gap-line">iOS Swift files: Xcode target membership not re-verified after recent project changes</div>
+        </div>
+      </div>
+      <div class="vrow__status"><span class="chip chip--partial">Partial</span></div>
+    </div>
+
+    <div class="vrow vrow--complete">
+      <div class="vrow__ver">V3</div>
+      <div class="vrow__body">
+        <div class="vrow__title">Smart Feed Player Pool</div>
+        <div class="vrow__path">lib/core/video_feed/</div>
+      </div>
+      <div class="vrow__status"><span class="chip chip--complete">Complete</span></div>
+    </div>
+
+    <div class="vrow vrow--partial">
+      <div class="vrow__ver">V4</div>
+      <div class="vrow__body">
+        <div class="vrow__title">Upload &amp; Transcoding Pipeline</div>
+        <div class="vrow__path">backend/video-pipeline/ · port 3000</div>
+        <div class="vrow__gaps">
+          <div class="gap-line">NestJS pipeline uses local disk storage; production videos live in Firebase Storage — feed returns [] until bridge is built</div>
+        </div>
+      </div>
+      <div class="vrow__status"><span class="chip chip--partial">Partial</span></div>
+    </div>
+
+    <div class="vrow vrow--complete">
+      <div class="vrow__ver">V5</div>
+      <div class="vrow__body">
+        <div class="vrow__title">Ranking &amp; Preload Intelligence</div>
+        <div class="vrow__path">backend/video-pipeline/src/modules/feed/</div>
+      </div>
+      <div class="vrow__status"><span class="chip chip--complete">Complete</span></div>
+    </div>
+
+    <div class="vrow vrow--complete">
+      <div class="vrow__ver">V6</div>
+      <div class="vrow__body">
+        <div class="vrow__title">Watch Telemetry &amp; Feedback Loop</div>
+        <div class="vrow__path">lib/core/video_telemetry/ · services/video-intelligence/ · port 3001</div>
+      </div>
+      <div class="vrow__status"><span class="chip chip--complete">Complete</span></div>
+    </div>
+
+    <div class="vrow vrow--complete">
+      <div class="vrow__ver">V7</div>
+      <div class="vrow__body">
+        <div class="vrow__title">Offline Telemetry Queue &amp; Reliability Guard</div>
+        <div class="vrow__path">lib/core/video_telemetry_reliability/</div>
+        <div class="vrow__gaps">
+          <div class="gap-line">Retry scheduler not wired to background isolate — sync only triggers on app foreground</div>
+        </div>
+      </div>
+      <div class="vrow__status"><span class="chip chip--complete">Complete</span></div>
+    </div>
+
+    <div class="vrow vrow--partial">
+      <div class="vrow__ver">V8</div>
+      <div class="vrow__body">
+        <div class="vrow__title">HLS Preparation &amp; Adaptive Streaming Layer</div>
+        <div class="vrow__path">backend/video-pipeline/src/modules/transcode/hls.service.ts</div>
+        <div class="vrow__gaps">
+          <div class="gap-line">Pipeline outputs index.m3u8 + 360p/index.m3u8; production uses master.m3u8 + playlist_360p.m3u8 — naming mismatch blocks end-to-end HLS delivery</div>
+          <div class="gap-line">CDN master.m3u8 variant URLs point to firebasestorage.googleapis.com, not cdn.stream.yohpal.com — segments bypass CDN cache</div>
+        </div>
+      </div>
+      <div class="vrow__status"><span class="chip chip--partial">Partial</span></div>
+    </div>
+
+    <div class="vrow vrow--complete">
+      <div class="vrow__ver">V9</div>
+      <div class="vrow__body">
+        <div class="vrow__title">CDN Abstraction &amp; Edge Delivery Readiness</div>
+        <div class="vrow__path">services/video-delivery/src/cdn/</div>
+        <div class="vrow__gaps">
+          <div class="gap-line">YohPalStreamProvider added; cdn.stream.yohpal.com confirmed live (HTTP/2 200); cdnAvailable wired to real probe replacing hardcoded false</div>
+        </div>
+      </div>
+      <div class="vrow__status"><span class="chip chip--complete">Complete</span></div>
+    </div>
+
+    <div class="vrow vrow--partial">
+      <div class="vrow__ver">V10</div>
+      <div class="vrow__body">
+        <div class="vrow__title">Performance Certification Dashboard</div>
+        <div class="vrow__path">services/video-intelligence/src/modules/performance/</div>
+        <div class="vrow__gaps">
+          <div class="gap-line">Backend gate API complete and verified; no Android/iOS 30-minute certification sessions submitted</div>
+          <div class="gap-line">HTML dashboard artifact not published</div>
+        </div>
+      </div>
+      <div class="vrow__status"><span class="chip chip--partial">Partial</span></div>
+    </div>
+
+    <div class="vrow vrow--partial">
+      <div class="vrow__ver">V11</div>
+      <div class="vrow__body">
+        <div class="vrow__title">Release Lock &amp; Controlled Rollout Gate</div>
+        <div class="vrow__path">services/release-control/ · port 3002 · lib/core/release/</div>
+        <div class="vrow__gaps">
+          <div class="gap-line">All 12 gate booleans in YohPalVideoReleaseLock are false — no release has been approved</div>
+          <div class="gap-line">networkType hardcoded '4g' in feed service — real device network type not passed to delivery decision</div>
+        </div>
+      </div>
+      <div class="vrow__status"><span class="chip chip--partial">Partial</span></div>
+    </div>
+
+    <div class="vrow vrow--complete">
+      <div class="vrow__ver">V12</div>
+      <div class="vrow__body">
+        <div class="vrow__title">Final Production Certification Pack</div>
+        <div class="vrow__path">docs/yohpal-video-engine/ (8 documents)</div>
+      </div>
+      <div class="vrow__status"><span class="chip chip--complete">Complete</span></div>
+    </div>
+
+  </div>
+
+  <!-- Gap register -->
+  <h2 class="section-heading">Gap Register</h2>
+  <div class="gap-table-wrap">
+    <table class="gap-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Severity</th>
+          <th>Version</th>
+          <th>Gap Description</th>
+          <th>Owner / Path</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>G-01</td>
+          <td><span class="sev sev--critical">Critical</span></td>
+          <td>V4</td>
+          <td>NestJS pipeline disconnected from Firebase Storage. Production videos exist in <code>yohlab.firebasestorage.app</code>; the NestJS feed reads from local disk and returns an empty array. A Firebase Storage adapter must be written for the feed to serve real content.</td>
+          <td><span class="gap-owner">backend/video-pipeline/src/modules/storage/</span></td>
+        </tr>
+        <tr>
+          <td>G-02</td>
+          <td><span class="sev sev--critical">Critical</span></td>
+          <td>V8</td>
+          <td>HLS output naming mismatch. Pipeline generates <code>index.m3u8</code> + <code>360p/index.m3u8</code>; production bucket uses <code>master.m3u8</code> + <code>playlist_360p.m3u8</code>. Paths must be aligned before the pipeline can write HLS that the CDN can serve.</td>
+          <td><span class="gap-owner">hls.service.ts · transcode.worker.ts</span></td>
+        </tr>
+        <tr>
+          <td>G-03</td>
+          <td><span class="sev sev--critical">Critical</span></td>
+          <td>V8/V9</td>
+          <td>CDN manifest rewrite missing. The <code>master.m3u8</code> on cdn.stream.yohpal.com references variant playlist URLs on <code>firebasestorage.googleapis.com</code>, not <code>cdn.stream.yohpal.com</code>. Segment fetches bypass CDN cache and incur Firebase egress costs.</td>
+          <td><span class="gap-owner">YohPalStreamProvider.sign()</span></td>
+        </tr>
+        <tr>
+          <td>G-04</td>
+          <td><span class="sev sev--critical">Critical</span></td>
+          <td>V10/V11</td>
+          <td>No certification sessions submitted. Both Android and iOS 30-minute stability tests are outstanding. <code>certifiedForControlledRelease</code> remains false; the V11 release gate blocks all rollout until these pass.</td>
+          <td><span class="gap-owner">POST /video-performance/metrics</span></td>
+        </tr>
+        <tr>
+          <td>G-05</td>
+          <td><span class="sev sev--critical">Critical</span></td>
+          <td>V11</td>
+          <td>Release lock not approved. All 12 boolean gates in <code>YohPalVideoReleaseLock</code> remain false. No approver name, role, or rollout percentage has been set. YohPal Live cannot enter controlled rollout.</td>
+          <td><span class="gap-owner">services/release-control/</span></td>
+        </tr>
+        <tr>
+          <td>G-06</td>
+          <td><span class="sev sev--high">High</span></td>
+          <td>V4</td>
+          <td>Cloud Functions not implemented: gift-to-earnings conversion, wallet balance aggregator, ad billing deduction, and M-Pesa payout trigger are all pending. Financial flows are incomplete for the attention economy.</td>
+          <td><span class="gap-owner">functions/ (pending)</span></td>
+        </tr>
+        <tr>
+          <td>G-07</td>
+          <td><span class="sev sev--high">High</span></td>
+          <td>V2</td>
+          <td>iOS Swift native bridge Xcode target membership not re-verified after recent project changes. V2 ExoPlayer/AVPlayer native files may be excluded from the iOS build target.</td>
+          <td><span class="gap-owner">ios/Runner.xcodeproj</span></td>
+        </tr>
+        <tr>
+          <td>G-08</td>
+          <td><span class="sev sev--high">High</span></td>
+          <td>V11</td>
+          <td><code>networkType</code> is hardcoded <code>'4g'</code> in <code>VideoFeedService.getSmartFeed()</code>. The actual device network type is never passed to the delivery decision, so 3G/low-data HLS quality switching cannot trigger.</td>
+          <td><span class="gap-owner">video-feed.service.ts:70</span></td>
+        </tr>
+        <tr>
+          <td>G-09</td>
+          <td><span class="sev sev--high">High</span></td>
+          <td>V4/V9</td>
+          <td>Video buffering observed on fresh app launch (spinner visible in live session). The feed returns real Firebase-hosted videos but no Firestore-to-NestJS bridge exists — the app is loading video URLs from a different code path than the NestJS engine.</td>
+          <td><span class="gap-owner">lib/core/video/ · feed integration</span></td>
+        </tr>
+        <tr>
+          <td>G-10</td>
+          <td><span class="sev sev--medium">Medium</span></td>
+          <td>V11</td>
+          <td><code>_userId</code> parameter in <code>getSmartFeed()</code> is unused. Feed ranking is not personalised per user — all users receive the same global ranking. User-specific watch history and preferences are not factored in.</td>
+          <td><span class="gap-owner">video-feed.service.ts:43</span></td>
+        </tr>
+        <tr>
+          <td>G-11</td>
+          <td><span class="sev sev--medium">Medium</span></td>
+          <td>V10</td>
+          <td>Performance certification HTML dashboard not published as a live artifact. Engineers must use raw curl commands against the API to check certification status. No visual summary is accessible to non-engineering reviewers.</td>
+          <td><span class="gap-owner">services/video-intelligence/</span></td>
+        </tr>
+        <tr>
+          <td>G-12</td>
+          <td><span class="sev sev--medium">Medium</span></td>
+          <td>V8</td>
+          <td><code>'auto'</code> is present in the <code>YohPalDeliveryDecision.recommendedQuality</code> type union but is no longer produced by the updated decision service. The stale type creates a false contract in downstream consumers.</td>
+          <td><span class="gap-owner">delivery-decision.service.ts:12</span></td>
+        </tr>
+        <tr>
+          <td>G-13</td>
+          <td><span class="sev sev--low">Low</span></td>
+          <td>V7</td>
+          <td>Telemetry retry scheduler not wired to a background isolate or <code>WorkManager</code> job. Offline events are only synced when the user opens the app. Events may be lost if the app is uninstalled before the user returns.</td>
+          <td><span class="gap-owner">yohpal_telemetry_sync_service.dart</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Footer -->
+  <footer class="report-footer">
+    <span><strong>YohPal Video Engine</strong> · Gap Report · Generated 2026-07-07</span>
+    <span>Branch: yohpal-search · 5 Critical · 3 High · 3 Medium · 1 Low</span>
+  </footer>
+
+</div>

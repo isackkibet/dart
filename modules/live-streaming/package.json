@@ -1,0 +1,31 @@
+{
+  "name": "yohpal-live-streaming-overlay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "YohPal Live streaming overlay module",
+  "scripts": {
+    "bootstrap": "bash scripts/bootstrap.sh",
+    "certs": "bash scripts/generate-certs.sh",
+    "turn:config": "bash scripts/generate-turn-config.sh",
+    "doctor": "bash scripts/doctor.sh",
+    "lan:check": "bash scripts/check-lan-ip.sh",
+    "endpoints:check": "bash scripts/check-local-endpoints.sh",
+    "docker:up": "docker compose -f docker/docker-compose.yml --env-file .env up --build",
+    "docker:down": "docker compose -f docker/docker-compose.yml --env-file .env down",
+    "docker:logs": "docker compose -f docker/docker-compose.yml --env-file .env logs -f",
+    "docker:ps": "docker compose -f docker/docker-compose.yml --env-file .env ps",
+    "token:broadcaster": "node scripts/mint-jwt.js broadcaster room1",
+    "token:viewer": "node scripts/mint-jwt.js viewer room1",
+    "test": "bash scripts/run-tests.sh",
+    "flutter:static": "bash scripts/flutter-static-check.sh",
+    "docker:health": "bash scripts/docker-health-check.sh",
+    "browser:checklist": "bash scripts/browser-client-checklist.sh",
+    "ci:required-files": "bash scripts/ci/validate-required-files.sh",
+    "ci:merge-safety": "bash scripts/ci/merge-safety-check.sh",
+    "ci:no-overwrite": "bash scripts/ci/check-no-foundation-overwrite.sh",
+    "ci": "npm run ci:required-files && npm run ci:no-overwrite && npm run test && npm run ci:merge-safety"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2"
+  }
+}

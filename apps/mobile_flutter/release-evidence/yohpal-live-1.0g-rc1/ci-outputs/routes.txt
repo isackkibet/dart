@@ -1,0 +1,6 @@
+=== dart run tool/check_routes.dart ===
+Command: dart run tool/check_routes.dart
+Timestamp: 2026-07-11T13:36:18Z
+---
+Running build hooks...Running build hooks...Route integrity passed: 58 statically-resolvable pushed routes verified.
+Exit code: 0

@@ -1,0 +1,103 @@
+{
+  "release": "YOHPAL LIVE RELEASE 1.0I",
+  "candidate": {
+    "featureBranch": "feature/yohpal-live-zero-wait-1.0h",
+    "releaseBranch": "release/yohpal-live-1.0h-rc1",
+    "commitHash": "REPLACE_WITH_FULL_40_CHARACTER_SHA",
+    "tag": "yohpal-live-v1.0.1-zero-wait-rc1",
+    "androidBuild": "REPLACE",
+    "iosBuild": "REPLACE"
+  },
+  "gates": [
+    {
+      "id": "REPOSITORY",
+      "mandatory": true,
+      "status": "PENDING",
+      "evidence": ["01-repository/"]
+    },
+    {
+      "id": "BUILD",
+      "mandatory": true,
+      "status": "PENDING",
+      "evidence": ["02-build/"]
+    },
+    {
+      "id": "RUNWAY_100",
+      "mandatory": true,
+      "status": "PENDING",
+      "evidence": ["03-inventory-runway/"]
+    },
+    {
+      "id": "STARTUP_WARMUP",
+      "mandatory": true,
+      "status": "PENDING",
+      "evidence": ["04-startup-warmup/"]
+    },
+    {
+      "id": "PERSISTENT_CACHE",
+      "mandatory": true,
+      "status": "PENDING",
+      "evidence": ["05-persistent-cache/"]
+    },
+    {
+      "id": "LOW_MEMORY_ANDROID",
+      "mandatory": true,
+      "status": "PENDING",
+      "evidence": ["06-low-memory-android/"]
+    },
+    {
+      "id": "MIDRANGE_ANDROID",
+      "mandatory": true,
+      "status": "PENDING",
+      "evidence": ["07-midrange-android/"]
+    },
+    {
+      "id": "FLAGSHIP_ANDROID",
+      "mandatory": true,
+      "status": "PENDING",
+      "evidence": ["08-flagship-android/"]
+    },
+    {
+      "id": "OLDER_IPHONE",
+      "mandatory": true,
+      "status": "PENDING",
+      "evidence": ["09-older-iphone/"]
+    },
+    {
+      "id": "NEWER_IPHONE",
+      "mandatory": true,
+      "status": "PENDING",
+      "evidence": ["10-newer-iphone/"]
+    },
+    {
+      "id": "NETWORK_RESULTS",
+      "mandatory": true,
+      "status": "PENDING",
+      "evidence": ["11-network-results/"]
+    },
+    {
+      "id": "PERFORMANCE",
+      "mandatory": true,
+      "status": "PENDING",
+      "evidence": ["12-performance-dashboard/"]
+    },
+    {
+      "id": "CRASHLYTICS",
+      "mandatory": true,
+      "status": "PENDING",
+      "evidence": ["13-crashlytics/"]
+    },
+    {
+      "id": "DEFECTS",
+      "mandatory": true,
+      "status": "PENDING",
+      "evidence": ["14-defects/defects.csv"]
+    },
+    {
+      "id": "GOVERNANCE",
+      "mandatory": true,
+      "status": "PENDING",
+      "evidence": ["15-governance/"]
+    }
+  ]
+}

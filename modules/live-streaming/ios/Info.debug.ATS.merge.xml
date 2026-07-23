@@ -1,0 +1,22 @@
+<!-- DEBUG ONLY.
+     Prefer installing and trusting the self-signed certificate on device.
+     Do not ship permissive ATS exceptions in production. -->
+<key>NSAppTransportSecurity</key>
+<dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <false/>
+    <key>NSExceptionDomains</key>
+    <dict>
+        <!-- Replace with your LAN IP or local dev hostname if using one.
+             IP-based ATS exceptions may still require certificate trust. -->
+        <key>192.168.1.10</key>
+        <dict>
+            <key>NSIncludesSubdomains</key>
+            <true/>
+            <key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+            <false/>
+            <key>NSTemporaryExceptionMinimumTLSVersion</key>
+            <string>TLSv1.2</string>
+        </dict>
+    </dict>
+</dict>

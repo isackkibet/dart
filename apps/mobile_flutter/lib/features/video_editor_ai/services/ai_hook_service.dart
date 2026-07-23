@@ -1,0 +1,24 @@
+import '../repositories/ai_video_repository.dart';
+import 'ai_creator_api_service.dart';
+
+class AiHookService {
+  final AiVideoRepository repository;
+  final AiCreatorApiService api;
+
+  AiHookService({required this.repository, required this.api});
+
+  Future<String> generateHooks({
+    required String userId,
+    required String videoId,
+    required String topic,
+  }) async {
+    final jobId = await repository.createJob(
+      userId: userId,
+      videoId: videoId,
+      type: 'hooks',
+      input: {'topic': topic},
+    );
+    await api.requestJobProcessing(jobId: jobId, userId: userId);
+    return jobId;
+  }
+}

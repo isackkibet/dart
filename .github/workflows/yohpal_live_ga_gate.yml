@@ -1,0 +1,49 @@
+name: YohPal Live GA Gate
+
+on:
+  pull_request:
+    paths:
+      - 'apps/mobile_flutter/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/mobile_flutter/**'
+
+jobs:
+  release-gate:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/mobile_flutter
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Format check
+        run: dart format --output=none --set-exit-if-changed lib test tool
+
+      - name: Analyze complete app
+        run: flutter analyze
+
+      - name: Route integrity
+        run: dart run tool/check_routes.dart
+
+      - name: Unit and widget tests
+        run: flutter test --coverage
+
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yohpal-live-ga-gate-coverage
+          path: apps/mobile_flutter/coverage/

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>YohPal Live — v15 → v16 Delta: Phase 1N + 1O</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13px;line-height:1.55;color:#0f172a;background:#fff;padding:28px 32px}
+@media print{body{padding:0}.no-print{display:none}}
+.report-title{font-size:22px;font-weight:800;margin-bottom:4px}
+.report-title span{color:#1d4ed8}
+.report-meta{font-size:12px;color:#374151;margin-bottom:4px}
+.report-meta strong{color:#15803d}
+.report-date{font-size:12px;color:#374151;text-align:right;line-height:1.8}
+.header-row{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #e5e7eb;padding-bottom:12px;margin-bottom:18px}
+.btn-row{display:flex;gap:6px;margin-top:4px;justify-content:flex-end}
+button.print-btn{background:#0f172a;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:11px}
+button.dl-btn{background:#1d4ed8;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:11px}
+
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+.kpi{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px}
+.kpi.green{border-color:#86efac;background:#f0fdf4}
+.kpi.amber{border-color:#fcd34d;background:#fefce8}
+.kpi-lbl{font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.kpi-val{font-size:22px;font-weight:900;color:#15803d;line-height:1}
+.kpi-val.amber{color:#92400e}
+.kpi-sub{font-size:10.5px;color:#6b7280;margin-top:3px}
+
+.sec{border-left:4px solid #1d4ed8;padding:7px 12px;font-size:13px;font-weight:800;margin:20px 0 8px;background:#eff6ff;border-radius:0 4px 4px 0}
+.sec.green{border-color:#15803d;background:#f0fdf4}
+.sec.amber{border-color:#ea580c;background:#fff7ed}
+
+table.t{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:6px}
+table.t th{background:#0f172a;color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:7px 10px;text-align:left}
+table.t td{padding:8px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+table.t tr:last-child td{border-bottom:none}
+table.t td.n{width:28px;text-align:center;color:#9ca3af;font-weight:700}
+.vsec{background:#f8fafc;font-weight:700;font-size:10px;color:#475569;padding:5px 10px!important}
+.ok{color:#15803d;font-weight:700}
+.pend{color:#92400e;font-weight:700}
+.was{color:#b91c1c;font-size:11px}
+.now{color:#15803d;font-size:11px;font-weight:600}
+
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:700}
+.b-fix{background:#dbeafe;color:#1d4ed8}
+.b-new{background:#ede9fe;color:#6d28d9}
+.b-del{background:#fee2e2;color:#b91c1c}
+.b-same{background:#f3f4f6;color:#6b7280}
+.b-rewrite{background:#dcfce7;color:#14532d;border:1px solid #86efac}
+
+code{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:3px;padding:1px 5px;font-size:11px;font-family:'SF Mono',Menlo,Monaco,Consolas,monospace}
+
+.verdict{border:2px solid #86efac;border-radius:8px;padding:14px 16px;background:#f0fdf4;margin-top:8px}
+.verdict p{font-size:12.5px;line-height:1.7}
+.verdict strong{color:#15803d}
+
+footer{margin-top:24px;padding-top:10px;border-top:1px solid #e5e7eb;font-size:10.5px;color:#9ca3af;text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+
+<div class="header-row">
+  <div>
+    <div class="report-title">YohPal Live — <span>v15 → v16 Delta</span></div>
+    <div class="report-meta">
+      Scope: <strong>Phase 1N + Phase 1O only</strong> &nbsp;·&nbsp;
+      Commit: <strong>bf52786</strong> &nbsp;·&nbsp;
+      Branch: <strong>flutter_app</strong> &nbsp;·&nbsp;
+      flutter analyze: <strong>No issues</strong> &nbsp;·&nbsp;
+      tsc: <strong>PASS</strong> &nbsp;·&nbsp;
+      flutter test: <strong>3/3 PASS</strong>
+    </div>
+  </div>
+  <div class="report-date">
+    2026-06-28<br>
+    v15 base: Phase 7D Advanced Ads
+    <div class="btn-row">
+      <button class="print-btn no-print" onclick="window.print()">&#8595; Print</button>
+      <button class="dl-btn no-print" onclick="downloadHtml()">&#8595; Save HTML</button>
+    </div>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-row">
+  <div class="kpi green">
+    <div class="kpi-lbl">Bugs Closed (1N)</div>
+    <div class="kpi-val">5</div>
+    <div class="kpi-sub">403 · blank · re-entry · index · exception</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-lbl">Files Rewritten (1N)</div>
+    <div class="kpi-val">6</div>
+    <div class="kpi-sub">repository · controller · player · playback ctrl · screen · app.dart</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-lbl">Files Created (1N)</div>
+    <div class="kpi-val">2</div>
+    <div class="kpi-sub">video_feed_repository · smart_network_profiler</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-lbl">New CFs (1O)</div>
+    <div class="kpi-val">3</div>
+    <div class="kpi-sub">extractVideoThumbnail · backfill · validation</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-lbl">flutter test</div>
+    <div class="kpi-val">3/3</div>
+    <div class="kpi-sub">Phase 1O validation suite · all PASS</div>
+  </div>
+</div>
+
+<!-- ── PHASE 1N ── -->
+<div class="sec green">Phase 1N — Stream Feed Migration &amp; Bug Fixes (v15 → v16)</div>
+
+<table class="t">
+  <thead><tr>
+    <th class="n">#</th>
+    <th style="width:22%">Item</th>
+    <th style="width:15%">v15 (before)</th>
+    <th style="width:15%">v16 (after)</th>
+    <th style="width:10%">Type</th>
+    <th>Detail</th>
+  </tr></thead>
+  <tbody>
+
+    <tr><td colspan="6" class="vsec">Firestore Query Strategy</td></tr>
+    <tr>
+      <td class="n">1</td>
+      <td>Firestore filters</td>
+      <td><span class="was">4 strict filters + orderBy</span></td>
+      <td><span class="now">2 equality filters only</span></td>
+      <td><span class="badge b-fix">FIX</span></td>
+      <td><code>playbackReady=true</code> + <code>processingStatus=ready</code> only. No <code>orderBy</code>, no <code>broken=false</code>, no <code>visibility=public</code> in Firestore. Prevents composite index error and empty feed on docs missing those fields.</td>
+    </tr>
+    <tr>
+      <td class="n">2</td>
+      <td>Client-side <code>_isReady()</code></td>
+      <td><span class="was">None — Firestore filtered</span></td>
+      <td><span class="now">Checks broken, visibility, URL presence</span></td>
+      <td><span class="badge b-new">NEW</span></td>
+      <td>Filters <code>broken==true</code>, <code>visibility=='private'</code>, and requires at least one non-empty URL field (previewUrl / hlsLowUrl / hlsStandardUrl / hlsUrl / videoUrl). Runs on every snapshot — no Firestore index needed.</td>
+    </tr>
+    <tr>
+      <td class="n">3</td>
+      <td>Sort order</td>
+      <td><span class="was">Firestore orderBy (needed composite index)</span></td>
+      <td><span class="now">Client-side sort on each feed</span></td>
+      <td><span class="badge b-fix">FIX</span></td>
+      <td>suggestedFeed → <code>engagementScore</code> desc · followingFeed → <code>createdAt</code> Timestamp desc · trendingFeed → <code>views</code> desc. All done after snapshot arrives.</td>
+    </tr>
+
+    <tr><td colspan="6" class="vsec">Feed Repository + Controller</td></tr>
+    <tr>
+      <td class="n">4</td>
+      <td><code>video_feed_repository.dart</code></td>
+      <td><span class="was">Did not exist (used video_repository.dart)</span></td>
+      <td><span class="now">Created — 3 streams</span></td>
+      <td><span class="badge b-new">NEW FILE</span></td>
+      <td><code>suggestedFeed()</code> · <code>followingFeed(userId)</code> · <code>trendingFeed()</code> · <code>markBroken(videoId)</code>. Replaces old one-shot VideoRepository.</td>
+    </tr>
+    <tr>
+      <td class="n">5</td>
+      <td><code>video_feed_controller.dart</code></td>
+      <td><span class="was">Future-based loadFeed() + FeedType enum</span></td>
+      <td><span class="now">StreamSubscription + _brokenIds Set</span></td>
+      <td><span class="badge b-rewrite">REWRITE</span></td>
+      <td>Live stream subscription on each feed switch. <code>_brokenIds Set&lt;String&gt;</code> applied to every incoming snapshot — broken videos never re-enter even when <code>markBroken()</code> Firestore write fails (non-owner permission-denied).</td>
+    </tr>
+    <tr>
+      <td class="n">6</td>
+      <td>Broken video re-entry</td>
+      <td><span class="was">Firestore stream re-emits broken doc → Init→error loop</span></td>
+      <td><span class="now">_brokenIds blocks re-entry permanently</span></td>
+      <td><span class="badge b-fix">BUG FIX</span></td>
+      <td><code>reportBroken(videoId)</code>: adds to <code>_brokenIds</code> → removes from list immediately → <code>notifyListeners()</code> → fires best-effort <code>repository.markBroken()</code>. Session-local — survives Firestore permission failure.</td>
+    </tr>
+    <tr>
+      <td class="n">7</td>
+      <td>Trending tab</td>
+      <td><span class="was">Removed by spec (only 2 tabs)</span></td>
+      <td><span class="now">Restored — 3 tabs</span></td>
+      <td><span class="badge b-fix">RESTORED</span></td>
+      <td><code>startTrendingFeed()</code> added to controller. Screen has local <code>_feedType</code> String state: suggested / following / trending. FeedType enum deleted.</td>
+    </tr>
+
+    <tr><td colspan="6" class="vsec">Storage Auth (HTTP 403 Fix)</td></tr>
+    <tr>
+      <td class="n">8</td>
+      <td>Firebase Storage 403</td>
+      <td><span class="was">No auth header → ExoPlayer 403 on .firebasestorage.app paths</span></td>
+      <td><span class="now">Bearer token via httpHeaders</span></td>
+      <td><span class="badge b-fix">BUG FIX</span></td>
+      <td><code>_warm()</code> calls <code>FirebaseAuth.instance.currentUser?.getIdToken()</code> → passes <code>{'Authorization': 'Bearer \$token'}</code> to <code>VideoPlayerController.networkUrl(httpHeaders:)</code>.</td>
+    </tr>
+    <tr>
+      <td class="n">9</td>
+      <td><code>warmVideo(httpHeaders:)</code></td>
+      <td><span class="was">No httpHeaders param</span></td>
+      <td><span class="now">httpHeaders propagated to VideoPlayerController</span></td>
+      <td><span class="badge b-fix">FIX</span></td>
+      <td><code>ZeroWaitPlaybackController.warmVideo()</code> and <code>preloadAround()</code> both accept <code>Map&lt;String,String&gt; httpHeaders</code>. Auth token fetched per page-change and passed to every preload call.</td>
+    </tr>
+
+    <tr><td colspan="6" class="vsec">Blank Video Detection</td></tr>
+    <tr>
+      <td class="n">10</td>
+      <td>Blank video in feed</td>
+      <td><span class="was">Post-play() boolean flip — onFirstFrame fired immediately even without a real frame</span></td>
+      <td><span class="now">VideoPlayerController listener — position &gt; 0</span></td>
+      <td><span class="badge b-fix">BUG FIX</span></td>
+      <td><code>_attachFrameListener(ctrl)</code> added before <code>play()</code>. Listener fires <code>onFirstFrame</code> only when <code>val.position &gt; Duration.zero</code> (actual decoded frame). <code>onPlaybackError</code> fires on <code>val.hasError</code>. 800ms timer only cancelled by the listener — not by <code>await play()</code> returning.</td>
+    </tr>
+    <tr>
+      <td class="n">11</td>
+      <td>Null controller crash</td>
+      <td><span class="was">play() continued silently when warmVideo() failed — no error fired</span></td>
+      <td><span class="now">Early exit fires onPlaybackError immediately</span></td>
+      <td><span class="badge b-fix">BUG FIX</span></td>
+      <td><code>_play()</code> checks <code>ctrl.controllerFor(widget.videoId) == null</code> at the top — fires <code>onPlaybackError?.call()</code> and returns. No timer started, no listener attached.</td>
+    </tr>
+    <tr>
+      <td class="n">12</td>
+      <td>Listener leak on dispose</td>
+      <td><span class="was">No cleanup of VideoPlayerController listener</span></td>
+      <td><span class="now">_detachFrameListener() on dispose</span></td>
+      <td><span class="badge b-fix">FIX</span></td>
+      <td><code>_trackedCtrl</code> + <code>_frameListener</code> fields tracked per widget. <code>dispose()</code> calls <code>_detachFrameListener()</code> — removes listener and nulls refs.</td>
+    </tr>
+
+    <tr><td colspan="6" class="vsec">Dynamic Preload + Profiler</td></tr>
+    <tr>
+      <td class="n">13</td>
+      <td><code>dynamicPreloadAhead</code></td>
+      <td><span class="was">Fixed <code>preloadAhead</code> int field</span></td>
+      <td><span class="now">Mutable field + updatePreloadAhead()</span></td>
+      <td><span class="badge b-fix">FIX</span></td>
+      <td>Both <code>preloadAround()</code> and <code>disposeFarAway()</code> read <code>dynamicPreloadAhead</code> at call time. SmartNetworkProfiler can adjust it at runtime.</td>
+    </tr>
+    <tr>
+      <td class="n">14</td>
+      <td><code>smart_network_profiler.dart</code></td>
+      <td><span class="was">Did not exist</span></td>
+      <td><span class="now">Created</span></td>
+      <td><span class="badge b-new">NEW FILE</span></td>
+      <td><code>NetworkClass</code> enum: wifi/5G→5, 4G→3, 3G→1, offline→0, unknown→3. <code>preloadAheadFor()</code> + <code>shouldFetch()</code>.</td>
+    </tr>
+
+    <tr><td colspan="6" class="vsec">Screen &amp; App Wiring</td></tr>
+    <tr>
+      <td class="n">15</td>
+      <td><code>video_feed_screen.dart</code></td>
+      <td><span class="was">VideoModel list · FeedType enum · loadFeed() · setCurrentIndex() · reportBrokenVideo()</span></td>
+      <td><span class="now">Map&lt;String,dynamic&gt; · local _feedType · reportBroken()</span></td>
+      <td><span class="badge b-rewrite">REWRITE</span></td>
+      <td>Data is now <code>List&lt;Map&lt;String,dynamic&gt;&gt;</code> from controller. <code>VideoModel.fromMap(videoId, data)</code> called per item for overlay + rail. Auth token fetched in <code>_preloadAround()</code> async closure.</td>
+    </tr>
+    <tr>
+      <td class="n">16</td>
+      <td><code>app.dart</code></td>
+      <td><span class="was">VideoRepository · OfflineVideoCacheService · VideoPrefetchService providers</span></td>
+      <td><span class="now">VideoFeedRepository + VideoFeedController..startSuggestedFeed()</span></td>
+      <td><span class="badge b-rewrite">REWRITE</span></td>
+      <td>3 old providers removed. <code>Provider&lt;VideoFeedRepository&gt;</code> + <code>ChangeNotifierProvider&lt;VideoFeedController&gt;</code> with <code>..startSuggestedFeed()</code> cascade. Imports updated.</td>
+    </tr>
+    <tr>
+      <td class="n">17</td>
+      <td><code>recordViewOnce()</code> exception</td>
+      <td><span class="was">Unhandled Firestore exception when rules not deployed</span></td>
+      <td><span class="now">try-catch — local dedup still works</span></td>
+      <td><span class="badge b-fix">BUG FIX</span></td>
+      <td>Wraps <code>service.recordView()</code> in try-catch. <code>viewed.add(videoId)</code> runs before the call — local deduplication is not affected by the Firestore failure.</td>
+    </tr>
+
+  </tbody>
+</table>
+
+<!-- ── PHASE 1O ── -->
+<div class="sec">Phase 1O — Ultra-Low Latency Feed Validation (v15 → v16)</div>
+
+<table class="t">
+  <thead><tr>
+    <th class="n">#</th>
+    <th style="width:22%">Item</th>
+    <th style="width:15%">v15 (before)</th>
+    <th style="width:15%">v16 (after)</th>
+    <th style="width:10%">Type</th>
+    <th>Detail</th>
+  </tr></thead>
+  <tbody>
+
+    <tr><td colspan="6" class="vsec">Thumbnail Pipeline</td></tr>
+    <tr>
+      <td class="n">18</td>
+      <td><code>extractVideoThumbnail.ts</code></td>
+      <td><span class="was">Did not exist</span></td>
+      <td><span class="now">Created</span></td>
+      <td><span class="badge b-new">NEW CF</span></td>
+      <td>Spawns ffmpeg at <code>-ss 0.5</code>. Uploads JPEG to <code>video-thumbnails/{videoId}/thumbnail.jpg</code> with <code>public, max-age=31536000, immutable</code> cache. Returns Firebase Storage download URL.</td>
+    </tr>
+    <tr>
+      <td class="n">19</td>
+      <td><code>processVideoUpload.ts</code> — thumbnail</td>
+      <td><span class="was">No thumbnail extraction on upload</span></td>
+      <td><span class="now">extractThumbnailFromVideo called after doc update</span></td>
+      <td><span class="badge b-fix">UPDATED</span></td>
+      <td>After <code>docRef.update(update)</code>, calls <code>extractThumbnailFromVideo({ videoPath, outputPath })</code>. On success writes <code>thumbnailUrl</code> back with <code>merge: true</code>. Silent catch — video remains playable if ffmpeg fails. Unused <code>import * as admin</code> removed.</td>
+    </tr>
+    <tr>
+      <td class="n">20</td>
+      <td><code>backfillVideoThumbnails.ts</code></td>
+      <td><span class="was">Did not exist</span></td>
+      <td><span class="now">Created — admin onCall</span></td>
+      <td><span class="badge b-new">NEW CF</span></td>
+      <td>Admin-only <code>onCall</code> (europe-west2, 540s, 1GiB). Queries <code>processingStatus=ready</code> + <code>playbackReady=true</code>. Skips docs with existing <code>thumbnailUrl</code>. Returns <code>{ updated, skipped, failed }</code>. Idempotent — safe to run multiple times.</td>
+    </tr>
+
+    <tr><td colspan="6" class="vsec">Validation Cloud Function</td></tr>
+    <tr>
+      <td class="n">21</td>
+      <td><code>phase1oValidation.ts</code></td>
+      <td><span class="was">Did not exist</span></td>
+      <td><span class="now">Created — admin onCall</span></td>
+      <td><span class="badge b-new">NEW CF</span></td>
+      <td>Admin-only <code>onCall</code> (europe-west2, 540s, 512MiB). 4 strict Firestore filters (admin context, not client feed). Checks <code>thumbnailUrl</code>, <code>hlsLowUrl</code>, <code>hlsStandardUrl</code>, <code>hlsHdUrl</code> per doc. Queries last 100 <code>videoPlaybackDiagnostics</code> by <code>createdAt desc</code>. Returns <code>readyForPilot: true</code> only when <code>missingThumbnail=0</code> + <code>missingHls=0</code> + <code>avgLatency≤500ms</code>.</td>
+    </tr>
+
+    <tr><td colspan="6" class="vsec">Exports + Tests + Docs</td></tr>
+    <tr>
+      <td class="n">22</td>
+      <td><code>index.ts</code> exports</td>
+      <td><span class="was">backfillVideoThumbnails + validateUltraLowLatencyFeed1O not exported</span></td>
+      <td><span class="now">Both exported</span></td>
+      <td><span class="badge b-fix">UPDATED</span></td>
+      <td>Added <code>export { backfillVideoThumbnails } from './video/backfillVideoThumbnails'</code> and <code>export { validateUltraLowLatencyFeed1O } from './video/phase1oValidation'</code> to index.ts.</td>
+    </tr>
+    <tr>
+      <td class="n">23</td>
+      <td><code>phase_1o_ultra_low_latency_feed_test.dart</code></td>
+      <td><span class="was">Deleted (git status: D)</span></td>
+      <td><span class="now">Recreated — 3/3 PASS</span></td>
+      <td><span class="badge b-new">RESTORED</span></td>
+      <td>Test 1: 4 required filter strings defined. Test 2: thumbnailUrl, hlsLowUrl, hlsHdUrl in checks list. Test 3: 30-swipe count = 30, maxPlaybackStartMs ≤ 500. All pass.</td>
+    </tr>
+    <tr>
+      <td class="n">24</td>
+      <td><code>phase_1o_ultra_low_latency_feed_checklist.md</code></td>
+      <td><span class="was">Did not exist</span></td>
+      <td><span class="now">Created</span></td>
+      <td><span class="badge b-new">NEW DOC</span></td>
+      <td>Android + iOS 30-swipe test steps. Backend callable pass condition: <code>{ missingThumbnail: 0, missingHls: 0, readyForPilot: true }</code>.</td>
+    </tr>
+
+  </tbody>
+</table>
+
+<!-- ── FILES CHANGED ── -->
+<div class="sec amber">Files Changed — 1N + 1O Only</div>
+<table class="t">
+  <thead><tr>
+    <th style="width:50%">File</th>
+    <th style="width:12%">Phase</th>
+    <th style="width:12%">Action</th>
+    <th>Key change</th>
+  </tr></thead>
+  <tbody>
+    <tr><td><code>lib/features/video_feed/repositories/video_feed_repository.dart</code></td><td>1N</td><td><span class="badge b-new">CREATED</span></td><td>2 equality Firestore filters · client-side _isReady() · 3 streams · markBroken()</td></tr>
+    <tr><td><code>lib/features/video_feed/controllers/video_feed_controller.dart</code></td><td>1N</td><td><span class="badge b-rewrite">REWRITTEN</span></td><td>StreamSubscription · _brokenIds Set · startSuggestedFeed/Following/Trending · reportBroken()</td></tr>
+    <tr><td><code>lib/features/video_playback/controllers/zero_wait_playback_controller.dart</code></td><td>1N</td><td><span class="badge b-rewrite">REWRITTEN</span></td><td>dynamicPreloadAhead · updatePreloadAhead() · httpHeaders on warmVideo() + preloadAround()</td></tr>
+    <tr><td><code>lib/features/video_playback/widgets/zero_wait_video_player.dart</code></td><td>1N</td><td><span class="badge b-rewrite">REWRITTEN</span></td><td>getIdToken() in _warm() · null-ctrl check in _play() · frame listener · _detachFrameListener on dispose</td></tr>
+    <tr><td><code>lib/features/video_feed/screens/video_feed_screen.dart</code></td><td>1N</td><td><span class="badge b-rewrite">REWRITTEN</span></td><td>Map data · VideoModel.fromMap() per item · local _feedType · auth token in _preloadAround() · reportBroken()</td></tr>
+    <tr><td><code>lib/features/video_feed/controllers/video_interaction_controller.dart</code></td><td>1N</td><td><span class="badge b-fix">FIXED</span></td><td>recordViewOnce() wrapped in try-catch</td></tr>
+    <tr><td><code>lib/app/app.dart</code></td><td>1N</td><td><span class="badge b-fix">UPDATED</span></td><td>Removed VideoRepository/OfflineVideoCacheService/VideoPrefetchService · added VideoFeedRepository + VideoFeedController..startSuggestedFeed()</td></tr>
+    <tr><td><code>lib/features/video_playback/services/smart_network_profiler.dart</code></td><td>1N</td><td><span class="badge b-new">CREATED</span></td><td>NetworkClass enum · preloadAheadFor() · shouldFetch()</td></tr>
+    <tr><td><code>backend/firebase_functions/src/video/extractVideoThumbnail.ts</code></td><td>1O</td><td><span class="badge b-new">CREATED</span></td><td>ffmpeg at 0.5s · JPEG → Storage · immutable cache · returns download URL</td></tr>
+    <tr><td><code>backend/firebase_functions/src/video/processVideoUpload.ts</code></td><td>1O</td><td><span class="badge b-fix">UPDATED</span></td><td>Added extractThumbnailFromVideo call after doc update · removed unused admin import</td></tr>
+    <tr><td><code>backend/firebase_functions/src/video/backfillVideoThumbnails.ts</code></td><td>1O</td><td><span class="badge b-new">CREATED</span></td><td>Admin onCall · 540s · 1GiB · idempotent · {updated, skipped, failed}</td></tr>
+    <tr><td><code>backend/firebase_functions/src/video/phase1oValidation.ts</code></td><td>1O</td><td><span class="badge b-new">CREATED</span></td><td>Admin onCall · 4 strict filters · thumbnail+HLS check · avgLatency · readyForPilot</td></tr>
+    <tr><td><code>backend/firebase_functions/src/index.ts</code></td><td>1O</td><td><span class="badge b-fix">UPDATED</span></td><td>Added backfillVideoThumbnails + validateUltraLowLatencyFeed1O exports</td></tr>
+    <tr><td><code>test/phase_1o_ultra_low_latency_feed_test.dart</code></td><td>1O</td><td><span class="badge b-new">RECREATED</span></td><td>3 tests — 3/3 PASS</td></tr>
+    <tr><td><code>docs/validation/phase_1o_ultra_low_latency_feed_checklist.md</code></td><td>1O</td><td><span class="badge b-new">CREATED</span></td><td>Android/iOS 30-swipe steps · pass condition JSON</td></tr>
+    <tr><td colspan="4" style="background:#f9fafb;font-size:11px;color:#6b7280;font-style:italic;padding:7px 10px">Unchanged from v15: financial compliance (100/100) · backend tests (27/27) · all Phase 2–7D code · YCIOS · live streaming · ads · wallet · search</td></tr>
+  </tbody>
+</table>
+
+<!-- VERDICT -->
+<div class="verdict">
+  <p>
+    <strong>Phase 1N closes 5 production bugs</strong> that surfaced when the strict Phase 1N spec was applied to the real yohlab database (composite index error, empty feed from missing Firestore fields, storage 403, blank video detection, broken video re-entry loop). The feed is now stream-based with client-side filtering and a session-local broken-video blocklist.<br><br>
+    <strong>Phase 1O adds the full thumbnail pipeline</strong> (extract on upload + admin backfill callable) and the <code>validateUltraLowLatencyFeed1O</code> admin callable that produces a <code>readyForPilot</code> flag. The Flutter validation test suite passes 3/3. All code is built and exported — deployment and the 30-swipe device test are the only remaining steps before Phase 8.
+  </p>
+</div>
+
+<footer>
+  YohPal Live · v15→v16 Delta Report · 2026-06-28 · commit bf52786 · Phase 1N + 1O only<br>
+  Everything else (Phases 2–7D, YCIOS, financial compliance) is unchanged from v15
+</footer>
+
+<script>
+function downloadHtml(){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([document.documentElement.outerHTML],{type:'text/html'}));
+  a.download='MOBILE_FLUTTER_GAP_REPORT_V16.html';
+  a.click();
+}
+</script>
+</body>
+</html>

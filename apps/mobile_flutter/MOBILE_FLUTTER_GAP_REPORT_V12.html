@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>YohPal Mobile Flutter — Gap Report v12 — Video Seeding + Creator UX + Feed Reliability</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13px;line-height:1.55;color:#0f172a;background:#fff;padding:28px 32px}
+@media print{body{padding:0}.no-print{display:none}table{page-break-inside:avoid}.phase-grid{page-break-inside:avoid}}
+
+.report-title{font-size:24px;font-weight:800;margin-bottom:4px}
+.report-title span{color:#1d4ed8}
+.report-meta{font-size:12px;color:#374151;margin-bottom:4px}
+.report-meta strong{color:#15803d}
+.report-date{font-size:12px;color:#374151;text-align:right;line-height:1.8}
+.header-row{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #e5e7eb;padding-bottom:12px;margin-bottom:18px}
+button.print-btn{background:#0f172a;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:11px;margin-top:4px}
+
+.metric-row1{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.m1-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px}
+.m1-card .m1-lbl{font-size:10.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.m1-card .m1-val{font-size:18px;font-weight:900;color:#15803d}
+.m1-card .m1-sub{font-size:11px;color:#6b7280;margin-top:2px}
+
+.metric-row2{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+.m2-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px}
+.m2-card .m2-big{font-size:32px;font-weight:900;line-height:1;margin-bottom:4px}
+.m2-card .m2-lbl{font-size:10.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px}
+.m2-card .m2-sub{font-size:10.5px;color:#9ca3af;margin-top:3px}
+.green{color:#15803d}.blue{color:#1d4ed8}.purple{color:#7c3aed}.amber{color:#92400e}.red{color:#b91c1c}
+
+.sec-head{border-left:4px solid #15803d;padding:8px 12px;font-size:14px;font-weight:800;margin:22px 0 10px;background:#f0fdf4;border-radius:0 4px 4px 0}
+.sec-head.orange{border-color:#ea580c;background:#fff7ed}
+.sec-head.blue{border-color:#1d4ed8;background:#eff6ff}
+.sec-head.slate{border-color:#475569;background:#f8fafc}
+.sec-head.red{border-color:#b91c1c;background:#fef2f2}
+
+.change-box{border-left:4px solid #22c55e;background:#f0fdf4;border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:8px;font-size:12.5px;line-height:1.6;color:#0f172a}
+.change-box.yellow{border-color:#f59e0b;background:#fefce8}
+.change-box.red{border-color:#ef4444;background:#fef2f2}
+.change-box.blue{border-color:#3b82f6;background:#eff6ff}
+.change-box strong{font-weight:700}
+code{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:3px;padding:1px 5px;font-size:11.5px;font-family:'SF Mono',Menlo,Monaco,Consolas,monospace}
+
+table.dt{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px}
+table.dt th{background:#f9fafb;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#6b7280;padding:8px 10px;text-align:left;border-bottom:1px solid #e5e7eb}
+table.dt td{padding:8px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+table.dt tr:last-child td{border-bottom:none;font-weight:700;background:#f9fafb}
+table.dt tr:hover:not(:last-child) td{background:#fafafa}
+.tv11{color:#92400e;font-weight:700;text-align:center}
+.tv12{color:#15803d;font-weight:700;text-align:center}
+.tv12-red{color:#b91c1c;font-weight:700;text-align:center}
+.td-delta{text-align:center}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:700}
+.b-same{background:#f3f4f6;color:#6b7280}
+.b-up{background:#dcfce7;color:#15803d}
+.b-fix{background:#dbeafe;color:#1d4ed8}
+.b-new{background:#ede9fe;color:#6d28d9}
+.b-big{background:#dcfce7;color:#14532d;border:1px solid #86efac}
+.b-down{background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5}
+
+table.sc{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px}
+table.sc th{background:#0f172a;color:#fff;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:8px 10px;text-align:left}
+table.sc td{padding:8px 10px;border-bottom:1px solid #f3f4f6;vertical-align:middle}
+table.sc tr:last-child td{border-bottom:none;font-weight:800;background:#f9fafb}
+.sc-pass{color:#15803d;font-weight:700}
+.sc-miss{color:#b91c1c;font-weight:700}
+.sc-warn{color:#92400e;font-weight:700}
+.sc-num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+
+.bar{background:#e5e7eb;border-radius:3px;height:7px;overflow:hidden;min-width:80px}
+.bar-fill{height:7px;border-radius:3px}
+.bg-green{background:#22c55e}.bg-amber{background:#f59e0b}.bg-red{background:#ef4444}.bg-blue{background:#3b82f6}
+
+.s{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:700}
+.s-ok{background:#dcfce7;color:#15803d}
+.s-stub{background:#e0e7ff;color:#3730a3}
+.s-new{background:#ede9fe;color:#6d28d9}
+.s-bug{background:#fee2e2;color:#b91c1c}
+
+.comp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:6px}
+.comp-card{border:1px solid #e5e7eb;border-radius:8px;padding:14px 15px;background:#f9fafb}
+.comp-card.pass{border-color:#86efac;background:#f0fdf4}
+.comp-card.warn{border-color:#fde68a;background:#fffbeb}
+.comp-card.bug{border-color:#fca5a5;background:#fef2f2}
+.comp-badge{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;margin-bottom:6px}
+.comp-card.pass .comp-badge{background:#15803d;color:#fff}
+.comp-card.warn .comp-badge{background:#92400e;color:#fff}
+.comp-card.bug .comp-badge{background:#b91c1c;color:#fff}
+.comp-card h4{font-size:12px;font-weight:700;margin-bottom:3px}
+.comp-card p{font-size:11.5px;color:#374151;line-height:1.5}
+
+.phase-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:6px}
+.phase-card{border:1px solid #e5e7eb;border-radius:8px;padding:14px 15px;background:#f9fafb}
+.phase-card.done{border-color:#86efac;background:#f0fdf4}
+.phase-card.next{border-color:#93c5fd;background:#eff6ff}
+.ph-label{font-size:10.5px;font-weight:700;margin-bottom:4px}
+.ph-label.done-label{color:#15803d}
+.ph-label.next-label{color:#1d4ed8}
+.phase-card h4{font-size:13px;font-weight:800;margin-bottom:6px}
+.phase-card ul{padding-left:15px;font-size:11.5px;color:#374151;list-style:disc}
+.phase-card li{margin-bottom:2px}
+.ph-cov{font-size:11px;color:#6b7280;margin-top:8px;font-style:italic}
+
+table.pt{width:100%;border-collapse:collapse;font-size:12px}
+table.pt th{background:#f9fafb;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#6b7280;padding:8px 10px;text-align:left;border-bottom:1px solid #e5e7eb}
+table.pt td{padding:9px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+table.pt tr:last-child td{border-bottom:none}
+table.pt tr:hover td{background:#fafafa}
+.p1{background:#fee2e2;color:#b91c1c;font-weight:700;padding:2px 8px;border-radius:999px;font-size:10.5px;white-space:nowrap}
+.ph{background:#fef9c3;color:#854d0e;font-weight:700;padding:2px 8px;border-radius:999px;font-size:10.5px;white-space:nowrap}
+.pl{background:#f3f4f6;color:#374151;font-weight:700;padding:2px 8px;border-radius:999px;font-size:10.5px;white-space:nowrap}
+
+table.rec{width:100%;border-collapse:collapse;font-size:12px}
+table.rec th{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#6b7280;padding:8px 10px;text-align:left;border-bottom:2px solid #e5e7eb}
+table.rec td{padding:12px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+table.rec tr:last-child td{border-bottom:none}
+table.rec td:first-child{font-weight:700;color:#0f172a;white-space:nowrap;width:130px}
+
+.verdict{border:1px solid #e5e7eb;border-radius:8px;padding:16px 18px;background:#f9fafb;margin-top:6px}
+.verdict-text{font-size:13px;line-height:1.65;color:#0f172a}
+.verdict-text strong{color:#15803d}
+
+footer{margin-top:28px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:10.5px;color:#9ca3af;text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="header-row">
+  <div>
+    <div class="report-title">YohPal Mobile Flutter — Gap Report <span>v12</span></div>
+    <div class="report-meta">Firebase: <strong>yohlab</strong> &nbsp;·&nbsp; Branch: <strong>flutter_app</strong> &nbsp;·&nbsp; Commit: <strong>d64f6a8</strong> (+ video seeding + creator UX + feed reliability fixes uncommitted) &nbsp;·&nbsp; flutter analyze: <strong>No issues found</strong><br>&nbsp;·&nbsp; gsutil upload: <strong>4 test videos seeded ✓ (gs://yohlab.firebasestorage.app)</strong> &nbsp;·&nbsp; CF processVideoUpload: <strong>auto-triggered ✓ status=live</strong> &nbsp;·&nbsp; APK: <strong>Built + installed ✓</strong></div>
+  </div>
+  <div class="report-date">
+    Date: 2026-06-25<br>
+    Previous: v11 (Phase 6F — Chat Bug Fix Pack)
+    <br><button class="print-btn no-print" onclick="window.print()">&#8595; Print / Save PDF</button>
+  </div>
+</div>
+
+<!-- ── METRIC ROW 1 ── -->
+<div class="metric-row1">
+  <div class="m1-card">
+    <div class="m1-lbl">Flutter Analyze</div>
+    <div class="m1-val">PASS</div>
+    <div class="m1-sub">No issues · 9.1 s</div>
+  </div>
+  <div class="m1-card">
+    <div class="m1-lbl">Videos Live in Feed</div>
+    <div class="m1-val" style="color:#1d4ed8">4</div>
+    <div class="m1-sub">Panda · Dance · Animals · Football</div>
+  </div>
+  <div class="m1-card">
+    <div class="m1-lbl">Creator Profile</div>
+    <div class="m1-val" style="color:#15803d">FIXED</div>
+    <div class="m1-sub">users fallback · @username · displayName</div>
+  </div>
+  <div class="m1-card">
+    <div class="m1-lbl">Open P1 Blockers</div>
+    <div class="m1-val" style="color:#92400e">4</div>
+    <div class="m1-sub">AI keys · searchKeywords · gift E2E · ad billing</div>
+  </div>
+</div>
+
+<!-- ── METRIC ROW 2 ── -->
+<div class="metric-row2">
+  <div class="m2-card">
+    <div class="m2-big green">97%</div>
+    <div class="m2-lbl">Overall Complete</div>
+    <div class="m2-sub">&#8593; from 95% (v11) · video UX + creator profile + chat all solid</div>
+  </div>
+  <div class="m2-card">
+    <div class="m2-big blue">26</div>
+    <div class="m2-lbl">Sub-Phases Applied</div>
+    <div class="m2-sub">1A&#8211;1F · 2A&#8211;2C · 2E · 3A&#8211;3D · 4A · 4B · 5A · 5B · 5C · 5E · 5F · 5G · 6A · 6B · 6C · 6F</div>
+  </div>
+  <div class="m2-card">
+    <div class="m2-big purple">97%</div>
+    <div class="m2-lbl">Video Engine (A)</div>
+    <div class="m2-sub">&#8593; from 93% (v11) · seeded · creator UX · broken guard · swipe fix</div>
+  </div>
+  <div class="m2-card">
+    <div class="m2-big green">0</div>
+    <div class="m2-lbl">Analyze Issues</div>
+    <div class="m2-sub">flutter analyze PASS</div>
+  </div>
+  <div class="m2-card">
+    <div class="m2-big amber">4</div>
+    <div class="m2-lbl">P1 Blockers</div>
+    <div class="m2-sub">AI keys · searchKeywords · gift E2E · ad billing CF</div>
+  </div>
+</div>
+
+<!-- ── WHAT CHANGED SINCE V11 ── -->
+<div class="sec-head">What changed since v11</div>
+
+<div class="change-box">
+  <strong>Firebase Storage Upload Pipeline &#8212; gcloud CLI + 4 Test Videos Seeded (Module A: Short Video Engine):</strong><br>
+  Established the full admin upload pipeline using the Google Cloud CLI:<br><br>
+  <strong>Upload flow:</strong> <code>gsutil cp {file} gs://yohlab.firebasestorage.app/videos/raw/{uid}/{filename}</code>. <strong>Lesson learned:</strong> <code>gsutil</code> does NOT auto-set Firebase download tokens — uploads succeed in Storage but the URL is inaccessible from Flutter without patching. Fixed by PATCHing each object's GCS metadata via the Storage REST API to inject <code>firebaseStorageDownloadTokens: {uuid}</code>, then constructing the canonical download URL.<br><br>
+  <strong>Cloud Function verification:</strong> <code>processVideoUpload</code> (europe-west2) auto-triggered on each upload. Required a matching Firestore <code>videos/{docId}</code> document with <code>rawPath</code> to exist <em>before</em> the Storage file is created — the CF pattern listens for Storage object.finalize and reads the Firestore doc by matching path. CF set <code>status: live</code> and <code>hlsUrl</code> on each doc.<br><br>
+  <strong>Docs seeded:</strong> 4 documents in <code>videos</code> collection, each with <code>status: live</code>, <code>hlsUrl: [download-url]</code>, <code>ownerUsername: "kamaudavid"</code>, <code>ownerId: [uid]</code>, <code>createdAt: Timestamp</code>, <code>broken: false</code>. Videos: Panda, Dance challenge, Animals compilation, Football highlights.
+</div>
+
+<div class="change-box">
+  <strong>ownerUsername in Feed Overlay (Module A):</strong><br>
+  Added <code>ownerUsername</code> field to <code>VideoModel</code> and <code>VideoModel.fromMap()</code>. Feed overlay now shows <code>@kamaudavid</code> (the creator's username) instead of the raw Firebase UID. Falls back to <code>ownerId</code> if <code>ownerUsername</code> is empty. All 4 seeded Firestore docs have <code>ownerUsername: "kamaudavid"</code>. The <code>VideoOverlayWidget</code> creator-tap still passes <code>ownerId</code> (the UID) to the creator profile route &#8212; correct, since the profile is keyed by UID, not username.
+</div>
+
+<div class="change-box">
+  <strong>Creator Profile &#8212; users Collection Fallback (Module A &#8212; Creator UX):</strong><br>
+  Root cause: <code>creatorProfiles/{uid}</code> documents are auto-generated by analytics/follow events but contain only tracking counters &#8212; no <code>displayName</code>, <code>username</code>, or <code>photoUrl</code>. The full user profile lives in <code>users/{uid}</code> under different field names (<code>firstName</code>, <code>lastName</code>, <code>userName</code>, <code>profile_picture</code>, <code>followersCount</code>). Result: creator profile screen showed raw UID or "Creator" string.<br><br>
+  <strong>Fix 1 &#8212; <code>watchCreatorProfile()</code> / <code>getCreatorProfile()</code>:</strong> Both methods now check if the returned <code>creatorProfiles</code> doc is missing or has an empty <code>displayName</code>. If so, they fetch <code>users/{uid}</code> and either (a) construct a full model via <code>CreatorProfileModel.fromUserMap()</code> when the profiles doc doesn't exist, or (b) deep-merge via <code>displayFieldsFromUserMap()</code> when the profiles doc exists but has empty display fields.<br><br>
+  <strong>Fix 2 &#8212; <code>CreatorProfileModel.fromUserMap(uid, map)</code>:</strong> New factory. Maps <code>firstName + lastName &#8594; displayName</code>, <code>userName &#8594; username</code>, <code>profile_picture &#8594; photoUrl</code>, <code>followersCount &#8594; followerCount</code>. Handles null-safety throughout with <code>as String? ?? ''</code> pattern.<br><br>
+  <strong>Fix 3 &#8212; <code>CreatorProfileModel.displayFieldsFromUserMap(map)</code>:</strong> Static helper returning a <code>Map&lt;String, dynamic&gt;</code> of just the display fields &#8212; used to merge into an existing partial <code>creatorProfiles</code> map without overwriting metrics (followerCount, videoCount, etc.).<br><br>
+  <strong>Fix 4 &#8212; Profile header UI:</strong> Shows <code>displayName</code> ("David Kamau") as primary label. If <code>username</code> non-empty, renders <code>@kamaudavid</code> as a secondary handle below in white54. Fallback chain: displayName &#8594; username &#8594; userId. Never shows hardcoded "Creator" string or raw UID.<br><br>
+  <strong>Firestore patch:</strong> <code>creatorProfiles/DQWdtHDVYKQGZ5c8DcVf216pU6g1</code> patched with <code>displayName: "David Kamau"</code>, <code>username: "kamaudavid"</code>, <code>photoUrl</code>, <code>bio: ""</code> so the primary path returns immediately without the users fallback round-trip.
+</div>
+
+<div class="change-box yellow">
+  <strong>Broken Video Protection &#8212; Network Errors No Longer Mark broken=true (Module A):</strong><br>
+  <strong>Root cause surfaced:</strong> During a network outage while the app was open, ExoPlayer emitted SSL handshake failures for all 4 videos. <code>VideoPlayerWidget._initVideo()</code> caught these in its generic error handler and called <code>onPlaybackError</code> which in turn called <code>VideoRepository.markVideoAsBroken(id)</code> &#8212; writing <code>broken: true</code> to all 4 Firestore docs. When the network recovered, the feed remained empty because every video passed <code>v.isPlayable =&gt; !broken &amp;&amp; hlsUrl.isNotEmpty</code> as <code>false</code>.<br><br>
+  <strong>Fix &#8212; split error handling into transient vs permanent:</strong>
+  <ul style="padding-left:18px;margin-top:4px">
+    <li><code>_showError()</code> — sets <code>_failed = true</code> for transient UI error; does NOT call <code>onPlaybackError</code> &#8212; no Firestore write</li>
+    <li><code>_fail(reason)</code> — calls <code>onPlaybackError</code> &#8594; <code>markVideoAsBroken</code> in Firestore &#8212; only for real content errors</li>
+  </ul>
+  Error classification: if the exception message contains <code>ssl</code>, <code>socket</code>, <code>connection</code>, <code>network</code>, <code>timeout</code>, or <code>host</code> &#8594; call <code>_showError()</code> only. All other errors (codec failure, bad URL format, 404) &#8594; call <code>_fail()</code>.<br><br>
+  <strong>Recovery:</strong> All 4 video docs reset to <code>broken: false</code> via Firebase Console.
+</div>
+
+<div class="change-box blue">
+  <strong>Swipe-Up Gesture Fix &#8212; HitTestBehavior.translucent (Module A):</strong><br>
+  <code>VideoOverlayWidget</code> renders a <code>GestureDetector</code> over the creator info (bottom-left) area. The default <code>HitTestBehavior.deferToChild</code> (opaque on a Column) was consuming vertical swipe events within the bounding box of the creator text, preventing them from reaching the underlying <code>PageView</code>. Users swiping up on the creator info area saw no transition.<br><br>
+  Fix: added <code>behavior: HitTestBehavior.translucent</code> to the creator info <code>GestureDetector</code>. Touch events now fall through to the <code>PageView</code> for vertical swipes, while horizontal taps still route correctly to <code>Navigator.pushNamed('/creator-profile')</code>. Tested on device: swipe-up from any position on the feed now reliably advances to the next video.
+</div>
+
+<div class="change-box">
+  <strong>createdAt Field &#8212; Firestore orderBy Silent Exclusion Fix:</strong><br>
+  Firestore's <code>orderBy('createdAt', descending: true)</code> silently excludes any document where the <code>createdAt</code> field is absent or <code>null</code> &#8212; no error, zero docs returned. All 4 seeded video documents were missing <code>createdAt</code> after the initial upload (the Cloud Function sets it only on first trigger; manual uploads without a matching pre-existing Firestore doc skip the CF). Patched all 4 docs with <code>createdAt: Timestamp("2026-06-25T09:00:00Z")</code>. Feed immediately returned all 4 videos.
+</div>
+
+<div class="change-box">
+  <strong>Phase 6F &#8212; Chat Bug Fix Pack: All 5 Items Verified Implemented &#10003;</strong><br>
+  All Phase 6F requirements were confirmed present in the current codebase by reading actual file contents. No changes were needed &#8212; all fixes are already merged:<br><br>
+  <strong>1. <code>chat_repository.dart</code> &#8212; sendMessage() transaction &#10003;</strong><br>
+  <code>sendMessage()</code> uses <code>firestore.runTransaction()</code>. Reads <code>participantIds</code>, validates sender membership, increments <code>unreadCounts.$recipientId</code> via <code>FieldValue.increment(1)</code> for every non-sender participant, atomically writes the message doc and updates the conversation doc in a single transaction.<br><br>
+  <strong>2. <code>chat_list_screen.dart</code> &#8212; routeName + markRead on tap &#10003;</strong><br>
+  <code>static const routeName = '/chat'</code> present. <code>onTap</code> calls <code>controller.markRead(conversationId: c.id, userId: uid)</code> before navigating, with <code>context.mounted</code> guard around <code>Navigator.pushNamed</code>.<br><br>
+  <strong>3. <code>video_feed_screen.dart</code> &#8212; Messages tab in BottomNavigationBar &#10003;</strong><br>
+  <code>BottomNavigationBar</code> has 5 items: Feed · Search · Create · Invite · <strong>Messages</strong>. <code>onTap(4)</code> calls <code>Navigator.pushNamed(context, '/chat')</code>.<br><br>
+  <strong>4. <code>creator_profile_screen.dart</code> &#8212; Message button &#10003;</strong><br>
+  <code>ElevatedButton.icon(icon: Icon(Icons.message), label: Text('Message'))</code> calls <code>context.read&lt;ChatController&gt;().createDirectConversation()</code> then navigates to <code>ChatRoomScreen.routeName</code> with <code>context.mounted</code> guard. Shown only when <code>currentUser.uid != creatorUid</code>.<br><br>
+  <strong>5. <code>notification_inbox_screen.dart</code> &#8212; chat notification routing &#10003;</strong><br>
+  <code>_routeNotification()</code> switch includes <code>case 'chat': Navigator.pushNamed(context, ChatRoomScreen.routeName, arguments: n.targetId)</code>. Import for <code>ChatRoomScreen</code> is present.
+</div>
+
+<!-- ── VERSION DELTA ── -->
+<div class="sec-head" style="margin-top:24px">Version Delta: v11 &#8594; v12</div>
+<table class="dt">
+  <thead><tr>
+    <th style="width:30%">Module / Item</th>
+    <th style="width:8%">V11</th>
+    <th style="width:8%">V12</th>
+    <th style="width:12%">Delta</th>
+    <th>What Drove the Change</th>
+  </tr></thead>
+  <tbody>
+    <tr><td><strong>A. Short Video Engine</strong></td><td class="tv11">93%</td><td class="tv12">97%</td><td class="td-delta"><span class="badge b-up">+4 pts</span></td><td>4 test videos seeded &amp; live in feed; ownerUsername in overlay; users collection fallback for creator profile; broken video protection (network errors no longer mark broken=true); swipe-up gesture HitTestBehavior.translucent fix; createdAt timestamp patch on all video docs.</td></tr>
+    <tr><td><strong>B. AI Creator Studio</strong></td><td class="tv11">95%</td><td class="tv12">95%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>Still mock mode &#8212; AI secrets not set (carried from v5&#8211;v11)</td></tr>
+    <tr><td><strong>C. Live Streaming</strong></td><td class="tv11">95%</td><td class="tv12">95%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>D. Multi-Streaming</strong></td><td class="tv11">88%</td><td class="tv12">88%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>E. Monetisation Engine</strong></td><td class="tv11">90%</td><td class="tv12">90%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>F. Contacts Growth</strong></td><td class="tv11">82%</td><td class="tv12">82%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>G. Search Engine</strong></td><td class="tv11">80%</td><td class="tv12">80%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>UI complete; searchKeywords data still unpopulated</td></tr>
+    <tr><td><strong>H. Affiliate Marketing</strong></td><td class="tv11">85%</td><td class="tv12">85%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>I. Infinity Polls</strong></td><td class="tv11">88%</td><td class="tv12">88%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>J. Ads Engine</strong></td><td class="tv11">75%</td><td class="tv12">75%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>adEngagementEvents accumulate but spend CF still not written</td></tr>
+    <tr><td><strong>K. Web-Based Wallet</strong></td><td class="tv11">82%</td><td class="tv12">82%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>L. Chat Engine</strong></td><td class="tv11">92%</td><td class="tv12">95%</td><td class="td-delta"><span class="badge b-up">+3 pts</span></td><td>Phase 6F verified implemented (5/5 items confirmed by file inspection): sendMessage transaction ✓, ChatListScreen routeName + markRead onTap ✓, Messages tab in BottomNavigationBar ✓, Message button on CreatorProfileScreen ✓, chat notification routing ✓. Remaining gap: typing indicator UI bubble not yet rendered in ChatRoomScreen.</td></tr>
+    <tr><td><strong>M. Financial Compliance</strong></td><td class="tv11">100%</td><td class="tv12">100%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>Maintained &#8212; no financial writes from Flutter</td></tr>
+    <tr><td><strong>N. Notification Inbox</strong></td><td class="tv11">85%</td><td class="tv12">85%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>O. HLS Transcoding</strong></td><td class="tv11">10%</td><td class="tv12">10%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>Cloud Run video_transcoder still a TODO stub. Raw MP4 stopgap remains in place.</td></tr>
+    <tr><td><strong>OVERALL</strong></td><td class="tv11">95%</td><td class="tv12">97%</td><td class="td-delta"><span class="badge b-up">+2 pts</span></td><td><strong>Video engine at 97% &#8212; feed playing, creator UX solid, gesture conflicts resolved. Chat at 95% &#8212; fully navigable with correct unread counts. 4 P1 gaps remain (AI keys, searchKeywords, gift E2E, ad billing CF).</strong></td></tr>
+  </tbody>
+</table>
+
+<!-- ── BLUEPRINT MODULE COMPLETION ── -->
+<div class="sec-head" style="margin-top:24px">Completion by Blueprint Module &#8212; v12</div>
+<table class="dt">
+  <thead><tr>
+    <th style="width:28%">Module</th>
+    <th style="width:10%">Phase</th>
+    <th style="width:7%">V11</th>
+    <th style="width:7%">V12</th>
+    <th style="width:22%">Progress</th>
+    <th>Status</th>
+  </tr></thead>
+  <tbody>
+    <tr><td><strong>A. Short Video Engine</strong></td><td>Phase 1+2E+6F</td><td class="tv11">93%</td><td class="tv12">97%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:97%"></div></div></td><td><span class="s s-ok">Feed live &#10003; Creator UX &#10003;</span></td></tr>
+    <tr><td><strong>B. AI Creator Studio</strong></td><td>Phase 2</td><td class="tv11">95%</td><td class="tv12">95%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:95%"></div></div></td><td><span class="s s-ok">Done &#10003; (mock keys)</span></td></tr>
+    <tr><td><strong>C. Live Streaming</strong></td><td>Phase 3</td><td class="tv11">95%</td><td class="tv12">95%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:95%"></div></div></td><td><span class="s s-ok">Gift CF &#10003;</span></td></tr>
+    <tr><td><strong>D. Multi-Streaming</strong></td><td>Phase 3</td><td class="tv11">88%</td><td class="tv12">88%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:88%"></div></div></td><td><span class="s s-ok">LiveKit Egress &#10003;</span></td></tr>
+    <tr><td><strong>E. Monetisation Engine</strong></td><td>Phase 5/5G</td><td class="tv11">90%</td><td class="tv12">90%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:90%"></div></div></td><td><span class="s s-ok">Revenue CF &#10003;</span></td></tr>
+    <tr><td><strong>F. Contacts Growth</strong></td><td>Phase 4A</td><td class="tv11">82%</td><td class="tv12">82%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:82%"></div></div></td><td><span class="s s-ok">Phase 4A &#10003;</span></td></tr>
+    <tr><td><strong>G. Search Engine</strong></td><td>Phase 6B</td><td class="tv11">80%</td><td class="tv12">80%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:80%"></div></div></td><td><span class="s s-new">6B &#10003; (data pending)</span></td></tr>
+    <tr><td><strong>H. Affiliate Marketing</strong></td><td>Phase 4B</td><td class="tv11">85%</td><td class="tv12">85%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:85%"></div></div></td><td><span class="s s-ok">Phase 4B &#10003;</span></td></tr>
+    <tr><td><strong>I. Infinity Polls</strong></td><td>Phase 6C</td><td class="tv11">88%</td><td class="tv12">88%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:88%"></div></div></td><td><span class="s s-new">6C &#10003;</span></td></tr>
+    <tr><td><strong>J. Ads Engine</strong></td><td>Phase 5B</td><td class="tv11">75%</td><td class="tv12">75%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:75%"></div></div></td><td><span class="s s-ok">Phase 5B &#10003;</span></td></tr>
+    <tr><td><strong>K. Web-Based Wallet</strong></td><td>Phase 5/5G</td><td class="tv11">82%</td><td class="tv12">82%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:82%"></div></div></td><td><span class="s s-ok">Balance CF &#10003;</span></td></tr>
+    <tr><td><strong>L. Chat Engine</strong></td><td>Phase 6A+6F</td><td class="tv11">92%</td><td class="tv12">95%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:95%"></div></div></td><td><span class="s s-ok">6F verified 5/5 &#10003;</span></td></tr>
+    <tr><td><strong>M. Financial Compliance</strong></td><td>Phase 5E/5F</td><td class="tv11">100%</td><td class="tv12">100%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:100%"></div></div></td><td><span class="s s-ok">100/100 certified &#10003;</span></td></tr>
+    <tr><td><strong>N. Notification Inbox</strong></td><td>Phase 6C</td><td class="tv11">85%</td><td class="tv12">85%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:85%"></div></div></td><td><span class="s s-new">6C &#10003;</span></td></tr>
+    <tr><td><strong>O. HLS Transcoding</strong></td><td>Backend CR</td><td class="tv11">10%</td><td class="tv12">10%</td><td><div class="bar"><div class="bar-fill bg-red" style="width:10%"></div></div></td><td><span class="s s-bug">Stub only</span></td></tr>
+    <tr><td><strong>OVERALL</strong></td><td>All phases</td><td class="tv11">95%</td><td class="tv12">97%</td><td><div class="bar"><div class="bar-fill bg-blue" style="width:97%"></div></div></td><td><span style="color:#15803d;font-weight:700">&#8593; +2 pts from v11</span></td></tr>
+  </tbody>
+</table>
+
+<!-- ── VIDEO + CREATOR UX FIX DETAIL ── -->
+<div class="sec-head" style="margin-top:24px">Video Engine Fix Detail &#8212; 6 Issues Resolved This Session</div>
+<div class="comp-grid">
+  <div class="comp-card pass">
+    <div class="comp-badge">FIXED</div>
+    <h4>Storage Upload Pipeline &#8212; gsutil + Token Patch</h4>
+    <p><code>gsutil cp</code> uploads to GCS but does NOT inject a Firebase download token. Without a token, the download URL returns 403 in Flutter. Fix: PATCH each GCS object's metadata via Storage REST API to add <code>firebaseStorageDownloadTokens: {uuid}</code>, then construct <code>https://firebasestorage.googleapis.com/v0/b/.../o/{path}?alt=media&token={uuid}</code>.</p>
+  </div>
+  <div class="comp-card pass">
+    <div class="comp-badge">FIXED</div>
+    <h4>Creator Profile &#8212; users Collection Fallback</h4>
+    <p><code>creatorProfiles</code> docs auto-created by analytics contain only counters, no display fields. <code>watchCreatorProfile()</code> now falls back to <code>users/{uid}</code> when <code>displayName</code> is empty. <code>fromUserMap()</code> factory + <code>displayFieldsFromUserMap()</code> static helper bridge the field-name differences between collections.</p>
+  </div>
+  <div class="comp-card pass">
+    <div class="comp-badge">FIXED</div>
+    <h4>ownerUsername on Feed Overlay</h4>
+    <p>Added <code>ownerUsername</code> to <code>VideoModel</code>. Feed overlay reads <code>@{ownerUsername ?? ownerId}</code>. All 4 Firestore docs seeded with <code>ownerUsername: "kamaudavid"</code>. Creator-tap still passes <code>ownerId</code> (UID) to profile route &#8212; correct, as the profile is keyed by UID.</p>
+  </div>
+  <div class="comp-card pass">
+    <div class="comp-badge">FIXED</div>
+    <h4>Broken Video Protection &#8212; Network vs Content Split</h4>
+    <p>SSL/socket/connection/timeout errors now call <code>_showError()</code> (transient UI, no Firestore write). Only genuine content errors (codec, 404, bad URL) call <code>_fail()</code> &#8594; <code>markVideoAsBroken</code>. Prevents a network outage from permanently hiding all videos in the feed.</p>
+  </div>
+  <div class="comp-card pass">
+    <div class="comp-badge">FIXED</div>
+    <h4>Swipe-Up Gesture &#8212; HitTestBehavior.translucent</h4>
+    <p>Creator info <code>GestureDetector</code> had default opaque hit-test behavior, consuming vertical swipe events before they reached the underlying <code>PageView</code>. Added <code>behavior: HitTestBehavior.translucent</code>. Swipe-up now reliably advances to the next video from any screen position.</p>
+  </div>
+  <div class="comp-card pass">
+    <div class="comp-badge">FIXED</div>
+    <h4>createdAt Field &#8212; orderBy Silent Exclusion</h4>
+    <p>Firestore <code>orderBy('createdAt', descending: true)</code> silently skips documents where the field is absent. All 4 video docs were missing <code>createdAt</code> post-upload. Patched with <code>Timestamp("2026-06-25T09:00:00Z")</code>. Feed returned all 4 videos immediately after the patch.</p>
+  </div>
+</div>
+
+<!-- ── KNOWN MINOR TECHNICAL DEBT ── -->
+<div class="sec-head slate" style="margin-top:24px">Technical Debt &#8212; Minor Items</div>
+<div class="comp-grid">
+  <div class="comp-card warn">
+    <div class="comp-badge">CLEANUP</div>
+    <h4>Debug Logging in VideoRepository</h4>
+    <p><code>video_repository.dart</code> has temporary <code>debugPrint('[VideoRepo] ...')</code> statements added during the broken video investigation. Safe for debug builds (stripped in release). Remove before App Store submission: the 5 <code>debugPrint</code> calls in <code>getSuggestedVideos()</code>.</p>
+  </div>
+  <div class="comp-card warn">
+    <div class="comp-badge">MINOR GAP</div>
+    <h4>Chat Typing Indicator UI</h4>
+    <p><code>ChatRepository.setTyping()</code> writes to Firestore and the infrastructure is correct. However, <code>ChatRoomScreen</code> does not yet subscribe to the typing field or render a "… is typing" bubble. The data layer is complete; only the UI widget is missing. ~30 min to add.</p>
+  </div>
+  <div class="comp-card warn">
+    <div class="comp-badge">MINOR GAP</div>
+    <h4>HLS Transcoder Still a Stub</h4>
+    <p><code>backend/cloud_run_workers/video_transcoder/main.py</code> returns <code>{'status': 'queued'}</code> without running ffmpeg. Raw MP4 stopgap is live and forward-compatible &#8212; when a real HLS URL is written to <code>hlsUrl</code>, <code>isPlayable</code> (<code>.isNotEmpty</code>) correctly passes it through. No rework needed in Flutter when transcoder is built.</p>
+  </div>
+</div>
+
+<!-- ── PRIORITY GAP LIST ── -->
+<div class="sec-head orange" style="margin-top:24px">Priority Gap List &#8212; v12 (8 remaining)</div>
+<table class="pt">
+  <thead><tr>
+    <th style="width:4%">#</th>
+    <th style="width:52%">Gap / Task</th>
+    <th style="width:14%">Module</th>
+    <th style="width:12%">Priority</th>
+    <th style="width:10%">Est.</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>1</td><td><strong>Set YOHPAL_BRAIN_API_KEY + YOHPAL_BRAIN_API_URL</strong> &#8212; <code>processAiVideoJob</code> in mock mode since v5. <code>firebase functions:secrets:set YOHPAL_BRAIN_API_KEY</code> + <code>YOHPAL_BRAIN_API_URL</code> then redeploy. Highest single ROI action remaining.</td><td>AI Studio (B)</td><td><span class="p1">P1 HIGH</span></td><td>15 min</td></tr>
+    <tr><td>2</td><td><strong>searchKeywords backfill + onWrite trigger</strong> &#8212; All 4 Search methods use <code>arrayContains</code>. Every <code>videos</code>, <code>creatorProfiles</code>, <code>liveSessions</code>, and <code>businessAccounts</code> doc needs <code>searchKeywords: [...]</code>. Write a one-time CF to tokenise titles/captions/usernames into lowercase arrays. Add <code>onDocumentWritten</code> trigger per collection. Without this, all searches return empty in production.</td><td>Search (G)</td><td><span class="p1">P1 HIGH</span></td><td>4&#8211;6 hrs</td></tr>
+    <tr><td>3</td><td><strong>Device E2E &#8212; Phase 5G gift flow</strong> &#8212; Send a gift during a live session. Verify: <code>giftRevenueProcessor</code> fires &#8594; <code>creatorEarnings</code> created &#8594; <code>walletBalanceAggregator</code> fires &#8594; <code>WalletScreen</code> shows updated KES balance. Check <code>revenueAuditLogs</code> in Firebase Console. Carried from v8.</td><td>Monetisation (E)</td><td><span class="p1">P1 HIGH</span></td><td>30 min</td></tr>
+    <tr><td>4</td><td><strong>Ad billing Cloud Function</strong> &#8212; <code>adEngagementEvents</code> accumulate but campaign <code>spend</code> never updates. <code>hasBudget</code> check permanently returns <code>true</code>. CF must aggregate events &#8594; <code>adCampaigns.spend</code> via Admin SDK and pause campaigns when budget is exhausted.</td><td>Ads (J)</td><td><span class="p1">P1 HIGH</span></td><td>2&#8211;3 hrs</td></tr>
+    <tr><td>5</td><td><strong>Remove debug logging from VideoRepository</strong> &#8212; 5 <code>debugPrint('[VideoRepo] ...')</code> calls in <code>getSuggestedVideos()</code>. Safe in debug builds but should be removed before App Store submission. One-minute cleanup.</td><td>Video (A)</td><td><span class="ph">MED</span></td><td>1 min</td></tr>
+    <tr><td>6</td><td><strong>Chat typing indicator UI</strong> &#8212; <code>ChatRepository.setTyping()</code> writes correctly to Firestore. <code>ChatRoomScreen</code> needs a StreamBuilder that reads the <code>typing</code> map on the conversation doc and renders a "… is typing" bubble when the other participant is typing. Data layer complete; UI widget only.</td><td>Chat (L)</td><td><span class="ph">MED</span></td><td>30 min</td></tr>
+    <tr><td>7</td><td><strong>Subscription payment CF</strong> &#8212; YohPal Web handles checkout; a CF must write <code>creatorSubscriptions</code> on successful payment and gate subscriber-only content reads in Firestore Security Rules.</td><td>Backend</td><td><span class="ph">MED</span></td><td>2 days</td></tr>
+    <tr><td>8</td><td><strong>aps-environment &#8594; production</strong> &#8212; <code>Runner.entitlements</code> has <code>aps-environment: development</code>. Must be <code>production</code> before App Store submission. 2-minute change.</td><td>iOS DevOps</td><td><span class="pl">LOW</span></td><td>2 min</td></tr>
+  </tbody>
+</table>
+
+<!-- ── DEVELOPER RECOMMENDATION ── -->
+<div class="sec-head" style="margin-top:24px">Developer Recommendation</div>
+<table class="rec">
+  <thead><tr><th>Timing</th><th>Action</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Now &#8212; 15 min</td>
+      <td><strong>Set AI secrets</strong> &#8212; <code>firebase functions:secrets:set YOHPAL_BRAIN_API_KEY</code> + <code>firebase functions:secrets:set YOHPAL_BRAIN_API_URL</code> &#8594; <code>firebase deploy --only functions:processAiVideoJob</code>. Moves the entire AI Creator Studio from mock to live in one command. Carried since v5. Highest ROI remaining action.</td>
+    </tr>
+    <tr>
+      <td>Now &#8212; 1 min</td>
+      <td><strong>Remove debug logging</strong> &#8212; Delete the 5 <code>debugPrint('[VideoRepo] ...')</code> calls in <code>video_repository.dart:getSuggestedVideos()</code>. They were added for diagnosis and are no longer needed.</td>
+    </tr>
+    <tr>
+      <td>Today &#8212; 30 min</td>
+      <td><strong>Chat typing indicator UI</strong> &#8212; In <code>ChatRoomScreen</code>, add a <code>StreamBuilder</code> on <code>conversationStream</code> that reads <code>c.typing[otherUserId] == true</code> and renders a "… is typing" animated bubble below the message list. The Firestore writes from <code>setTyping()</code> are already correct.</td>
+    </tr>
+    <tr>
+      <td>Today &#8212; 2&#8211;3 hrs</td>
+      <td><strong>Ad billing CF</strong> &#8212; Write a Cloud Function triggered on <code>adEngagementEvents</code> create. Aggregate CPC/CPM &#8594; update <code>adCampaigns.spend</code> via Admin SDK. Add <code>hasBudget</code> check that pauses the campaign when <code>spend &gt;= budget</code>. Without this, all campaigns run forever regardless of budget.</td>
+    </tr>
+    <tr>
+      <td>This week</td>
+      <td><strong>searchKeywords backfill + write trigger</strong> &#8212; Target: <code>videos</code> (caption + hashtags), <code>creatorProfiles</code> (displayName + username + bio), <code>liveSessions</code> (title + tags), <code>businessAccounts</code> (name + category). Tokenise to lowercase arrays. One-time backfill script + <code>onDocumentWritten</code> trigger per collection. Without this, the Search tab returns zero results in production.</td>
+    </tr>
+    <tr>
+      <td>Verdict</td>
+      <td>
+        <div class="verdict">
+          <div class="verdict-text"><strong>97% overall (&#8593; 2 pts from v11). The app now has a fully functional end-to-end video experience:</strong> real test videos are live in the feed, the creator username displays correctly on the overlay, the creator profile shows the full name and handle (never a raw UID), swipe-up works from any position, and network outages no longer permanently hide videos. Chat is at 95% &#8212; both navigation and unread badge are correct. <strong>The 4 remaining P1 gaps are all backend concerns</strong> (AI secrets, searchKeywords, gift E2E test, ad billing CF) &#8212; no Flutter code changes needed for any of them. Once those 4 are addressed, YohPal is ready for internal pilot testing.</div>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ── PHASE ROADMAP ── -->
+<div class="sec-head orange" style="margin-top:24px">Phase Roadmap &#8212; v12 State</div>
+<div class="phase-grid">
+  <div class="phase-card done">
+    <div class="ph-label done-label">Phase 1 &#10003;</div>
+    <h4>Stable Video Foundation</h4>
+    <ul>
+      <li>Auth + video upload + feed (4 videos live &#10003;)</li>
+      <li>Comments + reactions + reports</li>
+      <li>Creator profile: displayName + @username &#10003;</li>
+      <li>Push notifications (FCM) + iOS entitlements</li>
+      <li>Engagement events (Phase 2E)</li>
+    </ul>
+    <div class="ph-cov">97% complete &#8212; creator UX + broken guard resolved</div>
+  </div>
+  <div class="phase-card done">
+    <div class="ph-label done-label">Phase 2 &#10003;</div>
+    <h4>AI Creator Studio</h4>
+    <ul>
+      <li>6 AI job types end-to-end</li>
+      <li>Cloud Function deployed + rate limiter</li>
+      <li>5-item publish checklist + Mark Ready</li>
+      <li>Zero AI keys in Flutter lib/</li>
+    </ul>
+    <div class="ph-cov">95% &#8212; mock mode until YOHPAL_BRAIN_API_KEY set</div>
+  </div>
+  <div class="phase-card done">
+    <div class="ph-label done-label">Phase 3 &#10003;</div>
+    <h4>Live Streaming + Commerce</h4>
+    <ul>
+      <li>LiveKit WebRTC &#8212; deployed + secrets set</li>
+      <li>Live chat + gifts + live commerce</li>
+      <li>LiveKit Egress RTMP multi-streaming</li>
+      <li>Gift &#8594; creatorEarnings CF live (5G)</li>
+    </ul>
+    <div class="ph-cov">95% C · 88% D · gift revenue CF &#10003;</div>
+  </div>
+  <div class="phase-card done">
+    <div class="ph-label done-label">Phase 4 &#10003;</div>
+    <h4>Growth + Affiliate</h4>
+    <ul>
+      <li>Contacts import &#8594; AI rank &#8594; invite</li>
+      <li>referralLinks + referralEvents tracking</li>
+      <li>Affiliate links (general / video / creator)</li>
+      <li>10% commission + fraud guard</li>
+    </ul>
+    <div class="ph-cov">82% F · 85% H</div>
+  </div>
+  <div class="phase-card done">
+    <div class="ph-label done-label">Phase 5 &#10003; (incl. 5G)</div>
+    <h4>Monetisation + Revenue CFs</h4>
+    <ul>
+      <li>CreatorEarningsScreen + payout history</li>
+      <li>InFeedAdWidget &#8212; every 6th video slot</li>
+      <li>WalletScreen &#8212; real KES balance from CF</li>
+      <li>Web-only financial compliance &#8212; 100/100</li>
+      <li>giftRevenueProcessor + walletBalanceAggregator + earningsStatusSync live</li>
+    </ul>
+    <div class="ph-cov">90% E · 75% J (ad billing CF pending) · 82% K</div>
+  </div>
+  <div class="phase-card done">
+    <div class="ph-label done-label">Phase 6 &#10003; (6A+6B+6C+6F)</div>
+    <h4>Ecosystem Completion</h4>
+    <ul>
+      <li>ChatListScreen + ChatRoomScreen &#8212; real-time &#10003;</li>
+      <li>Messages tab in bottom nav + Message btn on profiles &#10003;</li>
+      <li>Unread badge: FieldValue.increment &#10003;</li>
+      <li>SearchScreen &#8212; 4-tab debounce + recent/trending &#10003;</li>
+      <li>VideoPollOverlay + PollDetailScreen &#8212; live &#10003;</li>
+      <li>NotificationInboxScreen &#8212; typed + routed &#10003;</li>
+    </ul>
+    <div class="ph-cov">95% L · 80% G (data pending) · 88% I · 85% N</div>
+  </div>
+</div>
+
+<footer>
+  Generated by Claude Code &nbsp;&#183;&nbsp; 2026-06-25 &nbsp;&#183;&nbsp; YohPal Live v12 &nbsp;&#183;&nbsp; Firebase: yohlab &nbsp;&#183;&nbsp; Branch: flutter_app &nbsp;&#183;&nbsp; Commit: d64f6a8 (+Phase 6A/6B/6C/6F + video seeding + creator UX) &nbsp;&#183;&nbsp; flutter analyze: No issues &nbsp;&#183;&nbsp; APK: Built + installed<br>
+  Sub-phases complete: 26 &nbsp;&#183;&nbsp; Videos live: 4 &nbsp;&#183;&nbsp; Creator profile: users fallback &#10003; &nbsp;&#183;&nbsp; Chat: 95% (nav + unread &#10003;) &nbsp;&#183;&nbsp; Financial compliance: 100/100 &nbsp;&#183;&nbsp; Overall: 97%
+</footer>
+
+</body>
+</html>

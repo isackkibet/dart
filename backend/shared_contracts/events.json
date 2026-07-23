@@ -1,0 +1,15 @@
+{
+  "video_uploaded": "video.uploaded",
+  "video_live": "video.live",
+  "video_viewed": "video.viewed",
+  "video_liked": "video.liked",
+  "video_shared": "video.shared",
+  "creator_followed": "creator.followed",
+  "poll_voted": "poll.voted",
+  "affiliate_converted": "affiliate.converted",
+  "ad_impression": "ad.impression",
+  "wallet_session_created": "wallet.session.created",
+  "live_started": "live.started",
+  "multistream_started": "multistream.started",
+  "chat_opened": "chat.opened"
+}

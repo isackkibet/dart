@@ -1,0 +1,5 @@
+device_model,ios_version,role_tested,cert_trusted,health_page_ok,wss_join_ok,camera_ok,microphone_ok,produce_audio,produce_video,consume_audio,consume_video,remote_render,30min_stable,result,notes
+iPhone 11,iOS 17,broadcaster+viewer,,,,,,,,,,,,,,
+iPhone 13,iOS 18,broadcaster+viewer,,,,,,,,,,,,,,
+iPhone 15,iOS 18,broadcaster+viewer,,,,,,,,,,,,,,
+iPhone SE,iOS 17,broadcaster+viewer,,,,,,,,,,,,,,

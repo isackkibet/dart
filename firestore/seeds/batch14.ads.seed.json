@@ -1,0 +1,55 @@
+{
+  "adCampaigns": [
+    {
+      "advertiserId": "REPLACE_WITH_ADVERTISER_UID",
+      "title": "YohPal Premium Launch",
+      "status": "active",
+      "budgetCents": 50000,
+      "spentCents": 12400,
+      "cpmCents": 200,
+      "creativeType": "banner",
+      "creativeRef": "Go Premium — watch ad-free and support your favorite creators.",
+      "ctaLabel": "Get Premium",
+      "ctaUrl": "https://yohpal.com/premium",
+      "targetingTags": ["music", "gaming", "live"],
+      "impressionCount": 620,
+      "clickCount": 31,
+      "createdBy": "REPLACE_WITH_ADVERTISER_UID",
+      "updatedBy": "REPLACE_WITH_ADVERTISER_UID"
+    },
+    {
+      "advertiserId": "REPLACE_WITH_ADVERTISER_UID",
+      "title": "Creator Merch Store — Summer Drop",
+      "status": "paused",
+      "budgetCents": 20000,
+      "spentCents": 8600,
+      "cpmCents": 150,
+      "creativeType": "overlay",
+      "creativeRef": "Limited Edition Summer Merch — Only 72 Hours Left!",
+      "ctaLabel": "Shop Now",
+      "ctaUrl": "https://merch.yohpal.com/summer",
+      "targetingTags": ["fashion", "lifestyle"],
+      "impressionCount": 287,
+      "clickCount": 22,
+      "createdBy": "REPLACE_WITH_ADVERTISER_UID",
+      "updatedBy": "REPLACE_WITH_ADVERTISER_UID"
+    },
+    {
+      "advertiserId": "REPLACE_WITH_ADVERTISER_UID",
+      "title": "Dance Challenge Sponsorship",
+      "status": "draft",
+      "budgetCents": 10000,
+      "spentCents": 0,
+      "cpmCents": 300,
+      "creativeType": "sponsored_poll",
+      "creativeRef": "Which dance move should we learn next?",
+      "ctaLabel": "Vote Now",
+      "ctaUrl": "https://yohpal.com/challenges",
+      "targetingTags": ["dance", "trending"],
+      "impressionCount": 0,
+      "clickCount": 0,
+      "createdBy": "REPLACE_WITH_ADVERTISER_UID",
+      "updatedBy": "REPLACE_WITH_ADVERTISER_UID"
+    }
+  ]
+}

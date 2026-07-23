@@ -1,0 +1,27 @@
+{
+  "name": "yohpal-firebase-functions",
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --testPathPattern='src/.*\\.test\\.ts$' --passWithNoTests",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "deploy": "npm run build && firebase deploy --only functions"
+  },
+  "engines": {
+    "node": "22"
+  },
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^6.1.0",
+    "livekit-server-sdk": "^2.9.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.7.5",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.11",
+    "typescript": "^5.7.0"
+  }
+}

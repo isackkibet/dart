@@ -1,0 +1,77 @@
+{
+  "mediaJobs": [
+    {
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "clipSegmentId": null,
+      "jobType": "replay_package",
+      "status": "completed",
+      "inputRef": "gs://yohpal-live/replays/REPLACE_WITH_SESSION_ID.mp4",
+      "outputRef": "gs://yohpal-live/packages/REPLACE_WITH_SESSION_ID_720p.mp4",
+      "config": {
+        "outputFormat": "mp4",
+        "resolution": "720p",
+        "videoBitrate": 2500,
+        "fps": 30,
+        "audioBitrate": 128,
+        "watermarkEnabled": false
+      },
+      "priority": 5,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "progressPercent": 100,
+      "errorMessage": null,
+      "createdBy": "REPLACE_WITH_CREATOR_UID",
+      "updatedBy": "REPLACE_WITH_CREATOR_UID"
+    },
+    {
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "clipSegmentId": "REPLACE_WITH_CLIP_ID",
+      "jobType": "clip_export",
+      "status": "queued",
+      "inputRef": "gs://yohpal-live/replays/REPLACE_WITH_SESSION_ID.mp4",
+      "outputRef": null,
+      "config": {
+        "outputFormat": "mp4",
+        "resolution": "1080p",
+        "videoBitrate": 5000,
+        "fps": 30,
+        "audioBitrate": 192,
+        "watermarkEnabled": true,
+        "watermarkRef": "gs://yohpal-live/watermarks/yohpal_logo.png"
+      },
+      "priority": 7,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "progressPercent": 0,
+      "errorMessage": null,
+      "createdBy": "REPLACE_WITH_CREATOR_UID",
+      "updatedBy": "REPLACE_WITH_CREATOR_UID"
+    },
+    {
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "clipSegmentId": null,
+      "jobType": "thumbnail",
+      "status": "failed",
+      "inputRef": "gs://yohpal-live/replays/REPLACE_WITH_SESSION_ID.mp4",
+      "outputRef": null,
+      "config": {
+        "outputFormat": "mp4",
+        "resolution": "720p",
+        "videoBitrate": 2500,
+        "fps": 30,
+        "audioBitrate": 128,
+        "watermarkEnabled": false
+      },
+      "priority": 3,
+      "retryCount": 1,
+      "maxRetries": 3,
+      "progressPercent": 45,
+      "errorMessage": "FFmpeg process timed out after 120s.",
+      "createdBy": "REPLACE_WITH_CREATOR_UID",
+      "updatedBy": "REPLACE_WITH_CREATOR_UID"
+    }
+  ]
+}

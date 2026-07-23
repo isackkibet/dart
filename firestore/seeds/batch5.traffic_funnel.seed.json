@@ -1,0 +1,36 @@
+{
+  "trafficCampaigns": [
+    {
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "name": "TikTok teaser pull campaign",
+      "sourcePlatform": "tiktok",
+      "campaignCode": "tiktok_demo_001",
+      "status": "active",
+      "createdBy": "REPLACE_WITH_CREATOR_UID",
+      "updatedBy": "REPLACE_WITH_CREATOR_UID"
+    }
+  ],
+  "trafficEvents": [
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "sourcePlatform": "tiktok",
+      "eventType": "join",
+      "anonymousId": "anon_demo_001",
+      "campaignCode": "tiktok_demo_001"
+    }
+  ],
+  "conversionEvents": [
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "sourcePlatform": "tiktok",
+      "conversionType": "follow",
+      "valueAmount": 0,
+      "currency": "KES",
+      "anonymousId": "anon_demo_001",
+      "campaignCode": "tiktok_demo_001"
+    }
+  ]
+}

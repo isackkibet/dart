@@ -1,0 +1,346 @@
+<title>Gap Report V22 — YohPal Live</title>
+<style>
+  :root {
+    --ink:#0C0D10;--ink-2:#4A4D5C;--ink-3:#8A8D9E;
+    --paper:#F4F5F8;--surface:#FFFFFF;--surface-2:#ECEEF4;--border:#D8DAE5;
+    --accent:#B8890A;--accent-bg:#FDF6E3;
+    --pass:#1A6B3E;--pass-bg:#EAF5EE;--pass-stripe:#22A05B;
+    --warn:#B06000;--warn-bg:#FFF4E0;--warn-stripe:#E07A00;
+    --crit:#A8200E;--crit-bg:#FEECEB;--crit-stripe:#D93020;
+    --ops:#1A4F8A;--ops-bg:#EBF2FC;--ops-stripe:#2870C8;
+    --font-mono:ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;
+    --font-sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+    --r:4px;
+  }
+  @media (prefers-color-scheme: dark) { :root {
+    --ink:#E8EAF0;--ink-2:#9DA1B4;--ink-3:#5C6078;
+    --paper:#0C0D10;--surface:#14161F;--surface-2:#1C1F2C;--border:#252838;
+    --accent:#D4A20E;--accent-bg:#1C1700;
+    --pass:#3FCC7A;--pass-bg:#091A10;--pass-stripe:#22A05B;
+    --warn:#F0A030;--warn-bg:#1A1000;--warn-stripe:#E07A00;
+    --crit:#F06050;--crit-bg:#1A0800;--crit-stripe:#D93020;
+    --ops:#5AABF8;--ops-bg:#08101E;--ops-stripe:#2870C8;
+  }}
+  :root[data-theme="light"] {
+    --ink:#0C0D10;--ink-2:#4A4D5C;--ink-3:#8A8D9E;
+    --paper:#F4F5F8;--surface:#FFFFFF;--surface-2:#ECEEF4;--border:#D8DAE5;
+    --accent:#B8890A;--accent-bg:#FDF6E3;
+    --pass:#1A6B3E;--pass-bg:#EAF5EE;--pass-stripe:#22A05B;
+    --warn:#B06000;--warn-bg:#FFF4E0;--warn-stripe:#E07A00;
+    --crit:#A8200E;--crit-bg:#FEECEB;--crit-stripe:#D93020;
+    --ops:#1A4F8A;--ops-bg:#EBF2FC;--ops-stripe:#2870C8;
+  }
+  :root[data-theme="dark"] {
+    --ink:#E8EAF0;--ink-2:#9DA1B4;--ink-3:#5C6078;
+    --paper:#0C0D10;--surface:#14161F;--surface-2:#1C1F2C;--border:#252838;
+    --accent:#D4A20E;--accent-bg:#1C1700;
+    --pass:#3FCC7A;--pass-bg:#091A10;--pass-stripe:#22A05B;
+    --warn:#F0A030;--warn-bg:#1A1000;--warn-stripe:#E07A00;
+    --crit:#F06050;--crit-bg:#1A0800;--crit-stripe:#D93020;
+    --ops:#5AABF8;--ops-bg:#08101E;--ops-stripe:#2870C8;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font-sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6;min-height:100vh}
+  .top-bar{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .top-bar-left{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .brand{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+  .report-id{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--ink);letter-spacing:.04em}
+  .verdict-chip{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:var(--r);background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-stripe)}
+  .top-bar-right{display:flex;align-items:center;gap:10px}
+  .theme-btn,.dl-btn{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;border:1px solid var(--border);background:var(--surface-2);color:var(--ink-2);padding:5px 12px;border-radius:var(--r);cursor:pointer;text-transform:uppercase;transition:background .15s,color .15s}
+  .theme-btn:hover,.dl-btn:hover{background:var(--border);color:var(--ink)}
+  .dl-btn{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+  .dl-btn:hover{background:var(--accent);color:var(--surface)}
+  .page{max-width:960px;margin:0 auto;padding:40px 24px 80px}
+  .report-header{margin-bottom:36px}
+  .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+  .report-title{font-size:28px;font-weight:800;line-height:1.2;color:var(--ink);text-wrap:balance;margin-bottom:12px}
+  .report-meta{display:flex;flex-wrap:wrap;gap:6px 20px}
+  .meta-item{font-family:var(--font-mono);font-size:11px;color:var(--ink-3)}
+  .meta-item strong{color:var(--ink-2);font-weight:600}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:40px}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px 16px;display:flex;flex-direction:column;gap:6px}
+  .stat-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+  .stat-value{font-size:36px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+  .stat-sub{font-size:11px;color:var(--ink-3);line-height:1.4}
+  .stat-card.crit .stat-value{color:var(--crit)}
+  .stat-card.high .stat-value{color:var(--warn)}
+  .stat-card.done .stat-value{color:var(--pass)}
+  .stat-card.ops .stat-value{color:var(--ops)}
+  .section{margin-bottom:44px}
+  .section-title{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:16px}
+  .section-sub{font-size:12px;color:var(--ink-3);margin:-8px 0 16px}
+  .build-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .build-row{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--pass-stripe);border-radius:var(--r);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .build-cmd{font-family:var(--font-mono);font-size:12px;color:var(--ink)}
+  .build-result{font-family:var(--font-mono);font-size:11px;color:var(--pass);white-space:nowrap}
+  .gates{display:flex;flex-direction:column;gap:8px}
+  .gate-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--ops-stripe);border-radius:var(--r);padding:12px 16px;flex-wrap:wrap}
+  .gate-num{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);flex-shrink:0;width:28px}
+  .gate-name{flex:1;font-weight:600;color:var(--ink);font-size:13px;min-width:220px}
+  .gate-owner{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);white-space:nowrap}
+  .gate-status{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--ops);white-space:nowrap}
+  .evidence-list{display:flex;flex-direction:column;gap:6px}
+  .evidence-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 16px;flex-wrap:wrap}
+  .evidence-num{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);flex-shrink:0;width:22px}
+  .evidence-name{flex:1;font-size:13px;color:var(--ink);min-width:220px}
+  .evidence-tag{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);border:1px solid var(--border);padding:2px 7px;border-radius:2px;white-space:nowrap}
+  .code-note{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;margin-top:6px}
+  .signoff-wrap{overflow-x:auto}
+  .signoff-table{width:100%;border-collapse:collapse;font-size:13px}
+  .signoff-table thead th{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--surface-2);white-space:nowrap}
+  .signoff-table tbody tr{border-bottom:1px solid var(--border);background:var(--surface)}
+  .signoff-table tbody tr:last-child{border-bottom:none}
+  .signoff-table tbody td{padding:10px 14px;font-size:13px;color:var(--ink)}
+  .signoff-table .role-cell{font-weight:600}
+  .signoff-table .blank-cell{color:var(--border);font-family:var(--font-mono);font-size:12px}
+  .report-footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .footer-text{font-family:var(--font-mono);font-size:11px;color:var(--ink-3)}
+  @media print{.top-bar{position:relative}.theme-btn,.dl-btn{display:none}body{background:white;color:black}}
+  @media (max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.build-grid{grid-template-columns:1fr}}
+</style>
+
+<div class="top-bar">
+  <div class="top-bar-left">
+    <span class="brand">YohPal Live</span>
+    <span class="report-id">Gap Report V22</span>
+    <span class="verdict-chip">Phase 10B/10D · Implemented, QA Partial</span>
+  </div>
+  <div class="top-bar-right">
+    <button class="theme-btn" onclick="toggleTheme()">Toggle Theme</button>
+    <button class="dl-btn" onclick="window.print()">Download PDF</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="report-header">
+    <p class="eyebrow">Production Readiness Audit</p>
+    <h1 class="report-title">Gap Report V22 — Phase 10B Brand Theme &amp; Phase 10D Zero-Wait Startup</h1>
+    <div class="report-meta">
+      <span class="meta-item"><strong>Date</strong> 2026-07-04</span>
+      <span class="meta-item"><strong>Branch</strong> flutter_app</span>
+      <span class="meta-item"><strong>Commit</strong> 7c2881c + uncommitted</span>
+      <span class="meta-item"><strong>Phase</strong> 10B · Unified Gold &amp; Black Brand Theme — 10D · Zero-Wait App Startup &amp; Feed Warm-Up</span>
+      <span class="meta-item"><strong>Analyst</strong> Claude Code</span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card crit">
+      <span class="stat-label">Critical Open</span>
+      <span class="stat-value">0</span>
+      <span class="stat-sub">No crashes or build blockers</span>
+    </div>
+    <div class="stat-card high">
+      <span class="stat-label">High Open</span>
+      <span class="stat-value">1</span>
+      <span class="stat-sub">Android cold-start &amp; theme QA not yet run</span>
+    </div>
+    <div class="stat-card done">
+      <span class="stat-label">Gates Completed</span>
+      <span class="stat-value">14</span>
+      <span class="stat-sub">Of 17 combined Phase 10B/10D gates</span>
+    </div>
+    <div class="stat-card ops">
+      <span class="stat-label">Gates Remaining</span>
+      <span class="stat-value">3</span>
+      <span class="stat-sub">2 partial, 1 pending (all Android-side)</span>
+    </div>
+  </div>
+
+  <!-- Build evidence -->
+  <div class="section">
+    <h2 class="section-title">Build Certification — Verified 2026-07-04</h2>
+    <div class="build-grid">
+      <div class="build-row">
+        <span class="build-cmd">flutter analyze</span>
+        <span class="build-result">✓ No issues (9.1s)</span>
+      </div>
+      <div class="build-row">
+        <span class="build-cmd">flutter test</span>
+        <span class="build-result">✓ 25 passed, 0 failed</span>
+      </div>
+      <div class="build-row" style="border-left-color:var(--ops-stripe)">
+        <span class="build-cmd">iOS Simulator cold start — burst capture</span>
+        <span class="build-result" style="color:var(--ops)">✓ splash @1.05s, login @1.75s</span>
+      </div>
+      <div class="build-row" style="border-left-color:var(--warn-stripe)">
+        <span class="build-cmd">Android cold start — emulator run</span>
+        <span class="build-result" style="color:var(--warn)">not run this cycle</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 10B gates -->
+  <div class="section">
+    <h2 class="section-title">Phase 10B — Unified Gold &amp; Black Brand Theme (8 Gates)</h2>
+    <p class="section-sub">Brand tokens, Day/Night ThemeData, persisted theme controller, settings screen, and reusable brand widgets — replacing the previously permanent-dark theme.</p>
+    <div class="gates">
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">B1</span>
+        <span class="gate-name">Brand color tokens — lib/design_system/tokens/yohpal_brand_colors.dart</span>
+        <span class="gate-owner">Flutter Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">B2</span>
+        <span class="gate-name">Day() / Night() ThemeData — lib/design_system/theme/yohpal_theme.dart</span>
+        <span class="gate-owner">Flutter Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">B3</span>
+        <span class="gate-name">Persisted theme mode controller — System/Day/Night, SharedPreferences-backed</span>
+        <span class="gate-owner">Flutter Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">B4</span>
+        <span class="gate-name">Theme Settings screen — lib/features/settings/theme_settings_screen.dart</span>
+        <span class="gate-owner">Flutter Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">B5</span>
+        <span class="gate-name">Reusable brand widgets — YohPalBrandButton, YohPalBrandCard</span>
+        <span class="gate-owner">Flutter Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">B6</span>
+        <span class="gate-name">Login &amp; Signup screens themed — previously hardcoded navy/cyan, now theme-driven</span>
+        <span class="gate-owner">Flutter Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--warn-stripe)">
+        <span class="gate-num">B7</span>
+        <span class="gate-name">Full module coverage — Feed, Creator Profile, Live Streaming, YCIOS still have hardcoded colors; Marketplace/Hustle modules don't exist in codebase yet</span>
+        <span class="gate-owner">QA Lead</span>
+        <span class="gate-status" style="color:var(--warn)">PARTIAL</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--warn-stripe)">
+        <span class="gate-num">B8</span>
+        <span class="gate-name">Android + iPhone visual QA, both modes, with screenshots</span>
+        <span class="gate-owner">QA Lead</span>
+        <span class="gate-status" style="color:var(--warn)">PARTIAL — iOS only</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 10D gates -->
+  <div class="section">
+    <h2 class="section-title">Phase 10D — Zero-Wait App Startup &amp; Feed Warm-Up Engine (9 Gates)</h2>
+    <p class="section-sub">Branded splash gates the feed until the first suggested video's player controller is initialized or a 4s fallback expires — replacing the bare loading spinner users saw for 10–15s on cold start.</p>
+    <div class="gates">
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">D1</span>
+        <span class="gate-name">Branded startup screen — lib/features/startup/yohpal_startup_screen.dart, theme-aware</span>
+        <span class="gate-owner">Flutter Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">D2</span>
+        <span class="gate-name">One-shot fetchInitialSuggestedVideos() added to the actually-wired VideoFeedRepository</span>
+        <span class="gate-owner">Flutter Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">D3</span>
+        <span class="gate-name">FeedStartupWarmupService — warms first 4 videos, gates only on video 1, videos 2-4 fire-and-forget</span>
+        <span class="gate-owner">Flutter Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">D4</span>
+        <span class="gate-name">YohPalBootstrap — reveals feed on first-video-ready OR 4s fallback timeout</span>
+        <span class="gate-owner">Flutter Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">D5</span>
+        <span class="gate-name">Splash shown before auth-state resolution, not just before feed — fixes login-screen flash on cold start</span>
+        <span class="gate-owner">Flutter Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">D6</span>
+        <span class="gate-name">Video loading spinner replaced with cached thumbnail + gold pulse — per-video and whole-feed</span>
+        <span class="gate-owner">Flutter Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">D7</span>
+        <span class="gate-name">Startup diagnostics recorded — appStartMs, feedWarmupMs, firstVideoReadyMs, warmupSuccess → Firestore</span>
+        <span class="gate-owner">Flutter Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--pass-stripe)">
+        <span class="gate-num">D8</span>
+        <span class="gate-name">iPhone cold start validated — burst-capture screenshots confirm splash at ~1.05s, login screen settled by ~1.75s</span>
+        <span class="gate-owner">QA Lead</span>
+        <span class="gate-status" style="color:var(--pass)">DONE</span>
+      </div>
+      <div class="gate-row" style="border-left-color:var(--crit-stripe)">
+        <span class="gate-num">D9</span>
+        <span class="gate-name">Android cold start validated — no emulator run this cycle</span>
+        <span class="gate-owner">QA Lead</span>
+        <span class="gate-status" style="color:var(--crit)">PENDING</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Evidence -->
+  <div class="section">
+    <h2 class="section-title">Validation Evidence</h2>
+    <div class="evidence-list">
+      <div class="evidence-row"><span class="evidence-num">1</span><span class="evidence-name">Git branch</span><span class="evidence-tag" style="color:var(--pass);border-color:var(--pass-stripe)">flutter_app</span></div>
+      <div class="evidence-row"><span class="evidence-num">2</span><span class="evidence-name">Commit hash</span><span class="evidence-tag">7c2881c + uncommitted</span></div>
+      <div class="evidence-row"><span class="evidence-num">3</span><span class="evidence-name">flutter analyze — No issues found (9.1s)</span><span class="evidence-tag" style="color:var(--pass);border-color:var(--pass-stripe)">✓ pass</span></div>
+      <div class="evidence-row"><span class="evidence-num">4</span><span class="evidence-name">flutter test — 25 passed, 0 failed</span><span class="evidence-tag" style="color:var(--pass);border-color:var(--pass-stripe)">✓ pass</span></div>
+      <div class="evidence-row"><span class="evidence-num">5</span><span class="evidence-name">iOS Simulator (iPhone 16) burst-capture — frame 1 native launch screen, frame 3 branded splash (~1.05s), frame 5 login screen settled (~1.75s)</span><span class="evidence-tag" style="color:var(--pass);border-color:var(--pass-stripe)">✓ verified</span></div>
+      <div class="evidence-row"><span class="evidence-num">6</span><span class="evidence-name">Login/Signup Day-mode screenshot — ivory background, black text, gold button confirmed</span><span class="evidence-tag" style="color:var(--pass);border-color:var(--pass-stripe)">✓ verified</span></div>
+      <div class="evidence-row"><span class="evidence-num">7</span><span class="evidence-name">Module theme coverage — Wallet, Rewards, Ads Arena, Chat, Profile Hub themed; Feed, Creator Profile, Live Streaming, YCIOS still hardcoded</span><span class="evidence-tag" style="color:var(--warn);border-color:var(--warn-stripe)">partial</span></div>
+      <div class="evidence-row"><span class="evidence-num">8</span><span class="evidence-name">Android emulator cold-start screenshots (Day + Night)</span><span class="evidence-tag" style="color:var(--crit);border-color:var(--crit-stripe)">not captured</span></div>
+      <div class="evidence-row"><span class="evidence-num">9</span><span class="evidence-name">Hustle / Marketplace modules — do not exist in codebase; theme inheritance N/A until built</span><span class="evidence-tag">n/a</span></div>
+    </div>
+    <p class="code-note">Nothing in this cycle's diff has been committed — all Phase 10B/10D files are uncommitted working-tree changes on top of 7c2881c, pending your review.</p>
+  </div>
+
+  <!-- Executive sign-off -->
+  <div class="section">
+    <h2 class="section-title">Executive Sign-Off — 7 Roles Required</h2>
+    <div class="signoff-wrap">
+      <table class="signoff-table">
+        <thead>
+          <tr><th>Role</th><th>Name</th><th>Signature</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="role-cell">Flutter Lead</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td></tr>
+          <tr><td class="role-cell">Backend Lead</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td></tr>
+          <tr><td class="role-cell">Firebase Lead</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td></tr>
+          <tr><td class="role-cell">QA Lead</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td></tr>
+          <tr><td class="role-cell">DevOps Lead</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td></tr>
+          <tr><td class="role-cell">Product Owner</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td></tr>
+          <tr><td class="role-cell">Executive Sponsor</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td><td class="blank-cell">_______________</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="report-footer">
+    <span class="footer-text">Gap Report V22 · YohPal Live · Branch: flutter_app · 7c2881c+uncommitted · 2026-07-04</span>
+    <span class="footer-text">0 Critical · 1 High · 14 of 17 Phase 10B/10D gates done · Android validation pending</span>
+  </div>
+
+</div>
+
+<script>
+  function toggleTheme() {
+    const r = document.documentElement;
+    const cur = r.getAttribute('data-theme');
+    if (cur === 'dark') r.setAttribute('data-theme','light');
+    else if (cur === 'light') r.setAttribute('data-theme','dark');
+    else r.setAttribute('data-theme', window.matchMedia('(prefers-color-scheme:dark)').matches ? 'light' : 'dark');
+  }
+</script>

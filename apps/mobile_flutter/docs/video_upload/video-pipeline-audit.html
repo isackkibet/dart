@@ -1,0 +1,707 @@
+<title>Video Upload &amp; Playback Pipeline — Production Audit</title>
+<style>
+  :root {
+    --ink: #F3F5F8;
+    --panel: #FFFFFF;
+    --panel-raised: #FFFFFF;
+    --line: #DCE2EA;
+    --paper: #1B222C;
+    --mist: #5B6779;
+    --signal: #0E7FA6;
+    --signal-dim: rgba(14, 127, 166, 0.12);
+    --good: #147A5C;
+    --good-dim: rgba(20, 122, 92, 0.1);
+    --gap: #C23F2E;
+    --gap-dim: rgba(194, 63, 46, 0.09);
+    --shadow: 0 1px 2px rgba(20, 26, 35, 0.06), 0 8px 24px -12px rgba(20, 26, 35, 0.12);
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #0A0E13;
+      --panel: #131A23;
+      --panel-raised: #161E29;
+      --line: #232C3A;
+      --paper: #E7ECF3;
+      --mist: #8FA0B5;
+      --signal: #5FC9E8;
+      --signal-dim: rgba(95, 201, 232, 0.1);
+      --good: #49D3A0;
+      --good-dim: rgba(73, 211, 160, 0.1);
+      --gap: #FF7A66;
+      --gap-dim: rgba(255, 122, 102, 0.1);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -16px rgba(0, 0, 0, 0.5);
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #0A0E13;
+    --panel: #131A23;
+    --panel-raised: #161E29;
+    --line: #232C3A;
+    --paper: #E7ECF3;
+    --mist: #8FA0B5;
+    --signal: #5FC9E8;
+    --signal-dim: rgba(95, 201, 232, 0.1);
+    --good: #49D3A0;
+    --good-dim: rgba(73, 211, 160, 0.1);
+    --gap: #FF7A66;
+    --gap-dim: rgba(255, 122, 102, 0.1);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -16px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+
+  :root[data-theme="light"] {
+    --ink: #F3F5F8;
+    --panel: #FFFFFF;
+    --panel-raised: #FFFFFF;
+    --line: #DCE2EA;
+    --paper: #1B222C;
+    --mist: #5B6779;
+    --signal: #0E7FA6;
+    --signal-dim: rgba(14, 127, 166, 0.12);
+    --good: #147A5C;
+    --good-dim: rgba(20, 122, 92, 0.1);
+    --gap: #C23F2E;
+    --gap-dim: rgba(194, 63, 46, 0.09);
+    --shadow: 0 1px 2px rgba(20, 26, 35, 0.06), 0 8px 24px -12px rgba(20, 26, 35, 0.12);
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  body {
+    font-family: "Iowan Old Style", "Charter", "Georgia", "Times New Roman", serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mono {
+    font-family: "JetBrains Mono", "SF Mono", "Cascadia Code", "Roboto Mono", ui-monospace, "Menlo", monospace;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .stage, .card { animation: rise 0.5s ease backwards; }
+    .stage:nth-child(1) { animation-delay: 0.02s; }
+    .stage:nth-child(2) { animation-delay: 0.06s; }
+    .stage:nth-child(3) { animation-delay: 0.10s; }
+    .stage:nth-child(4) { animation-delay: 0.14s; }
+    .stage:nth-child(5) { animation-delay: 0.18s; }
+    .stage:nth-child(6) { animation-delay: 0.22s; }
+    .stage:nth-child(7) { animation-delay: 0.26s; }
+    .stage:nth-child(8) { animation-delay: 0.30s; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  }
+
+  a { color: var(--signal); }
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 64px 28px 96px;
+  }
+
+  /* ---------- Header ---------- */
+
+  header.masthead {
+    margin-bottom: 56px;
+  }
+
+  .eyebrow {
+    font-family: inherit;
+    font-family: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--signal);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--signal);
+    box-shadow: 0 0 0 3px var(--signal-dim);
+    flex: none;
+  }
+
+  h1 {
+    font-family: "JetBrains Mono", "SF Mono", "Cascadia Code", ui-monospace, monospace;
+    font-weight: 700;
+    font-size: clamp(28px, 4.4vw, 40px);
+    line-height: 1.14;
+    letter-spacing: -0.01em;
+    margin: 0 0 16px;
+    text-wrap: balance;
+    color: var(--paper);
+  }
+
+  .dek {
+    font-size: 18.5px;
+    line-height: 1.6;
+    color: var(--mist);
+    max-width: 62ch;
+    margin: 0 0 28px;
+    text-wrap: pretty;
+  }
+
+  .scope-line {
+    font-family: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+    font-size: 12.5px;
+    color: var(--mist);
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+  }
+
+  .scope-line b { color: var(--paper); font-weight: 600; }
+
+  /* ---------- Section headings ---------- */
+
+  h2 {
+    font-family: "JetBrains Mono", "SF Mono", "Cascadia Code", ui-monospace, monospace;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--paper);
+    margin: 0 0 4px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  h2 .idx {
+    color: var(--signal);
+    font-weight: 700;
+  }
+
+  .section-dek {
+    color: var(--mist);
+    font-size: 15.5px;
+    margin: 0 0 26px;
+    max-width: 66ch;
+  }
+
+  section.block {
+    margin-top: 68px;
+    scroll-margin-top: 24px;
+  }
+
+  /* ---------- Pipeline diagram ---------- */
+
+  .diagram-scroll {
+    overflow-x: auto;
+    margin: 0 -28px 8px;
+    padding: 4px 28px 20px;
+  }
+
+  .diagram {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    min-width: 760px;
+  }
+
+  .stage {
+    flex: 1 1 0;
+    min-width: 96px;
+    position: relative;
+    padding-right: 22px;
+  }
+
+  .stage:last-child { padding-right: 0; }
+
+  .stage::after {
+    content: "";
+    position: absolute;
+    top: 34px;
+    right: -2px;
+    width: 20px;
+    height: 1px;
+    background: var(--line);
+  }
+
+  .stage:last-child::after { display: none; }
+
+  .stage-num {
+    font-family: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--mist);
+    margin-bottom: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stage-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    margin-bottom: 14px;
+    border: 2px solid var(--line);
+    background: var(--panel);
+  }
+
+  .stage[data-status="good"] .stage-dot { background: var(--good); border-color: var(--good); }
+  .stage[data-status="partial"] .stage-dot { background: var(--panel); border-color: var(--signal); }
+  .stage[data-status="gap"] .stage-dot { background: var(--gap); border-color: var(--gap); }
+
+  .stage-label {
+    font-family: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--paper);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .stage-note {
+    font-size: 12px;
+    color: var(--mist);
+    line-height: 1.45;
+  }
+
+  .legend {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-family: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--mist);
+    margin-bottom: 8px;
+  }
+
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .legend .lg-good { background: var(--good); }
+  .legend .lg-partial { background: var(--panel); border: 2px solid var(--signal); }
+  .legend .lg-gap { background: var(--gap); }
+
+  /* ---------- Two-column verdict grid ---------- */
+
+  .verdict-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 720px) {
+    .verdict-grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px 22px 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .card h3 {
+    font-family: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card.good h3 { color: var(--good); }
+  .card.gap h3 { color: var(--gap); }
+
+  .card h3::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .card.good h3::before { background: var(--good); }
+  .card.gap h3::before { background: var(--gap); }
+
+  .card ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .card li {
+    font-size: 14.5px;
+    line-height: 1.55;
+    padding-left: 18px;
+    position: relative;
+    color: var(--paper);
+  }
+
+  .card.good li::before { content: "✓"; position: absolute; left: 0; color: var(--good); font-weight: 700; font-size: 13px; top: 1px; }
+  .card.gap li::before { content: "×"; position: absolute; left: 1px; color: var(--gap); font-weight: 700; font-size: 15px; top: 0; }
+
+  .card li b { color: var(--paper); font-weight: 600; }
+  .card li code {
+    font-family: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+    font-size: 0.86em;
+    background: var(--signal-dim);
+    color: var(--signal);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+  .card li .rationale {
+    display: block;
+    color: var(--mist);
+    font-size: 13px;
+    margin-top: 3px;
+  }
+
+  /* ---------- Priority callout ---------- */
+
+  .priority {
+    margin-top: 68px;
+    border: 1px solid var(--gap);
+    border-radius: 10px;
+    background: var(--gap-dim);
+    padding: 26px 26px 22px;
+  }
+
+  .priority h2 { color: var(--gap); margin-bottom: 6px; }
+  .priority h2 .idx { color: var(--gap); }
+  .priority .section-dek { margin-bottom: 20px; }
+
+  .rank-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    counter-reset: rank;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .rank-list li {
+    counter-increment: rank;
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 14px;
+    align-items: baseline;
+  }
+
+  .rank-list li::before {
+    content: counter(rank);
+    font-family: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--gap);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rank-list b {
+    display: block;
+    font-size: 15px;
+    color: var(--paper);
+    margin-bottom: 2px;
+  }
+
+  .rank-list span {
+    display: block;
+    font-size: 13.5px;
+    color: var(--mist);
+    line-height: 1.5;
+  }
+
+  /* ---------- Footer ---------- */
+
+  footer {
+    margin-top: 72px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-family: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+    font-size: 11.5px;
+    color: var(--mist);
+    line-height: 1.6;
+  }
+
+  /* ---------- PDF download ---------- */
+
+  .pdf-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    color: var(--signal);
+    background: var(--signal-dim);
+    border: 1px solid var(--signal);
+    border-radius: 7px;
+    padding: 8px 14px;
+    margin-top: 18px;
+    transition: opacity 0.15s ease;
+  }
+  .pdf-btn:hover { opacity: 0.8; }
+  .pdf-btn svg { width: 13px; height: 13px; flex: none; }
+
+  @media print {
+    .pdf-btn { display: none; }
+    /* Entrance animations use fill-mode:backwards (opacity:0 pre-animation);
+       a print/PDF snapshot is captured before they finish, so force the
+       settled end state instead of relying on the animation completing. */
+    .stage, .card {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    /* overflow-x:auto has no scrollbar in print — let the diagram reflow to
+       the page width instead of being clipped past it. */
+    .diagram-scroll { overflow: visible; margin: 0; padding: 0; }
+    .diagram { min-width: 0; flex-wrap: wrap; row-gap: 20px; }
+    .stage { min-width: 160px; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">Engineering Audit — Video Pipeline</div>
+    <h1>Upload &amp; Playback, End to End</h1>
+    <p class="dek">
+      What actually happens between a creator tapping the shutter and a viewer's feed
+      playing that clip back — and where this pipeline still falls short of a
+      TikTok-grade production bar.
+    </p>
+    <div class="scope-line">
+      <span><b>Client</b> apps/mobile_flutter (Flutter)</span>
+      <span><b>Backend</b> backend/firebase_functions (Cloud Functions v2)</span>
+      <span><b>Storage</b> Firestore <code class="mono">videos</code> + Cloud Storage <code class="mono">videos-raw/</code></span>
+    </div>
+    <a class="pdf-btn" href="video-pipeline-audit.pdf" download>
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 1.5v9m0 0L4.5 7M8 10.5L11.5 7" />
+        <path d="M2 11.5v2a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-2" />
+      </svg>
+      Download PDF
+    </a>
+  </header>
+
+  <section class="block">
+    <h2><span class="idx">§1</span> The pipeline, stage by stage</h2>
+    <p class="section-dek">
+      Eight stages from shutter to screen. Status reflects what's actually wired
+      today, not what field names imply.
+    </p>
+
+    <div class="legend">
+      <span><i class="lg-good"></i> production-ready</span>
+      <span><i class="lg-partial"></i> exists, incomplete</span>
+      <span><i class="lg-gap"></i> not implemented</span>
+    </div>
+
+    <div class="diagram-scroll">
+      <div class="diagram">
+        <div class="stage" data-status="good">
+          <div class="stage-num">01</div>
+          <div class="stage-dot"></div>
+          <div class="stage-label">Capture</div>
+          <div class="stage-note">Live camera or gallery pick</div>
+        </div>
+        <div class="stage" data-status="good">
+          <div class="stage-num">02</div>
+          <div class="stage-dot"></div>
+          <div class="stage-label">Persist locally</div>
+          <div class="stage-note">Copied to app storage, draft saved</div>
+        </div>
+        <div class="stage" data-status="good">
+          <div class="stage-num">03</div>
+          <div class="stage-dot"></div>
+          <div class="stage-label">Preview</div>
+          <div class="stage-note">Playback + title/caption/tags</div>
+        </div>
+        <div class="stage" data-status="partial">
+          <div class="stage-num">04</div>
+          <div class="stage-dot"></div>
+          <div class="stage-label">Publish</div>
+          <div class="stage-note">Progress + cancel/retry, no rate limit</div>
+        </div>
+        <div class="stage" data-status="gap">
+          <div class="stage-num">05</div>
+          <div class="stage-dot"></div>
+          <div class="stage-label">Transcode</div>
+          <div class="stage-note">No real adaptive-bitrate pipeline</div>
+        </div>
+        <div class="stage" data-status="gap">
+          <div class="stage-num">06</div>
+          <div class="stage-dot"></div>
+          <div class="stage-label">Moderate</div>
+          <div class="stage-note">Goes public with zero review</div>
+        </div>
+        <div class="stage" data-status="partial">
+          <div class="stage-num">07</div>
+          <div class="stage-dot"></div>
+          <div class="stage-label">Fetch</div>
+          <div class="stage-note">Paginated, preloaded, no CDN</div>
+        </div>
+        <div class="stage" data-status="good">
+          <div class="stage-num">08</div>
+          <div class="stage-dot"></div>
+          <div class="stage-label">Play</div>
+          <div class="stage-note">Zero-wait preload + diagnostics</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2><span class="idx">§2</span> Upload &amp; ingest</h2>
+    <p class="section-dek">
+      Capture through the moment a document lands in Firestore with
+      <code class="mono">status: 'live'</code>.
+    </p>
+
+    <div class="verdict-grid">
+      <div class="card good">
+        <h3>Working</h3>
+        <ul>
+          <li><b>Unified capture screen.</b> One screen handles live recording (front/rear
+            switch, proper permission flow) and gallery selection, with camera lifecycle
+            correctly torn down and rebuilt across app background/foreground.</li>
+          <li><b>Stable local persistence.</b> Recorded/picked files are copied out of the
+            camera plugin's and picker's ephemeral cache paths before anything else touches
+            them, so a draft survives beyond the OS's whim.</li>
+          <li><b>Real draft recovery.</b> Backing out mid-flow saves the file path and form
+            fields; relaunching Upload offers to resume, not just discard.</li>
+          <li><b>Genuine transfer control.</b> Progress, cancel, and retry are wired to the
+            actual <code class="mono">UploadTask</code>, not a simulated progress bar — cancel
+            aborts the transfer and deletes the orphaned document.</li>
+          <li><b>Automatic thumbnails.</b> A Cloud Function extracts a real frame via
+            <code class="mono">ffmpeg</code> on upload, after a missing-binary bug that had
+            silently broken this for every prior upload was found and fixed.</li>
+        </ul>
+      </div>
+      <div class="card gap">
+        <h3>Missing for production</h3>
+        <ul>
+          <li><b>No client-side compression.</b> Full-resolution camera output is uploaded
+            byte-for-byte; there's no quality-vs-bandwidth trade-off before the transfer even
+            starts.
+            <span class="rationale">TikTok re-encodes on-device before upload; this pipeline sends raw footage over whatever network is available.</span></li>
+          <li><b>No content moderation gate.</b> A document is created with
+            <code class="mono">visibility: 'public'</code> immediately — no automated
+            NSFW/violence screening, no human review queue, before it's reachable in the feed.</li>
+          <li><b>No malware or duplicate-upload scanning.</b> Any file passing the extension
+            check is accepted as-is.</li>
+          <li><b>No per-user rate limit.</b> A single account can publish an unbounded number
+            of videos back to back — no daily cap, unlike the existing 50/day quota on the AI
+            job pipeline.</li>
+          <li><b>Upload doesn't survive process death.</b> Cancel/retry work within a live app
+            session, but killing the app mid-transfer loses it — there's no background-session
+            resumability (WorkManager / iOS background URL sessions).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2><span class="idx">§3</span> Fetch &amp; playback</h2>
+    <p class="section-dek">
+      From a feed query returning documents to a frame appearing on screen.
+    </p>
+
+    <div class="verdict-grid">
+      <div class="card good">
+        <h3>Working</h3>
+        <ul>
+          <li><b>Predictive preloading.</b> A dedicated playback controller preloads the
+            videos adjacent to the current scroll position before the viewer reaches them —
+            a "zero-wait" architecture most apps at this maturity skip entirely.</li>
+          <li><b>Real telemetry, not vibes.</b> Every playback attempt logs time-to-first-frame,
+            whether the preload actually hit, source URL type, and network type — the kind of
+            signal a team needs to know if playback is actually fast, not just feels fast.</li>
+          <li><b>Poster frames on load.</b> Now that thumbnail generation works, the feed shows
+            a real frame instead of a blank tile while a clip buffers.</li>
+          <li><b>Resilient field reads.</b> The client tolerates schema drift across upload
+            paths (legacy vs. current field names for owner, thumbnail, tags) rather than
+            hard-failing on missing data.</li>
+        </ul>
+      </div>
+      <div class="card gap">
+        <h3>Missing for production</h3>
+        <ul>
+          <li><b>No adaptive bitrate.</b> There's nothing to adapt <em>to</em> — the field
+            named <code class="mono">hlsUrl</code> is, today, the raw MP4's direct download
+            URL. The five-deep URL-priority fallback chain in the video model
+            (<code class="mono">hlsLowUrl → hlsStandardUrl → hlsUrl → videoUrl → hlsPath</code>)
+            is itself the evidence: it exists because a real multi-bitrate manifest has never
+            reliably been there to prefer.</li>
+          <li><b>No purpose-built video CDN.</b> Playback is served straight from Cloud
+            Storage's default path, not an edge network built for video delivery
+            (Cloudflare Stream / Mux / CloudFront-style segment caching).</li>
+          <li><b>Static, long-lived URLs.</b> Playback URLs are download tokens written once
+            into Firestore, not short-lived signed URLs — a leaked link grants indefinite
+            access to that file.</li>
+          <li><b>No offline or deep prefetch.</b> Preloading covers immediate feed neighbors
+            only; nothing is cached for offline viewing or further ahead.</li>
+          <li><b>Shallow engagement analytics.</b> Views and likes are counted, but there's no
+            watch-time percentage, drop-off point, or rewatch signal — the data a
+            recommendation system actually needs.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="priority">
+    <h2><span class="idx">!</span> If only three things get fixed next</h2>
+    <p class="section-dek">Ranked by how directly each blocks a real TikTok-grade launch.</p>
+    <ol class="rank-list">
+      <li>
+        <b>Stand up real transcoding.</b>
+        <span>Without an adaptive-bitrate ladder, every other playback optimization
+        (preloading, CDN, diagnostics) is polishing delivery of a file that's the wrong
+        size for the network it's on. This is the one gap that makes every other fetch/playback
+        gap worse.</span>
+      </li>
+      <li>
+        <b>Gate publish behind moderation.</b>
+        <span>Instant, unreviewed public visibility is a trust and safety liability at any
+        scale beyond a closed pilot — this needs to exist before upload volume grows, not after.</span>
+      </li>
+      <li>
+        <b>Add upload rate limiting and background resumability.</b>
+        <span>Two different failure modes with the same root cause: nothing constrains or
+        protects an in-flight or repeated upload once it leaves the preview screen.</span>
+      </li>
+    </ol>
+  </section>
+
+  <footer>
+    Scope: apps/mobile_flutter video_upload &amp; video_feed features, backend/firebase_functions
+    video processing, and the deployed Firestore/Storage rules, as of this session. Verify
+    against current code before treating specifics as still accurate — this pipeline has moved
+    fast across several rebuilds.
+  </footer>
+
+</div>

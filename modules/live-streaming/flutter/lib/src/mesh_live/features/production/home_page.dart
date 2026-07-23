@@ -1,0 +1,2 @@
+import 'package:flutter/material.dart';import '../shared/role_page.dart';import '../director/director_setup_page.dart';import '../camera/camera_join_page.dart';
+class HomePage extends StatelessWidget {const HomePage({super.key});@override Widget build(BuildContext context)=>RolePage(onDirector:()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>const DirectorSetupPage())),onCamera:()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>const CameraJoinPage())));}

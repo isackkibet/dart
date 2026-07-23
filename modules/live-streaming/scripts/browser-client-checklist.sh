@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -e
+
+echo "Browser client manual validation:"
+echo ""
+echo "1. Start Docker:"
+echo "   npm run docker:up"
+echo ""
+echo "2. Open:"
+echo "   https://<LAN_IP>/test-client/"
+echo ""
+echo "3. Generate token:"
+echo "   npm run token:broadcaster"
+echo ""
+echo "4. Paste token into browser client"
+echo ""
+echo "5. Confirm:"
+echo "   - WSS connects"
+echo "   - joinRoom succeeds"
+echo "   - routerRtpCapabilities appears"
+echo "   - listProducers returns response"
+echo "   - local camera preview works"

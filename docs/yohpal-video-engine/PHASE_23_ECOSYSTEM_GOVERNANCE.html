@@ -1,0 +1,425 @@
+<title>YohPal Platform Phase 23 — Ecosystem Operations & Lifecycle Governance</title>
+<style>
+  :root {
+    --gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);--gold-line:rgba(201,162,39,.28);
+    --ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;
+    --paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;
+    --pass:#1b5e20;--pass-bg:#e8f5e9;--pass-border:#a5d6a7;
+    --pend:#78350f;--pend-bg:#fef3c7;--pend-border:#fcd34d;
+    --fail:#b71c1c;--fail-bg:#fce4e4;--fail-border:#ef9a9a;
+    --info:#0d47a1;--info-bg:#e8eef7;--info-border:#90caf9;
+    --purple:#4a148c;--purple-bg:#f3e5f5;--purple-border:#ce93d8;
+    --teal:#004d40;--teal-bg:#e0f2f1;--teal-border:#80cbc4;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+    --r:2px;--doc-max:920px;
+  }
+  @media(prefers-color-scheme:dark){:root{
+    --gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);--gold-line:rgba(212,172,48,.22);
+    --ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;
+    --paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;
+    --pass:#4caf50;--pass-bg:#1b2e1c;--pass-border:#388e3c;
+    --pend:#fbbf24;--pend-bg:#1f1600;--pend-border:#92400e;
+    --fail:#ef5350;--fail-bg:#2d1212;--fail-border:#c62828;
+    --info:#90caf9;--info-bg:#0d1e33;--info-border:#1565c0;
+    --purple:#ce93d8;--purple-bg:#1a0e22;--purple-border:#7b1fa2;
+    --teal:#80cbc4;--teal-bg:#0a1f1e;--teal-border:#00695c;
+  }}
+  :root[data-theme="light"]{--gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);--gold-line:rgba(201,162,39,.28);--ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;--paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;--pass:#1b5e20;--pass-bg:#e8f5e9;--pass-border:#a5d6a7;--pend:#78350f;--pend-bg:#fef3c7;--pend-border:#fcd34d;--fail:#b71c1c;--fail-bg:#fce4e4;--fail-border:#ef9a9a;--info:#0d47a1;--info-bg:#e8eef7;--info-border:#90caf9;--purple:#4a148c;--purple-bg:#f3e5f5;--purple-border:#ce93d8;--teal:#004d40;--teal-bg:#e0f2f1;--teal-border:#80cbc4;}
+  :root[data-theme="dark"]{--gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);--gold-line:rgba(212,172,48,.22);--ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;--paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;--pass:#4caf50;--pass-bg:#1b2e1c;--pass-border:#388e3c;--pend:#fbbf24;--pend-bg:#1f1600;--pend-border:#92400e;--fail:#ef5350;--fail-bg:#2d1212;--fail-border:#c62828;--info:#90caf9;--info-bg:#0d1e33;--info-border:#1565c0;--purple:#ce93d8;--purple-bg:#1a0e22;--purple-border:#7b1fa2;--teal:#80cbc4;--teal-bg:#0a1f1e;--teal-border:#00695c;}
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif;font-size:13.5px;line-height:1.65;background:var(--paper);color:var(--ink);padding-bottom:5rem;}
+
+  .pbar{position:sticky;top:0;z-index:100;background:var(--paper-2);border-bottom:1px solid var(--paper-3);padding:.45rem 1.5rem;display:flex;align-items:center;gap:1rem;font-size:11px;color:var(--ink-3);}
+  .pbar .brand{font-weight:700;color:var(--gold-text);letter-spacing:.06em;font-size:12px;}
+  .pbar .badge{font-weight:700;font-size:10px;letter-spacing:.08em;padding:.2rem .65rem;border-radius:var(--r);background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass-border);text-transform:uppercase;}
+  .pbar .spacer{flex:1;}
+  .pbar button{background:var(--gold);color:#fff;border:none;padding:.3rem 1rem;border-radius:var(--r);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;}
+  .pbar button:hover{background:var(--gold-2);}
+
+  .doc{max-width:var(--doc-max);margin:0 auto;padding:2.5rem 1.5rem 0;}
+
+  .mast{border-top:3px solid var(--gold);border-bottom:3px solid var(--gold);padding:1.1rem 0 1rem;margin-bottom:1.75rem;position:relative;}
+  .mast::after{content:'';position:absolute;bottom:5px;left:0;right:0;height:1px;background:var(--gold);opacity:.3;}
+  .mast .eye{font-size:9.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.3rem;}
+  .mast h1{font-family:Georgia,'Times New Roman',serif;font-size:1.65rem;font-weight:700;line-height:1.15;margin-bottom:.65rem;text-wrap:balance;}
+  .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:.25rem .75rem;font-size:11.5px;color:var(--ink-3);}
+  .meta span{display:flex;gap:.3rem;}
+  .meta strong{color:var(--ink-2);}
+
+  /* Purpose statement */
+  .purpose{background:var(--gold-dim);border:1px solid var(--gold-line);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1.75rem;}
+  .purpose p{font-size:13px;color:var(--ink-2);line-height:1.8;}
+  .purpose strong{color:var(--ink);}
+
+  .sec{margin-bottom:2rem;}
+  .sh{font-family:Georgia,'Times New Roman',serif;font-size:.95rem;font-weight:700;padding-bottom:.35rem;border-bottom:1px solid var(--gold);margin-bottom:.9rem;display:flex;align-items:center;gap:.55rem;}
+  .sn{background:var(--gold);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:system-ui,sans-serif;}
+
+  /* 5-Board grid */
+  .board-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.1rem;}
+  .board-card{border-radius:var(--r);overflow:hidden;border:1px solid var(--paper-3);}
+  .board-card .bh{padding:.6rem .85rem;font-size:11px;font-weight:700;letter-spacing:.05em;border-bottom:1px solid;}
+  .board-card .bb{padding:.65rem .85rem;background:var(--paper-2);}
+  .board-card .bb .b-sub{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.35rem;}
+  .board-card .bb ul{list-style:none;padding:0;margin:0;}
+  .board-card .bb ul li{font-size:11.5px;color:var(--ink-2);padding:.18rem 0;display:flex;gap:.4rem;}
+  .board-card .bb ul li::before{content:'·';color:var(--ink-3);font-weight:700;flex-shrink:0;}
+  .bc-arch .bh{background:var(--gold-dim);color:var(--gold-text);border-color:var(--gold-line);}
+  .bc-arch .b-sub{color:var(--gold-text);}
+  .bc-release .bh{background:var(--info-bg);color:var(--info);border-color:var(--info-border);}
+  .bc-release .b-sub{color:var(--info);}
+  .bc-security .bh{background:var(--fail-bg);color:var(--fail);border-color:var(--fail-border);}
+  .bc-security .b-sub{color:var(--fail);}
+  .bc-ai .bh{background:var(--purple-bg);color:var(--purple);border-color:var(--purple-border);}
+  .bc-ai .b-sub{color:var(--purple);}
+  .bc-ops .bh{background:var(--teal-bg);color:var(--teal);border-color:var(--teal-border);}
+  .bc-ops .b-sub{color:var(--teal);}
+  /* Full-width card for Platform Operations */
+  .board-card.full{grid-column:1 / -1;}
+
+  /* Annual governance calendar */
+  .cal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.85rem;}
+  .cal-quarter{border:1px solid var(--paper-3);border-radius:var(--r);overflow:hidden;}
+  .cal-quarter .qh{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.35rem .6rem;border-bottom:1px solid var(--paper-3);background:var(--paper-2);color:var(--ink-3);}
+  .cal-quarter ul{list-style:none;padding:.45rem .6rem;margin:0;}
+  .cal-quarter ul li{font-size:11px;color:var(--ink-2);padding:.2rem 0;border-bottom:1px solid var(--paper-3);display:flex;gap:.4rem;align-items:baseline;}
+  .cal-quarter ul li:last-child{border-bottom:none;}
+  .cal-quarter ul li .ev-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;position:relative;top:1px;}
+  .ev-dot.arch{background:var(--gold);}
+  .ev-dot.sec{background:var(--fail);}
+  .ev-dot.ai{background:var(--purple);}
+  .ev-dot.ops{background:var(--teal);}
+  .ev-dot.rel{background:var(--info);}
+  .ev-dot.cert{background:var(--pass);}
+
+  /* Deliverables */
+  .del-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.85rem;}
+  .del-card{border:1px solid var(--paper-3);border-radius:var(--r);padding:.75rem .9rem;background:var(--paper-2);}
+  .del-card .dc-n{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gold-text);margin-bottom:.3rem;}
+  .del-card .dc-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:.35rem;}
+  .del-card .dc-desc{font-size:11.5px;color:var(--ink-3);line-height:1.55;}
+
+  /* Success criteria */
+  .sc-list{list-style:none;padding:0;margin-bottom:.85rem;}
+  .sc-list li{display:flex;gap:.6rem;align-items:baseline;padding:.38rem 0;border-bottom:1px solid var(--paper-3);font-size:12.5px;color:var(--ink-2);}
+  .sc-list li:last-child{border-bottom:none;}
+  .sc-list li::before{content:'✓';color:var(--pass);font-weight:700;flex-shrink:0;}
+
+  /* Governance principles */
+  .principle-row{border-bottom:1px solid var(--paper-3);padding:.65rem 0;display:grid;grid-template-columns:1.75rem 1fr;gap:.5rem;align-items:baseline;}
+  .principle-row:last-child{border-bottom:none;}
+  .pr-n{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gold-text);}
+  .pr-body strong{font-size:13px;color:var(--ink);display:block;margin-bottom:.15rem;}
+  .pr-body span{font-size:12px;color:var(--ink-3);line-height:1.55;}
+
+  /* Renewal cycle */
+  .renewal-wrap{overflow-x:auto;margin-bottom:.85rem;}
+  .rt{width:100%;border-collapse:collapse;}
+  .rt th{background:var(--paper-2);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:.4rem .7rem;border:1px solid var(--paper-3);text-align:left;}
+  .rt td{padding:.45rem .7rem;border:1px solid var(--paper-3);font-size:12px;color:var(--ink-2);}
+  .rt td:first-child{font-weight:600;color:var(--ink);background:var(--paper-2);}
+  .rt tr:nth-child(even) td:not(:first-child){background:rgba(0,0,0,.02);}
+
+  /* Terminal outcome */
+  .terminal{border:2px solid var(--pass-border);border-radius:var(--r);background:var(--pass-bg);padding:1.25rem 1.5rem;margin-bottom:1.5rem;}
+  .terminal .t-eye{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--pass);margin-bottom:.3rem;}
+  .terminal h2{font-family:Georgia,'Times New Roman',serif;font-size:1.05rem;font-weight:700;color:var(--ink);margin-bottom:.75rem;}
+  .terminal p{font-size:12.5px;color:var(--ink-2);line-height:1.75;}
+
+  .callout{padding:.85rem 1.1rem;border-radius:0 var(--r) var(--r) 0;margin-bottom:1.25rem;}
+  .callout.gold{background:var(--gold-dim);border-left:4px solid var(--gold);}
+  .callout h3{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.35rem;}
+  .callout p{font-size:12.5px;color:var(--ink-2);line-height:1.75;}
+
+  .rule{border:none;border-top:2px solid var(--gold);margin:2rem 0 0;opacity:.4;}
+
+  @media(max-width:720px){.meta{grid-template-columns:1fr 1fr;}.board-grid{grid-template-columns:1fr;}.cal-grid{grid-template-columns:1fr 1fr;}.del-grid{grid-template-columns:1fr;}}
+  @media print{.pbar{display:none;}body{font-size:12px;}@page{margin:1.5cm;}.sec{break-inside:avoid;}}
+</style>
+
+<div class="pbar">
+  <span class="brand">YohPal Platform</span>
+  <span class="badge">Phase 23 — Permanent Governance</span>
+  <span class="spacer"></span>
+  <button onclick="window.print()">Download PDF</button>
+</div>
+
+<div class="doc">
+
+  <div class="mast">
+    <div class="eye">Permanent Governance Framework — Post-Certification Operations</div>
+    <h1>YohPal Platform Phase 23 — Ecosystem Operations &amp; Lifecycle Governance</h1>
+    <div class="meta">
+      <span><strong>Version:</strong> 1.0</span>
+      <span><strong>Date:</strong> 2026-07-09</span>
+      <span><strong>Prerequisite:</strong> Phase 22 Certification Granted</span>
+      <span><strong>Boards Established:</strong> 5</span>
+      <span><strong>Annual Reviews:</strong> 6 recurring processes</span>
+      <span><strong>Deliverables:</strong> 4 governance documents</span>
+    </div>
+  </div>
+
+  <!-- Purpose -->
+  <div class="purpose">
+    <p><strong>Phase 23 is the permanent governance layer for the YohPal ecosystem after enterprise certification.</strong> It replaces ad-hoc platform phases with structured, recurring governance processes. After this phase, future work occurs through normal product releases and the mechanisms defined here — not through additional platform phases. YohPal transitions from a certified platform into a sustainably governed enterprise ecosystem with continuous oversight, periodic certification, and long-term operational resilience.</p>
+  </div>
+
+  <!-- 1. Five Governance Boards -->
+  <div class="sec">
+    <div class="sh"><span class="sn">1</span>Five Governance Boards</div>
+    <div class="board-grid">
+      <div class="board-card bc-arch">
+        <div class="bh">Architecture Review Board</div>
+        <div class="bb">
+          <div class="b-sub">Responsibilities</div>
+          <ul>
+            <li>Annual platform architecture review</li>
+            <li>Approve all structural changes to shared platform services</li>
+            <li>Review new module proposals before development begins</li>
+            <li>Maintain Architecture Decision Records (ADRs)</li>
+            <li>Approve technology additions to the platform stack</li>
+          </ul>
+        </div>
+      </div>
+      <div class="board-card bc-release">
+        <div class="bh">Release Review Board</div>
+        <div class="bb">
+          <div class="b-sub">Responsibilities</div>
+          <ul>
+            <li>Govern all production releases using the Phase 18 9-gate framework</li>
+            <li>Approve or reject module release candidates</li>
+            <li>Maintain rollback readiness for every production release</li>
+            <li>Review CI/CD pipeline health quarterly</li>
+            <li>Own the release calendar and freeze windows</li>
+          </ul>
+        </div>
+      </div>
+      <div class="board-card bc-security">
+        <div class="bh">Security Review Board</div>
+        <div class="bb">
+          <div class="b-sub">Responsibilities</div>
+          <ul>
+            <li>Annual security audit across all modules and platform services</li>
+            <li>Approve all changes to Firestore rules and Storage rules</li>
+            <li>Review financial compliance for wallet and payout flows</li>
+            <li>Respond to security incidents via Mission Control</li>
+            <li>Govern security threat automation policies</li>
+          </ul>
+        </div>
+      </div>
+      <div class="board-card bc-ai">
+        <div class="bh">AI Governance Board</div>
+        <div class="bb">
+          <div class="b-sub">Responsibilities</div>
+          <ul>
+            <li>Annual audit of YohPal Brain tasks and AI agent behaviour</li>
+            <li>Approve all AI model changes or agent additions</li>
+            <li>Review AI latency, failure rate, and cost KPIs</li>
+            <li>Govern AI-triggered automation requiring approval</li>
+            <li>Maintain AI operations documentation</li>
+          </ul>
+        </div>
+      </div>
+      <div class="board-card bc-ops full">
+        <div class="bh">Platform Operations Board</div>
+        <div class="bb">
+          <div class="b-sub">Responsibilities</div>
+          <ul>
+            <li>Own Mission Control dashboard and enterprise Digital Twin — ensure all 7 modules report health continuously</li>
+            <li>Conduct annual disaster recovery exercise and validate rollback procedures across all modules</li>
+            <li>Review enterprise KPIs monthly: availability ≥99.95%, crash-free ≥99.7%, wallet success ≥99.99%</li>
+            <li>Govern the YohPal OS automation engine: register new policies, review triggered actions and approval records</li>
+            <li>Coordinate annual certification renewal with the Executive Architecture &amp; Governance Board</li>
+            <li>Produce quarterly operations report for executive leadership</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Annual Governance Calendar -->
+  <div class="sec">
+    <div class="sh"><span class="sn">2</span>Annual Governance Calendar</div>
+    <div class="cal-grid">
+      <div class="cal-quarter">
+        <div class="qh">Q1 — January to March</div>
+        <ul>
+          <li><span class="ev-dot arch"></span>Architecture Review Board annual review</li>
+          <li><span class="ev-dot rel"></span>Release pipeline health audit</li>
+          <li><span class="ev-dot ops"></span>Q4 operations report published</li>
+        </ul>
+      </div>
+      <div class="cal-quarter">
+        <div class="qh">Q2 — April to June</div>
+        <ul>
+          <li><span class="ev-dot sec"></span>Security audit — all modules</li>
+          <li><span class="ev-dot sec"></span>Firestore rules review</li>
+          <li><span class="ev-dot ops"></span>Q1 operations report published</li>
+          <li><span class="ev-dot rel"></span>Release calendar H2 planning</li>
+        </ul>
+      </div>
+      <div class="cal-quarter">
+        <div class="qh">Q3 — July to September</div>
+        <ul>
+          <li><span class="ev-dot ai"></span>AI governance audit</li>
+          <li><span class="ev-dot ops"></span>Disaster recovery exercise</li>
+          <li><span class="ev-dot ops"></span>Q2 operations report published</li>
+          <li><span class="ev-dot sec"></span>Financial compliance review</li>
+        </ul>
+      </div>
+      <div class="cal-quarter">
+        <div class="qh">Q4 — October to December</div>
+        <ul>
+          <li><span class="ev-dot cert"></span>Annual certification renewal</li>
+          <li><span class="ev-dot ops"></span>Documentation audit</li>
+          <li><span class="ev-dot ops"></span>Q3 operations report published</li>
+          <li><span class="ev-dot arch"></span>Next-year architecture planning</li>
+        </ul>
+      </div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:.5rem;font-size:11px;color:var(--ink-3);">
+      <span style="display:flex;align-items:center;gap:.3rem;"><span class="ev-dot arch" style="display:inline-block;"></span>Architecture</span>
+      <span style="display:flex;align-items:center;gap:.3rem;"><span class="ev-dot sec" style="display:inline-block;"></span>Security</span>
+      <span style="display:flex;align-items:center;gap:.3rem;"><span class="ev-dot ai" style="display:inline-block;"></span>AI Governance</span>
+      <span style="display:flex;align-items:center;gap:.3rem;"><span class="ev-dot ops" style="display:inline-block;"></span>Operations</span>
+      <span style="display:flex;align-items:center;gap:.3rem;"><span class="ev-dot rel" style="display:inline-block;"></span>Release</span>
+      <span style="display:flex;align-items:center;gap:.3rem;"><span class="ev-dot cert" style="display:inline-block;"></span>Certification</span>
+    </div>
+  </div>
+
+  <!-- 3. Certification Renewal Policy -->
+  <div class="sec">
+    <div class="sh"><span class="sn">3</span>Certification Renewal Policy</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.75rem;">The Enterprise Platform Certificate issued in Phase 22 must be renewed annually. Renewal requires passing a reduced evidence gate — lighter than the original certification, but substantive enough to confirm the platform remains operationally sound.</p>
+    <div class="renewal-wrap">
+      <table class="rt">
+        <thead><tr><th>Renewal Gate</th><th>Required Evidence</th><th>Responsible Board</th><th>Cadence</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Architecture integrity</td>
+            <td>No undocumented structural changes; ADRs up to date</td>
+            <td>Architecture Review Board</td>
+            <td>Annual (Q1)</td>
+          </tr>
+          <tr>
+            <td>Security clearance</td>
+            <td>Security audit complete; all Critical/High findings resolved</td>
+            <td>Security Review Board</td>
+            <td>Annual (Q2)</td>
+          </tr>
+          <tr>
+            <td>AI governance</td>
+            <td>AI audit complete; no unapproved model changes</td>
+            <td>AI Governance Board</td>
+            <td>Annual (Q3)</td>
+          </tr>
+          <tr>
+            <td>Disaster recovery</td>
+            <td>DR exercise conducted; rollback tested for all 7 modules</td>
+            <td>Platform Operations Board</td>
+            <td>Annual (Q3)</td>
+          </tr>
+          <tr>
+            <td>KPI compliance</td>
+            <td>All enterprise KPIs met (availability, crash rate, wallet success)</td>
+            <td>Platform Operations Board</td>
+            <td>Annual (Q4)</td>
+          </tr>
+          <tr>
+            <td>Documentation audit</td>
+            <td>All governance docs current; handover docs updated</td>
+            <td>Platform Operations Board</td>
+            <td>Annual (Q4)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 4. Governance Principles -->
+  <div class="sec">
+    <div class="sh"><span class="sn">4</span>Core Governance Principles</div>
+    <div>
+      <div class="principle-row">
+        <span class="pr-n">01</span>
+        <div class="pr-body"><strong>Evidence before decisions</strong><span>No governance decision — certification, release approval, architecture change, security clearance — is recorded without supporting evidence. The Phase 21/22 precedent holds permanently.</span></div>
+      </div>
+      <div class="principle-row">
+        <span class="pr-n">02</span>
+        <div class="pr-body"><strong>Approval records for high-impact actions</strong><span>The Phase 20 governance rule is permanent: rollback, wallet freeze, payout freeze, AI model switch, security lockdown, and user mass actions require an ApprovalRequest record before execution.</span></div>
+      </div>
+      <div class="principle-row">
+        <span class="pr-n">03</span>
+        <div class="pr-body"><strong>No platform phases after Phase 23</strong><span>Future development occurs through normal product releases governed by the Release Review Board, not through new platform phases. Architecture evolution is managed through ADRs and Architecture Review Board approval.</span></div>
+      </div>
+      <div class="principle-row">
+        <span class="pr-n">04</span>
+        <div class="pr-body"><strong>Financial compliance is non-negotiable</strong><span>Wallet write operations remain web-only. All changes to financial flows require Security Review Board approval and a compliance review before deployment. This constraint does not expire.</span></div>
+      </div>
+      <div class="principle-row">
+        <span class="pr-n">05</span>
+        <div class="pr-body"><strong>Mission Control is always on</strong><span>The Platform Operations Board owns Mission Control. If any of the 7 modules falls off the digital twin stream, it is treated as an incident. There is no acceptable state in which modules are invisible to the enterprise operating layer.</span></div>
+      </div>
+      <div class="principle-row">
+        <span class="pr-n">06</span>
+        <div class="pr-body"><strong>Governance is a function, not a project</strong><span>These boards meet on a recurring schedule regardless of whether new features are being developed. Governance runs continuously, not only during releases or incidents.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Deliverables -->
+  <div class="sec">
+    <div class="sh"><span class="sn">5</span>Phase 23 Deliverables</div>
+    <div class="del-grid">
+      <div class="del-card">
+        <div class="dc-n">Deliverable 01</div>
+        <div class="dc-title">YohPal Governance Charter</div>
+        <div class="dc-desc">Defines the mandate, membership, quorum, cadence, and decision-making authority of each of the five governance boards. The foundational constitutional document of the YohPal ecosystem.</div>
+      </div>
+      <div class="del-card">
+        <div class="dc-n">Deliverable 02</div>
+        <div class="dc-title">Enterprise Operations Handbook</div>
+        <div class="dc-desc">Day-to-day operating procedures for the Platform Operations Board: Mission Control, incident response, predictive risk review, approval queue management, and escalation paths.</div>
+      </div>
+      <div class="del-card">
+        <div class="dc-n">Deliverable 03</div>
+        <div class="dc-title">Certification Renewal Policy</div>
+        <div class="dc-desc">The formal policy governing annual certificate renewal: evidence gates, responsible boards, deadlines, what constitutes a renewal failure, and how certification is reinstated after lapse.</div>
+      </div>
+      <div class="del-card">
+        <div class="dc-n">Deliverable 04</div>
+        <div class="dc-title">Platform Lifecycle Management Manual</div>
+        <div class="dc-desc">Covers the full lifecycle of a YohPal module: proposal, architecture review, development, release, monitoring, deprecation, and decommissioning. The authoritative guide for new module teams.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Success Criteria -->
+  <div class="sec">
+    <div class="sh"><span class="sn">6</span>Success Criteria</div>
+    <ul class="sc-list">
+      <li>Five governance boards are established with named members, quorum rules, and documented mandates</li>
+      <li>Annual governance calendar is adopted and scheduled in the organisation's calendar for the next 12 months</li>
+      <li>Certification renewal policy is ratified — the Phase 22 certificate will not expire without a formal renewal process</li>
+      <li>Platform Lifecycle Management Manual is available to all current and future module teams</li>
+      <li>Mission Control is monitored continuously by the Platform Operations Board with no untracked modules</li>
+      <li>Governance becomes a permanent operational function — not dependent on any single person or platform phase</li>
+      <li>Future product development proceeds through release governance, not through new platform phases</li>
+    </ul>
+  </div>
+
+  <!-- Terminal outcome -->
+  <div class="terminal">
+    <div class="t-eye">Phase 23 Outcome — Permanent Governance</div>
+    <h2>YohPal transitions from a certified platform into a sustainably governed enterprise ecosystem</h2>
+    <p>After Phase 23, the YohPal ecosystem has continuous oversight, periodic certification renewal, five standing governance boards, an annual review calendar, and long-term operational resilience. There are no further platform phases. All future work — new features, new modules, architecture changes, security updates, AI improvements — occurs within this governance model through normal product releases and board approvals. The platform is complete. Governance keeps it that way.</p>
+  </div>
+
+  <div class="callout gold">
+    <h3>A Note on What Has Been Built</h3>
+    <p>Across Phases 11 through 23, YohPal has moved from individual application designs to a unified enterprise platform with a shared service layer, mission control, digital twin, event bus, automation engine, approval framework, release governance, enterprise certification, and now a permanent governance model. The architectural challenge is solved. What remains — and what Phase 23 ensures never drifts — is operational discipline: evidence-backed decisions, recurring reviews, and governance that runs as a function rather than a project.</p>
+  </div>
+
+  <hr class="rule">
+</div>

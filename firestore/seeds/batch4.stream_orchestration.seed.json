@@ -1,0 +1,31 @@
+{
+  "streamRoutePolicies": [
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "destinationId": "REPLACE_WITH_DESTINATION_ID",
+      "mode": "teaser",
+      "enabled": true,
+      "delaySeconds": 20,
+      "previewWindowSeconds": 60,
+      "ctaOverlayEnabled": true,
+      "ctaText": "Join the full live on YohPal",
+      "ctaUrl": "https://yohpal.live/watch/REPLACE_WITH_SESSION_ID",
+      "watermarkEnabled": true,
+      "blurAfterPreview": true,
+      "createdBy": "REPLACE_WITH_CREATOR_UID",
+      "updatedBy": "REPLACE_WITH_CREATOR_UID"
+    }
+  ],
+  "streamHealth": [
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "status": "healthy",
+      "ingestStatus": "mock_ingest_active",
+      "activeDestinations": 1,
+      "failedDestinations": 0,
+      "bitrateKbps": 4200,
+      "latencyMs": 850,
+      "updatedBy": "REPLACE_WITH_CREATOR_UID"
+    }
+  ]
+}

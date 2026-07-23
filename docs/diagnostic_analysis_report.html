@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YohPal Live Streaming Diagnostic Analysis Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        
+        .header .timestamp {
+            margin-top: 15px;
+            font-size: 0.9em;
+            opacity: 0.85;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .download-section {
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .download-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 10px;
+        }
+        
+        .download-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .download-button:active {
+            transform: translateY(0);
+        }
+        
+        .download-icon {
+            margin-right: 10px;
+            font-size: 1.3em;
+        }
+        
+        .file-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .file-card {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .file-card:hover {
+            background: #e8ecff;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .file-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .file-card p {
+            color: #555;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .status-pending {
+            background: #ffeaa7;
+            color: #d63031;
+        }
+        
+        .status-complete {
+            background: #a9e3b2;
+            color: #27ae60;
+        }
+        
+        .status-blocker {
+            background: #ff7675;
+            color: white;
+        }
+        
+        .analysis-section {
+            margin: 30px 0;
+        }
+        
+        .analysis-section h2 {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .comparison-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        .blocker-list {
+            background: #ffe5e5;
+            border: 2px solid #ff7675;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .blocker-list h3 {
+            color: #d63031;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .blocker-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ff7675;
+            border-radius: 3px;
+        }
+        
+        .blocker-item strong {
+            color: #d63031;
+        }
+        
+        .recommendation-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-left: 5px solid #667eea;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .recommendation-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .readiness-chart {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .readiness-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .readiness-label {
+            width: 200px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .readiness-bar {
+            flex: 1;
+            height: 25px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 0 15px;
+        }
+        
+        .readiness-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        
+        .readiness-percent {
+            width: 60px;
+            text-align: right;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .footer {
+            background: #f9f9f9;
+            border-top: 1px solid #e0e0e0;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .pdf-section {
+            background: #e8f5e9;
+            border: 2px dashed #27ae60;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .pdf-section h3 {
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+        
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #667eea, transparent);
+            margin: 30px 0;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+            .download-section {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 YohPal Live Streaming Diagnostic Analysis</h1>
+            <p>Comprehensive Report Analysis & Cross-Reference</p>
+            <div class="timestamp">Generated: July 13, 2026 | Latest Diagnostic: LS-4 QA Report</div>
+        </div>
+        
+        <div class="content">
+            <!-- Download Section -->
+            <div class="download-section">
+                <h2>📄 PDF Documents</h2>
+                <p style="margin-bottom: 20px; color: #666;">Download the original source documents:</p>
+                <div>
+                    <a href="Live Streaming Gap Report (6 Jul 2026).pdf" download class="download-button">
+                        <span class="download-icon">📥</span>Live Streaming Gap Report
+                    </a>
+                    <a href="YohPal Live All-Batch Gap Report v2 t.pdf" download class="download-button">
+                        <span class="download-icon">📥</span>YohPal All-Batch Report
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Source Files Overview -->
+            <div class="analysis-section">
+                <h2>📋 Source Documents Overview</h2>
+                <div class="file-list">
+                    <div class="file-card">
+                        <h3>Live Streaming Gap Report (6 Jul 2026)</h3>
+                        <p><strong>Focus:</strong> Flutter client stability assessment and server-side completion status</p>
+                        <p><strong>Key Finding:</strong> Server-side (mediasoup SFU, signaling, Docker, TURN, JWT) is 100% production-ready. Flutter client contains 4 blocking defects.</p>
+                        <span class="status-badge status-blocker">4 BLOCKERS IDENTIFIED</span>
+                    </div>
+                    
+                    <div class="file-card">
+                        <h3>YohPal Live All-Batch Gap Report v2</h3>
+                        <p><strong>Focus:</strong> Comprehensive assessment across all YohPal platform batches</p>
+                        <p><strong>Key Finding:</strong> Cross-platform readiness analysis including streaming, integration, and QA validation</p>
+                        <span class="status-badge status-pending">VALIDATION IN PROGRESS</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <!-- Critical Blockers from Gap Report -->
+            <div class="analysis-section">
+                <h2>🚨 Critical Blockers (Live Streaming Gap Report)</h2>
+                <div class="blocker-list">
+                    <h3>Flutter Client Blocking Issues:</h3>
+                    
+                    <div class="blocker-item">
+                        <strong>BLOCKER 1:</strong> Missing flutter/pubspec.yaml
+                        <p style="margin-top: 5px;">Impact: Module cannot compile, packages cannot resolve, CI cannot build. <span class="status-badge status-blocker">MUST FIX FIRST</span></p>
+                    </div>
+                    
+                    <div class="blocker-item">
+                        <strong>BLOCKER 2:</strong> Infinite Recursion in YohPalPeerFactory.createPeerConnection()
+                        <p style="margin-top: 5px;">Impact: StackOverflow on peer connection creation, affects broadcasters and viewers.</p>
+                    </div>
+                    
+                    <div class="blocker-item">
+                        <strong>BLOCKER 3:</strong> DTLS Echo Bug
+                        <p style="margin-top: 5px;">Impact: Client echoes server's fingerprint instead of sending its own. Result: No media flow, no video delivery, broadcasts fail. <span class="status-badge status-blocker">CRITICAL</span></p>
+                    </div>
+                    
+                    <div class="blocker-item">
+                        <strong>BLOCKER 4:</strong> Deprecated Color.withOpacity() (9 occurrences)
+                        <p style="margin-top: 5px;">Impact: Build warnings now; Flutter 4 build failure in future. Replace with withValues(alpha: ...)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <!-- Readiness Assessment -->
+            <div class="analysis-section">
+                <h2>📊 Component Readiness Status</h2>
+                <div class="readiness-chart">
+                    <div class="readiness-item">
+                        <div class="readiness-label">Main YohPal Live App</div>
+                        <div class="readiness-bar">
+                            <div class="readiness-fill" style="width: 99%;">99-100%</div>
+                        </div>
+                        <div class="readiness-percent">99-100%</div>
+                    </div>
+                    
+                    <div class="readiness-item">
+                        <div class="readiness-label">Live Streaming Server</div>
+                        <div class="readiness-bar">
+                            <div class="readiness-fill" style="width: 100%;">100%</div>
+                        </div>
+                        <div class="readiness-percent">100% ✓</div>
+                    </div>
+                    
+                    <div class="readiness-item">
+                        <div class="readiness-label">Theme System</div>
+                        <div class="readiness-bar">
+                            <div class="readiness-fill" style="width: 98%;">98%</div>
+                        </div>
+                        <div class="readiness-percent">98%</div>
+                    </div>
+                    
+                    <div class="readiness-item">
+                        <div class="readiness-label">Zero-Wait Feed</div>
+                        <div class="readiness-bar">
+                            <div class="readiness-fill" style="width: 99%;">99%</div>
+                        </div>
+                        <div class="readiness-percent">99%</div>
+                    </div>
+                    
+                    <div class="readiness-item">
+                        <div class="readiness-label">Wallet</div>
+                        <div class="readiness-bar">
+                            <div class="readiness-fill" style="width: 100%;">100%</div>
+                        </div>
+                        <div class="readiness-percent">100% ✓</div>
+                    </div>
+                    
+                    <div class="readiness-item">
+                        <div class="readiness-label">YCIOS</div>
+                        <div class="readiness-bar">
+                            <div class="readiness-fill" style="width: 98%;">98%</div>
+                        </div>
+                        <div class="readiness-percent">98%</div>
+                    </div>
+                    
+                    <div class="readiness-item">
+                        <div class="readiness-label">Live Streaming Flutter Client</div>
+                        <div class="readiness-bar">
+                            <div class="readiness-fill" style="width: 75%; background: linear-gradient(90deg, #ff7675 0%, #ff9800 100%);">75% (BLOCKER)</div>
+                        </div>
+                        <div class="readiness-percent">~75%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <!-- Latest Diagnostic - LS-4 QA Report -->
+            <div class="analysis-section">
+                <h2>✅ Latest Diagnostic: LS-4 Controlled Streaming QA Report</h2>
+                
+                <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">Integration Validation Status</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Gate</th>
+                            <th>Status</th>
+                            <th>Assessment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>LS-2 Evidence Received</strong></td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td>Awaiting device proof from LS-2 phase</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Live Streaming Route Visible</strong></td>
+                            <td><span class="status-badge status-complete">Complete</span></td>
+                            <td>Feature flag enabled, route accessible</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Go Live Opens</strong></td>
+                            <td><span class="status-badge status-complete">Complete</span></td>
+                            <td>Broadcasting UI initialized successfully</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Viewer Joins</strong></td>
+                            <td><span class="status-badge status-complete">Complete</span></td>
+                            <td>Viewer connection flow functional</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Remote Media Visible</strong></td>
+                            <td><span class="status-badge status-pending">Pending device proof</span></td>
+                            <td>Requires platform-specific validation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Chat Visible</strong></td>
+                            <td><span class="status-badge status-complete">Complete</span></td>
+                            <td>Real-time messaging functional</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Gift Button Gated</strong></td>
+                            <td><span class="status-badge status-complete">Complete</span></td>
+                            <td>Gift feature properly restricted</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Creator Ends Stream</strong></td>
+                            <td><span class="status-badge status-complete">Complete</span></td>
+                            <td>Broadcast termination flow works</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Feature Flag Rollback</strong></td>
+                            <td><span class="status-badge status-complete">Complete</span></td>
+                            <td>Safe feature disable mechanism</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">Platform Streaming Validation</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Test</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Android Streaming Proof</strong></td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td>Waiting for LS-2 device evidence</td>
+                        </tr>
+                        <tr>
+                            <td><strong>iPhone Streaming Proof</strong></td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td>Waiting for LS-2 device evidence</td>
+                        </tr>
+                        <tr>
+                            <td><strong>30-Minute Stream Stability</strong></td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td>Device stability validation required</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Multi-Viewer Test</strong></td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td>Concurrent viewer scenario testing</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <!-- Comparative Analysis -->
+            <div class="analysis-section">
+                <h2>🔍 Comparative Analysis: Gap Reports vs. LS-4 Diagnostics</h2>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Live Streaming Gap Report</th>
+                            <th>LS-4 QA Report</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Server Readiness</strong></td>
+                            <td>100% Production Ready</td>
+                            <td>N/A (not tested in LS-4)</td>
+                            <td><span class="status-badge status-complete">✓ COMPLETE</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Client Compilation</strong></td>
+                            <td>BLOCKER: Missing pubspec.yaml</td>
+                            <td>Partially resolved</td>
+                            <td><span class="status-badge status-pending">In Progress</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>RTC Peer Connection</strong></td>
+                            <td>BLOCKER: Infinite recursion</td>
+                            <td>Partially tested (Go Live opens)</td>
+                            <td><span class="status-badge status-pending">Needs Validation</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Media Flow (DTLS)</strong></td>
+                            <td>BLOCKER: Echo bug, no media</td>
+                            <td>PENDING: Remote media visible (device proof)</td>
+                            <td><span class="status-badge status-blocker">CRITICAL</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>UI/UX Compliance</strong></td>
+                            <td>BLOCKER: Deprecated widgets</td>
+                            <td>Feature gates functional</td>
+                            <td><span class="status-badge status-pending">Minor</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Chat Integration</strong></td>
+                            <td>Not evaluated</td>
+                            <td><span class="status-badge status-complete">COMPLETE</span></td>
+                            <td><span class="status-badge status-complete">✓ COMPLETE</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Features (Gifts)</strong></td>
+                            <td>Not evaluated</td>
+                            <td><span class="status-badge status-complete">Gated/Disabled</span></td>
+                            <td><span class="status-badge status-complete">✓ COMPLETE</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <!-- Recommendations -->
+            <div class="analysis-section">
+                <h2>💡 Strategic Recommendations</h2>
+                
+                <div class="recommendation-box">
+                    <h3>🎯 Immediate Actions Required</h3>
+                    <ul style="margin-left: 20px; line-height: 1.8; color: #333;">
+                        <li><strong>Fix BLOCKER 3 (DTLS Echo Bug):</strong> Highest priority. This prevents all media flow. Estimated 2-hour fix.</li>
+                        <li><strong>Resolve BLOCKER 1 (pubspec.yaml):</strong> Create flutter/pubspec.yaml and verify standalone module compilation.</li>
+                        <li><strong>Fix BLOCKER 2 (Recursion):</strong> Rename and refactor YohPalPeerFactory.createPeerConnection() to break recursion cycle.</li>
+                        <li><strong>Replace BLOCKER 4 (Deprecated Widgets):</strong> Replace 9 occurrences of Color.withOpacity() with withValues(alpha: ...).</li>
+                    </ul>
+                </div>
+                
+                <div class="recommendation-box" style="margin-top: 20px;">
+                    <h3>📋 Next Phase: LS-1 Client Stabilization Sprint</h3>
+                    <ul style="margin-left: 20px; line-height: 1.8; color: #333;">
+                        <li><strong>Sprint A — Build Foundation:</strong> Create pubspec.yaml, verify standalone module build, resolve dependencies</li>
+                        <li><strong>Sprint B — RTC Stability:</strong> Fix infinite recursion, implement DTLS handshake correctly</li>
+                        <li><strong>Sprint C — Integration Testing:</strong> Platform-specific tests (Android 30min stream, iPhone streaming)</li>
+                        <li><strong>Sprint D — Multi-viewer & Scale:</strong> Concurrent viewer validation, stability under load</li>
+                    </ul>
+                </div>
+                
+                <div class="recommendation-box" style="margin-top: 20px;">
+                    <h3>✅ Hold Point</h3>
+                    <p style="color: #333; line-height: 1.6;">
+                        <strong>DO NOT integrate Live Streaming into production YohPal Live yet.</strong> 
+                        Complete a dedicated stabilization sprint for the Flutter client first. This avoids introducing instability into 
+                        the otherwise production-ready main application (99-100% readiness).
+                    </p>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <!-- PDF Section for Download -->
+            <div class="pdf-section">
+                <h3>📥 Source PDF Documents</h3>
+                <p style="color: #333; margin-top: 10px; line-height: 1.6;">
+                    The original PDF documents referenced in this analysis are available for download above. 
+                    These files contain detailed technical findings, architecture validation, and comprehensive gap analysis.
+                </p>
+                <ul style="margin-left: 30px; margin-top: 15px; color: #555;">
+                    <li><strong>Live Streaming Gap Report (6 Jul 2026):</strong> Detailed assessment of 4 blocking defects in Flutter client and 100% server-side completion</li>
+                    <li><strong>YohPal Live All-Batch Gap Report v2:</strong> Comprehensive cross-platform readiness analysis</li>
+                </ul>
+            </div>
+            
+            <!-- Summary -->
+            <div class="analysis-section" style="background: #f0f4ff; border-radius: 8px; padding: 20px; margin-top: 30px;">
+                <h2>📊 Executive Summary</h2>
+                <p style="color: #333; line-height: 1.8; margin-bottom: 15px;">
+                    <strong>Overall Assessment:</strong> The Live Streaming infrastructure is 75% complete. The server-side architecture 
+                    (mediasoup SFU, signaling, Docker, TURN, JWT, Android foreground service, DevOps) is 100% production-ready. 
+                    However, the Flutter client contains 4 blocking defects that must be resolved before integration testing can proceed.
+                </p>
+                <p style="color: #333; line-height: 1.8; margin-bottom: 15px;">
+                    <strong>Latest Diagnostic (LS-4):</strong> Validates that core feature gates are functional (Go Live opens, viewers join, chat visible, gifts gated, stream termination works). 
+                    However, the critical "Remote Media Visible" validation is PENDING device proof, which directly correlates to the DTLS echo bug identified in the gap report.
+                </p>
+                <p style="color: #333; line-height: 1.8;">
+                    <strong>Recommendation:</strong> Execute the LS-1 Client Stabilization Sprint to resolve all 4 blockers. This approach 
+                    keeps the main YohPal Live application (99-100% ready) stable while addressing Live Streaming client issues in isolation.
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>YohPal Live Streaming Diagnostic Analysis Report | Generated on July 13, 2026</p>
+            <p>Latest Diagnostic: LS-4 Controlled Streaming QA Report | Source Reports: Live Streaming Gap Report & YohPal All-Batch Report</p>
+        </div>
+    </div>
+    
+    <script>
+        // PDF download handling
+        document.querySelectorAll('.download-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const filename = this.getAttribute('href');
+                const docsPath = 'docs/';
+                // Browser handles PDF downloads natively
+            });
+        });
+    </script>
+</body>
+</html>

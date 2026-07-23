@@ -1,0 +1,8 @@
+.env
+node_modules/
+docker/certs/
+server/mediasoup/node_modules/
+flutter/.dart_tool/
+flutter/build/
+flutter/.packages
+.DS_Store

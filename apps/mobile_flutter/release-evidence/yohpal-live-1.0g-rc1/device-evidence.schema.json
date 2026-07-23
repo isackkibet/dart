@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "YohPal Live Device Evidence",
+  "type": "object",
+  "required": [
+    "testId",
+    "platform",
+    "deviceModel",
+    "osVersion",
+    "buildNumber",
+    "commitHash",
+    "status",
+    "tester",
+    "executedAt",
+    "evidencePaths"
+  ],
+  "properties": {
+    "testId": {
+      "type": "string"
+    },
+    "platform": {
+      "enum": ["android", "ios"]
+    },
+    "deviceModel": {
+      "type": "string"
+    },
+    "osVersion": {
+      "type": "string"
+    },
+    "buildNumber": {
+      "type": "string"
+    },
+    "commitHash": {
+      "type": "string",
+      "minLength": 40,
+      "maxLength": 40
+    },
+    "status": {
+      "enum": ["passed", "failed", "blocked"]
+    },
+    "tester": {
+      "type": "string"
+    },
+    "executedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidencePaths": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

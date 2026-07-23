@@ -1,0 +1,58 @@
+name: YohPal Mesh Live v1.0.2 Certification Candidate
+on:
+  pull_request:
+    paths:
+      - 'modules/live-streaming/**'
+      - '.github/workflows/yohpal-mesh-live-v1.0.2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  control-plane:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: modules/live-streaming/server/mesh-control
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: modules/live-streaming/server/mesh-control/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - run: npm audit --audit-level=high
+  sfu-contracts:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: modules/live-streaming/server/mediasoup
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run test:smoke
+      - run: npm run test:contract
+  flutter:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: modules/live-streaming/flutter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f modules/live-streaming/server/mesh-control/Dockerfile modules/live-streaming
+      - run: docker build modules/live-streaming/server/mediasoup

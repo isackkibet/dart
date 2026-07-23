@@ -1,0 +1,17 @@
+{
+  "creatorProfiles": [
+    {
+      "uid": "REPLACE_WITH_FIREBASE_AUTH_UID",
+      "displayName": "YohPal Demo Creator",
+      "handle": "yohpal_demo",
+      "category": "multistreaming",
+      "bio": "Demo creator profile for YohPal Live AI Multistreaming.",
+      "verificationStatus": "pending",
+      "monetisationEnabled": false,
+      "riskScore": 0,
+      "status": "active",
+      "createdBy": "REPLACE_WITH_FIREBASE_AUTH_UID",
+      "updatedBy": "REPLACE_WITH_FIREBASE_AUTH_UID"
+    }
+  ]
+}

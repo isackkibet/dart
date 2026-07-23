@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>admin_web Completeness Analysis — YohPal Live v2</title>
+<style>
+  @page { margin: 36pt 48pt; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    color: #1a1a1a;
+    background: #fff;
+  }
+
+  /* ── Cover ── */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 64pt 48pt;
+    border-bottom: 4px solid #e63946;
+    page-break-after: always;
+  }
+  .cover .tag {
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #e63946;
+    margin-bottom: 24pt;
+  }
+  .cover h1 {
+    font-size: 28pt;
+    font-weight: 800;
+    line-height: 1.15;
+    color: #111;
+    margin-bottom: 12pt;
+  }
+  .cover h1 span { color: #e63946; }
+  .cover .subtitle {
+    font-size: 13pt;
+    color: #555;
+    margin-bottom: 40pt;
+  }
+  .cover .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20pt;
+    border-top: 1px solid #eee;
+    padding-top: 24pt;
+  }
+  .cover .meta-item label {
+    font-size: 7.5pt;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #999;
+    display: block;
+    margin-bottom: 4pt;
+  }
+  .cover .meta-item span {
+    font-size: 10pt;
+    font-weight: 600;
+    color: #222;
+  }
+
+  /* ── Page layout ── */
+  .page { padding: 32pt 48pt; page-break-after: always; }
+  .page:last-child { page-break-after: avoid; }
+
+  /* ── Section headings ── */
+  h2 {
+    font-size: 14pt;
+    font-weight: 800;
+    color: #111;
+    margin-top: 28pt;
+    margin-bottom: 10pt;
+    padding-bottom: 6pt;
+    border-bottom: 2px solid #e63946;
+  }
+  h2:first-child { margin-top: 0; }
+
+  h3 {
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: #333;
+    margin-top: 18pt;
+    margin-bottom: 6pt;
+  }
+
+  p { margin-bottom: 8pt; }
+
+  /* ── Summary banner ── */
+  .banner {
+    background: #fff3f3;
+    border-left: 4px solid #e63946;
+    border-radius: 4px;
+    padding: 14pt 16pt;
+    margin-bottom: 20pt;
+  }
+  .banner strong { color: #e63946; }
+
+  /* ── Stat cards ── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12pt;
+    margin-bottom: 24pt;
+  }
+  .stat-card {
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 14pt 12pt;
+    text-align: center;
+  }
+  .stat-card .num {
+    font-size: 22pt;
+    font-weight: 800;
+    color: #e63946;
+    line-height: 1;
+    display: block;
+    margin-bottom: 4pt;
+  }
+  .stat-card .lbl {
+    font-size: 7.5pt;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #888;
+  }
+
+  /* ── Tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+    margin-bottom: 20pt;
+    page-break-inside: avoid;
+  }
+  thead th {
+    background: #f4f4f4;
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #444;
+    padding: 7pt 10pt;
+    text-align: left;
+    border-bottom: 2px solid #ddd;
+  }
+  tbody td {
+    padding: 7pt 10pt;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+    color: #222;
+  }
+  tbody tr:nth-child(even) td { background: #fafafa; }
+
+  /* Status badges */
+  .badge {
+    display: inline-block;
+    padding: 2pt 7pt;
+    border-radius: 3px;
+    font-size: 8pt;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .badge-missing { background: #fde8e8; color: #c0392b; }
+  .badge-partial { background: #fef3cd; color: #856404; }
+  .badge-ok      { background: #d4edda; color: #155724; }
+  .badge-fail    { background: #fde8e8; color: #c0392b; }
+
+  /* ── Code block ── */
+  pre {
+    background: #f6f8fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 4px;
+    padding: 12pt;
+    font-size: 8.5pt;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+    line-height: 1.6;
+    overflow: hidden;
+    margin-bottom: 16pt;
+    page-break-inside: avoid;
+  }
+  pre .miss { color: #e63946; font-weight: 700; }
+  pre .ok   { color: #2a9d8f; }
+  pre .dim  { color: #999; }
+
+  /* ── Priority list ── */
+  .priority-list { list-style: none; margin-bottom: 16pt; }
+  .priority-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10pt;
+    padding: 8pt 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 9.5pt;
+  }
+  .priority-list li:last-child { border-bottom: none; }
+  .step-num {
+    flex-shrink: 0;
+    width: 20pt;
+    height: 20pt;
+    background: #e63946;
+    color: #fff;
+    font-size: 8pt;
+    font-weight: 800;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1pt;
+  }
+  .priority-list .step-desc strong { display: block; font-weight: 700; color: #111; }
+  .priority-list .step-desc span   { color: #666; font-size: 8.5pt; }
+
+  /* ── Footer ── */
+  .footer {
+    font-size: 7.5pt;
+    color: #bbb;
+    text-align: center;
+    margin-top: 32pt;
+    padding-top: 12pt;
+    border-top: 1px solid #eee;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     COVER PAGE
+════════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="tag">YohPal Live v2 &mdash; Internal Technical Report</div>
+  <h1><span>admin_web</span> Completeness<br>Analysis</h1>
+  <p class="subtitle">Gap assessment of <code>apps/admin_web</code> against the Master Product Blueprint (zip2.0 – zip2.8)</p>
+  <div class="meta-grid">
+    <div class="meta-item">
+      <label>Date</label>
+      <span>4 June 2026</span>
+    </div>
+    <div class="meta-item">
+      <label>Branch</label>
+      <span>yohpaladmin</span>
+    </div>
+    <div class="meta-item">
+      <label>Overall Completeness</label>
+      <span>0% feature complete</span>
+    </div>
+    <div class="meta-item">
+      <label>Blueprint source</label>
+      <span>zip2.0 → zip2.8</span>
+    </div>
+    <div class="meta-item">
+      <label>Target app</label>
+      <span>apps/admin_web</span>
+    </div>
+    <div class="meta-item">
+      <label>Stack</label>
+      <span>Next.js 15 · React 19 · Firebase 11</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE 1 — EXECUTIVE SUMMARY
+════════════════════════════════════════════════════════════ -->
+<div class="page">
+  <h2>1. Executive Summary</h2>
+
+  <div class="banner">
+    <strong>Verdict:</strong> <code>apps/admin_web</code> contains only a bare Next.js scaffold — a static placeholder heading, an empty layout shell, and a package.json. Every blueprint-defined route, every Firestore data connection, every QA gate, and all required infrastructure (auth guard, sidebar, tsconfig, env wiring) are entirely absent.
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <span class="num">0 / 6</span>
+      <span class="lbl">Routes built</span>
+    </div>
+    <div class="stat-card">
+      <span class="num">0 / 11</span>
+      <span class="lbl">Firestore collections wired</span>
+    </div>
+    <div class="stat-card">
+      <span class="num">0 / 7</span>
+      <span class="lbl">QA gates passing</span>
+    </div>
+    <div class="stat-card">
+      <span class="num">0 / 5</span>
+      <span class="lbl">Infrastructure items complete</span>
+    </div>
+  </div>
+
+  <p>The <code>yohpaladmin</code> branch is the correct starting point — per <code>DEVELOPER_EXECUTION_MANUAL.md</code>, admin dashboards are the final module (step 17) and are intentionally built last. However, the work to reach blueprint parity is significant: six distinct pages, eleven Firestore bindings, a shared auth-guarded layout, and a TypeScript configuration all need to be built from scratch.</p>
+
+  <h2>2. Current State</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Content</th>
+        <th>Blueprint alignment</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>app/layout.tsx</code></td>
+        <td>Bare <code>&lt;html&gt;&lt;body&gt;</code> wrapper, no navigation, no auth</td>
+        <td><span class="badge badge-partial">Partial</span> Shell exists; sidebar + auth guard missing</td>
+      </tr>
+      <tr>
+        <td><code>app/page.tsx</code></td>
+        <td>Static <code>&lt;h1&gt;YohPal Admin Web&lt;/h1&gt;</code> placeholder</td>
+        <td><span class="badge badge-missing">Missing</span> Blueprint root should redirect to <code>/dashboard</code></td>
+      </tr>
+      <tr>
+        <td><code>package.json</code></td>
+        <td>Next.js 15, React 19, Firebase 11; no charting lib, no auth helper</td>
+        <td><span class="badge badge-partial">Partial</span> Blueprint specifies Next 14 / React 18; version drift is minor but should be intentional</td>
+      </tr>
+      <tr>
+        <td><code>tsconfig.json</code></td>
+        <td><em>Missing</em></td>
+        <td><span class="badge badge-missing">Missing</span> Required for TypeScript resolution across all pages</td>
+      </tr>
+      <tr>
+        <td><code>.env.local</code></td>
+        <td><em>Missing</em></td>
+        <td><span class="badge badge-missing">Missing</span> Firebase project config and M-Pesa keys required</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE 2 — BLUEPRINT ROUTES
+════════════════════════════════════════════════════════════ -->
+<div class="page">
+  <h2>3. Blueprint-Defined Routes — All Missing</h2>
+
+  <p>The following six pages are explicitly defined across the blueprint zip modules. None exist in <code>apps/admin_web</code>.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:18%">Route</th>
+        <th style="width:14%">Defined in</th>
+        <th>Blueprint content</th>
+        <th style="width:10%">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>/dashboard</code></td>
+        <td>zip2.1</td>
+        <td>Top-level admin overview with nav links to: Revenue, Creator Earnings, Ads, Poll Analytics, Moderation, Live Sessions</td>
+        <td><span class="badge badge-missing">Missing</span></td>
+      </tr>
+      <tr>
+        <td><code>/finance</code></td>
+        <td>zip2.0, zip2.5</td>
+        <td>KPI grid (Revenue Today, Pending Payouts, Creator Earnings, Risk Reviews) with queue links: Wallet Ledger, Payout Requests, Affiliate Commissions, Ad Revenue Share, M-Pesa Reconciliation</td>
+        <td><span class="badge badge-missing">Missing</span></td>
+      </tr>
+      <tr>
+        <td><code>/finance/payouts</code></td>
+        <td>zip2.5</td>
+        <td>Payout Review Queue — displays risk scores per creator, M-Pesa B2C disbursement status, approve/hold actions</td>
+        <td><span class="badge badge-missing">Missing</span></td>
+      </tr>
+      <tr>
+        <td><code>/advertiser</code></td>
+        <td>zip2.6</td>
+        <td>Ads KPI dashboard (Active Campaigns, Impressions, Clicks, Spend). Lists placement types: in-feed ads, live lower-quarter ads, sponsored polls, search ads</td>
+        <td><span class="badge badge-missing">Missing</span></td>
+      </tr>
+      <tr>
+        <td><code>/polls</code></td>
+        <td>zip2.6</td>
+        <td>Infinity Polls Analytics — vote velocity, sponsored poll performance, demographic breakdowns, fraud holds</td>
+        <td><span class="badge badge-missing">Missing</span></td>
+      </tr>
+      <tr>
+        <td><code>/moderation</code></td>
+        <td>zip2.7, zip2.8</td>
+        <td>Moderation report queue. Implied by two QA gates: "Report creates moderation queue item" (Step 2.7) and "Report appears in moderation queue" (Gate 5, Step 2.8)</td>
+        <td><span class="badge badge-missing">Missing</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>4. File Structure: Blueprint vs. Actual</h2>
+
+  <pre><span class="dim">BLUEPRINT EXPECTS                     ACTUAL (apps/admin_web)</span>
+<span class="dim">──────────────────────────────────────────────────────────────</span>
+app/
+  layout.tsx                           <span class="ok">layout.tsx</span>  ← exists (bare shell only)
+  <span class="miss">page.tsx (redirect → /dashboard)</span>     page.tsx    ← static placeholder, no redirect
+  <span class="miss">dashboard/page.tsx</span>                   (missing)
+  <span class="miss">finance/page.tsx</span>                     (missing)
+  <span class="miss">finance/payouts/page.tsx</span>             (missing)
+  <span class="miss">advertiser/page.tsx</span>                  (missing)
+  <span class="miss">polls/page.tsx</span>                       (missing)
+  <span class="miss">moderation/page.tsx</span>                  (missing)
+<span class="miss">tsconfig.json</span>                        (missing)
+<span class="miss">.env.local</span>                           (missing)</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE 3 — DATA + QA GATES
+════════════════════════════════════════════════════════════ -->
+<div class="page">
+  <h2>5. Firestore Collections — None Wired</h2>
+
+  <p>Defined in <code>STEP_2_5_MONETISATION_WALLET_MERGE_MANUAL.md</code> as backend-only collections that admin dashboards must surface. The security rules test plan (zip2.8) additionally specifies: <em>"Finance admin can read walletLedger"</em> — confirming an admin role is required in Firestore rules.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Collection</th>
+        <th>Admin dashboard use</th>
+        <th>Wired?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>walletLedger</code></td><td>All credit/debit audit trail — Finance dashboard</td><td><span class="badge badge-missing">No</span></td></tr>
+      <tr><td><code>walletBalances</code></td><td>Live user balance view</td><td><span class="badge badge-missing">No</span></td></tr>
+      <tr><td><code>walletPayouts</code></td><td>Payout request list — /finance/payouts</td><td><span class="badge badge-missing">No</span></td></tr>
+      <tr><td><code>walletReconciliation</code></td><td>M-Pesa reconciliation queue</td><td><span class="badge badge-missing">No</span></td></tr>
+      <tr><td><code>creatorEarnings</code></td><td>Per-creator revenue totals — Finance KPI</td><td><span class="badge badge-missing">No</span></td></tr>
+      <tr><td><code>creatorGiftLedger</code></td><td>Gift transaction log</td><td><span class="badge badge-missing">No</span></td></tr>
+      <tr><td><code>creatorSubscriptions</code></td><td>Active subscription status</td><td><span class="badge badge-missing">No</span></td></tr>
+      <tr><td><code>adRevenueShare</code></td><td>Ad revenue splits — Advertiser dashboard</td><td><span class="badge badge-missing">No</span></td></tr>
+      <tr><td><code>affiliateCommissions</code></td><td>Affiliate payout queue</td><td><span class="badge badge-missing">No</span></td></tr>
+      <tr><td><code>riskReviews</code></td><td>High-risk payout holds — Finance KPI</td><td><span class="badge badge-missing">No</span></td></tr>
+      <tr><td><code>financeAuditLogs</code></td><td>Full audit log for finance admins</td><td><span class="badge badge-missing">No</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>6. QA Gates That Reference <code>admin_web</code></h2>
+
+  <p>These are hard pass/fail gates defined across blueprint steps. All currently fail.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Gate</th>
+        <th>Source</th>
+        <th>Requirement</th>
+        <th>Result</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Step 2.1 Manual QA</td>
+        <td><code>STEP_2_1_RUN_TO_GREEN.md</code></td>
+        <td>Admin dashboard route opens</td>
+        <td><span class="badge badge-fail">Fail</span></td>
+      </tr>
+      <tr>
+        <td>Step 2.5 QA</td>
+        <td><code>STEP_2_5_RUN_TO_GREEN_QA.md</code></td>
+        <td>Finance dashboard builds</td>
+        <td><span class="badge badge-fail">Fail</span></td>
+      </tr>
+      <tr>
+        <td>Step 2.6 QA</td>
+        <td><code>STEP_2_6_RUN_TO_GREEN_QA.md</code></td>
+        <td>Advertiser dashboard builds</td>
+        <td><span class="badge badge-fail">Fail</span></td>
+      </tr>
+      <tr>
+        <td>Step 2.6 QA</td>
+        <td><code>STEP_2_6_RUN_TO_GREEN_QA.md</code></td>
+        <td>Poll analytics dashboard builds</td>
+        <td><span class="badge badge-fail">Fail</span></td>
+      </tr>
+      <tr>
+        <td>Gate 1 — Build</td>
+        <td><code>STEP_2_8_PRODUCTION_LAUNCH_GATES.md</code></td>
+        <td>Admin web build passes</td>
+        <td><span class="badge badge-ok">Pass</span> (scaffold compiles)</td>
+      </tr>
+      <tr>
+        <td>Gate 4 — Monetisation</td>
+        <td><code>STEP_2_8_PRODUCTION_LAUNCH_GATES.md</code></td>
+        <td>Finance dashboard builds</td>
+        <td><span class="badge badge-fail">Fail</span></td>
+      </tr>
+      <tr>
+        <td>Gate 5 — Growth</td>
+        <td><code>STEP_2_8_PRODUCTION_LAUNCH_GATES.md</code></td>
+        <td>Report appears in moderation queue</td>
+        <td><span class="badge badge-fail">Fail</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE 4 — BUILD ORDER + CLOSING
+════════════════════════════════════════════════════════════ -->
+<div class="page">
+  <h2>7. Recommended Build Order</h2>
+
+  <p>Following the blueprint's own module sequencing, the correct order to build out <code>admin_web</code> to full parity:</p>
+
+  <ul class="priority-list">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-desc">
+        <strong>tsconfig.json + Firebase config wiring</strong>
+        <span>Add <code>tsconfig.json</code> with strict mode. Wire Firebase project credentials via <code>.env.local</code>. This unblocks all subsequent TypeScript and Firestore work.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-desc">
+        <strong>Shared layout — sidebar + admin auth guard</strong>
+        <span>Update <code>layout.tsx</code> with a sidebar containing the six blueprint nav items. Add a Firebase Auth check that enforces an admin custom claim before rendering any page.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-desc">
+        <strong><code>/dashboard</code> — main overview</strong>
+        <span>Build the top-level dashboard page with nav cards linking to: Finance, Advertiser, Polls, Moderation, Live Sessions. Source: zip2.1.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-desc">
+        <strong><code>/finance</code> + <code>/finance/payouts</code> — monetisation module</strong>
+        <span>KPI grid reading <code>creatorEarnings</code>, <code>riskReviews</code>. Payout review queue reading <code>walletPayouts</code> with approve/hold actions. Source: zip2.5.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">5</div>
+      <div class="step-desc">
+        <strong><code>/advertiser</code> + <code>/polls</code> — ads &amp; polls module</strong>
+        <span>Ads KPI dashboard reading <code>adRevenueShare</code> and campaign collections. Polls analytics reading vote aggregates and fraud-hold flags. Source: zip2.6.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">6</div>
+      <div class="step-desc">
+        <strong><code>/moderation</code> — content &amp; user reports</strong>
+        <span>Moderation report queue reading user-submitted report documents. Required to pass Gate 5 (Step 2.8). Source: zip2.7.</span>
+      </div>
+    </li>
+  </ul>
+
+  <h2>8. Conclusion</h2>
+
+  <p><code>apps/admin_web</code> is at <strong>0% feature completeness</strong> against the master blueprint. The branch is correctly named and positioned in the build sequence — admin dashboards are intentionally the last module per <code>DEVELOPER_EXECUTION_MANUAL.md</code>. But the full feature set remains to be built: six routes, eleven Firestore bindings, a shared auth-guarded layout, and TypeScript configuration are all outstanding.</p>
+
+  <p>One of seven QA gates currently passes (the build gate, since the empty scaffold compiles). The remaining six gates — spanning Step 2.1, 2.5, 2.6, and the final production gates 4 and 5 — will only pass once the blueprint pages and data connections are implemented in the order above.</p>
+
+  <div class="footer">
+    YohPal Live v2 &mdash; admin_web Completeness Report &mdash; June 2026 &mdash; Branch: yohpaladmin
+  </div>
+</div>
+
+</body>
+</html>

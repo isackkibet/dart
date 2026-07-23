@@ -1,0 +1,105 @@
+# Minimum iOS 16 required for device_info_plus isiOSAppOnVision API
+platform :ios, '16.0'
+
+# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
+def flutter_root
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  unless File.exist?(generated_xcode_build_settings_path)
+    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
+  end
+
+  File.foreach(generated_xcode_build_settings_path) do |line|
+    matches = line.match(/FLUTTER_ROOT\=(.*)/)
+    return matches[1].strip if matches
+  end
+  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
+end
+
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+
+flutter_ios_podfile_setup
+
+target 'Runner' do
+  use_frameworks!
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+
+    target.build_configurations.each do |config|
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
+        '$(inherited)',
+
+        ## permission_handler
+        'PERMISSION_CAMERA=1',
+        'PERMISSION_MICROPHONE=1',
+        'PERMISSION_CONTACTS=1',
+        'PERMISSION_PHOTOS=1',
+
+        # Everything else disabled
+        'PERMISSION_LOCATION=0',
+        'PERMISSION_LOCATION_WHENINUSE=0',
+        'PERMISSION_NOTIFICATIONS=0',
+        'PERMISSION_MEDIA_LIBRARY=0',
+        'PERMISSION_SENSORS=0',
+        'PERMISSION_BLUETOOTH=0',
+        'PERMISSION_EVENTS=0',
+        'PERMISSION_REMINDERS=0',
+        'PERMISSION_SPEECH_RECOGNIZER=0',
+        'PERMISSION_APP_TRACKING_TRANSPARENCY=0',
+      ]
+
+      # Prevent arm64e builds
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphoneos*]'] = 'arm64e'
+    end
+  end
+
+  # Strip arm64e from prebuilt frameworks (ffmpeg-kit, etc.)
+  installer.pods_project.targets.each do |target|
+    target.build_phases.each do |phase|
+      next unless phase.respond_to?(:files)
+
+      phase.files.each do |file|
+        next unless file.file_ref
+
+        framework_path = file.file_ref.real_path.to_s
+
+        next unless framework_path.end_with?(".framework")
+
+        binary_name = File.basename(framework_path, ".framework")
+        binary_path = File.join(framework_path, binary_name)
+
+        next unless File.exist?(binary_path)
+
+        architectures = `lipo -info "#{binary_path}"`
+
+        if architectures.include?("arm64e")
+          puts "Removing arm64e from #{binary_path}"
+
+          system(
+            "lipo",
+            "-remove",
+            "arm64e",
+            binary_path,
+            "-output",
+            binary_path
+          )
+        end
+      end
+    end
+  end
+end

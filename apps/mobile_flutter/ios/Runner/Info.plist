@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>CADisableMinimumFrameDurationOnPhone</key>
+		<true/>
+		<key>CFBundleDevelopmentRegion</key>
+		<string>$(DEVELOPMENT_LANGUAGE)</string>
+		<key>CFBundleDisplayName</key>
+		<string>Yohpal Live</string>
+		<key>CFBundleExecutable</key>
+		<string>$(EXECUTABLE_NAME)</string>
+		<key>CFBundleIdentifier</key>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+		<key>CFBundleInfoDictionaryVersion</key>
+		<string>6.0</string>
+		<key>CFBundleName</key>
+		<string>yohpal_live</string>
+		<key>CFBundlePackageType</key>
+		<string>APPL</string>
+		<key>CFBundleShortVersionString</key>
+		<string>$(FLUTTER_BUILD_NAME)</string>
+		<key>CFBundleSignature</key>
+		<string>????</string>
+		<key>CFBundleVersion</key>
+		<string>$(FLUTTER_BUILD_NUMBER)</string>
+		<key>LSApplicationCategoryType</key>
+		<string></string>
+		<key>LSRequiresIPhoneOS</key>
+		<true/>
+		<!-- Contacts -->
+		<key>NSContactsUsageDescription</key>
+		<string>Yohpal uses your contacts to help you find and invite people you know.</string>
+		<!-- Camera -->
+		<key>NSCameraUsageDescription</key>
+		<string>Yohpal uses the camera so you can capture profile photos, record videos to post, and participate in live video sessions.</string>
+		<!-- Photo Library -->
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Yohpal accesses your photo library so you can select and upload photos.</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>Yohpal saves images to your photo library when you choose to save them.</string>
+		<!-- Microphone -->
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Yohpal uses the microphone to record audio for your videos and during live audio and video sessions.</string>
+		<key>UIApplicationSupportsIndirectInputEvents</key>
+		<true/>
+		<!-- yohpal://wallet-status return link from YohPal Web after a wallet
+		     top-up/withdrawal — see YohPalWebHandoff and
+		     YohPalDeepLinkService. Custom scheme, not a verified Universal
+		     Link (no apple-app-site-association hosted yet). -->
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLName</key>
+				<string>com.yohpal.live.walletreturn</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>yohpal</string>
+				</array>
+			</dict>
+			<!-- REVERSED_CLIENT_ID from GoogleService-Info.plist — required
+			     by google_sign_in on iOS so Google's auth flow can redirect
+			     back into this app. -->
+			<dict>
+				<key>CFBundleURLName</key>
+				<string>com.yohpal.live.googlesignin</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.googleusercontent.apps.524208469179-bgqdbj5md5vqrva8qifsd6fo4muct87o</string>
+				</array>
+			</dict>
+		</array>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>remote-notification</string>
+		</array>
+		<key>UILaunchStoryboardName</key>
+		<string>LaunchScreen</string>
+		<key>UIMainStoryboardFile</key>
+		<string>Main</string>
+		<key>UISupportedInterfaceOrientations</key>
+		<array>
+			<string>UIInterfaceOrientationPortrait</string>
+			<string>UIInterfaceOrientationLandscapeLeft</string>
+			<string>UIInterfaceOrientationLandscapeRight</string>
+		</array>
+		<key>UISupportedInterfaceOrientations~ipad</key>
+		<array>
+			<string>UIInterfaceOrientationPortrait</string>
+			<string>UIInterfaceOrientationPortraitUpsideDown</string>
+			<string>UIInterfaceOrientationLandscapeLeft</string>
+			<string>UIInterfaceOrientationLandscapeRight</string>
+		</array>
+		<key>UIStatusBarHidden</key>
+		<false/>
+	</dict>
+</plist>

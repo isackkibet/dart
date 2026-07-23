@@ -1,0 +1,35 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <!-- Required for WebRTC media capture and local server access -->
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+  <!-- Required for camera/microphone capture -->
+  <uses-permission android:name="android.permission.CAMERA" />
+  <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+  <!-- Recommended for Bluetooth audio devices -->
+  <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+  <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+  <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+  <!-- Required if streaming continues while app is foreground-service protected -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+
+  <!-- Android 13+ notification permission if foreground service shows notification -->
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+  <application
+      android:usesCleartextTraffic="false"
+      android:networkSecurityConfig="@xml/yohpal_live_network_security_config">
+
+    <!-- Optional placeholder foreground service for long live sessions -->
+    <service
+        android:name=".streaming.YohPalLiveForegroundService"
+        android:exported="false"
+        android:foregroundServiceType="camera|microphone|dataSync" />
+
+  </application>
+</manifest>

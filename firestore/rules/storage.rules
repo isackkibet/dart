@@ -1,0 +1,60 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Raw uploads (new convention: videos/raw/{userId}/{fileName})
+    match /videos/raw/{userId}/{fileName} {
+      allow read:  if request.auth != null;
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 250 * 1024 * 1024
+        && request.resource.contentType.matches('video/.*');
+    }
+
+    // Raw uploads (original convention: videos-raw/{userId}/{videoId}.mp4)
+    match /videos-raw/{userId}/{fileName} {
+      allow read:  if request.auth != null;
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 250 * 1024 * 1024
+        && request.resource.contentType.matches('video/.*');
+    }
+
+    // HLS streams (new convention: videos/hls/{videoId}/{file})
+    match /videos/hls/{videoId}/{fileName} {
+      allow read:  if true;
+      allow write: if false;
+    }
+
+    // HLS streams (original convention: videos-hls/{videoId}/{file})
+    // Public read required so the HLS player can resolve relative segment URLs
+    match /videos-hls/{videoId}/{fileName} {
+      allow read:  if true;
+      allow write: if false;
+    }
+
+    // Thumbnails (new convention)
+    match /videos/thumbnails/{userId}/{videoId}/{fileName} {
+      allow read:  if true;
+      allow write: if false;
+    }
+
+    // Thumbnails (original convention)
+    match /thumbnails/{allPaths=**} {
+      allow read:  if true;
+      allow write: if false;
+    }
+
+    // Profile pictures — authenticated read, owner write
+    match /profile_pictures/{userId}/{allPaths=**} {
+      allow read:  if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // All other paths — authenticated read, no client write
+    match /{allPaths=**} {
+      allow read:  if request.auth != null;
+      allow write: if false;
+    }
+  }
+}

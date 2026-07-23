@@ -1,0 +1,503 @@
+<title>YohPal Platform Phase 19 — Enterprise Mission Control &amp; Digital Twin</title>
+<style>
+  :root {
+    --gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);
+    --ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;
+    --paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;
+    --pass:#1b5e20;--pass-bg:#e8f5e9;
+    --pend:#78350f;--pend-bg:#fef3c7;
+    --fail:#b71c1c;--fail-bg:#fce4e4;
+    --info:#0d47a1;--info-bg:#e8eef7;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+    --radius:2px;--doc-max:900px;
+  }
+  @media(prefers-color-scheme:dark){:root{
+    --gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);
+    --ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;
+    --paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;
+    --pass:#4caf50;--pass-bg:#1b2e1c;
+    --pend:#fbbf24;--pend-bg:#1f1600;
+    --fail:#ef5350;--fail-bg:#2d1212;
+    --info:#90caf9;--info-bg:#0d1e33;
+  }}
+  :root[data-theme="light"]{--gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);--ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;--paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;--pass:#1b5e20;--pass-bg:#e8f5e9;--pend:#78350f;--pend-bg:#fef3c7;--fail:#b71c1c;--fail-bg:#fce4e4;--info:#0d47a1;--info-bg:#e8eef7;}
+  :root[data-theme="dark"]{--gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);--ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;--paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;--pass:#4caf50;--pass-bg:#1b2e1c;--pend:#fbbf24;--pend-bg:#1f1600;--fail:#ef5350;--fail-bg:#2d1212;--info:#90caf9;--info-bg:#0d1e33;}
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif;font-size:13.5px;line-height:1.65;background:var(--paper);color:var(--ink);padding-bottom:5rem;}
+
+  .print-bar{position:sticky;top:0;z-index:100;background:var(--paper-2);border-bottom:1px solid var(--paper-3);padding:.45rem 1.5rem;display:flex;align-items:center;gap:1rem;font-size:11px;color:var(--ink-3);}
+  .print-bar .brand{font-weight:700;color:var(--gold-text);letter-spacing:.06em;font-size:12px;}
+  .print-bar .spacer{flex:1;}
+  .print-bar .verdict{font-weight:700;font-size:10px;letter-spacing:.08em;padding:.2rem .65rem;border-radius:var(--radius);background:var(--gold-dim);color:var(--gold-text);border:1px solid var(--gold);text-transform:uppercase;}
+  .dl-btn{background:var(--gold);color:#fff;border:none;padding:.3rem 1rem;border-radius:var(--radius);font-size:11px;font-weight:700;letter-spacing:.06em;cursor:pointer;text-transform:uppercase;}
+  .dl-btn:hover{background:var(--gold-2);}
+
+  .doc{max-width:var(--doc-max);margin:0 auto;padding:2.5rem 1.5rem 0;}
+
+  .masthead{border-top:3px solid var(--gold);border-bottom:3px solid var(--gold);padding:1.1rem 0 1rem;margin-bottom:1.75rem;position:relative;}
+  .masthead::after{content:'';display:block;height:1px;background:var(--gold);position:absolute;bottom:5px;left:0;right:0;opacity:.35;}
+  .masthead .eyebrow{font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.3rem;}
+  .masthead h1{font-family:Georgia,'Times New Roman',serif;font-size:1.6rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.65rem;text-wrap:balance;}
+  .meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.25rem .75rem;font-size:11.5px;color:var(--ink-3);}
+  .meta-grid .m{display:flex;gap:.3rem;}
+  .meta-grid strong{color:var(--ink-2);}
+
+  .section{margin-bottom:1.75rem;}
+  .sh{font-family:Georgia,'Times New Roman',serif;font-size:.95rem;font-weight:700;color:var(--ink);padding-bottom:.35rem;border-bottom:1px solid var(--gold);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem;}
+  .sh .sn{background:var(--gold);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:system-ui,sans-serif;}
+
+  /* Gate bar */
+  .gate-bar{display:flex;gap:0;border:1px solid var(--paper-3);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem;}
+  .gate-cell{flex:1;padding:.65rem .5rem;text-align:center;border-right:1px solid var(--paper-3);}
+  .gate-cell:last-child{border-right:none;}
+  .gate-cell .gn{font-size:1.4rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;margin-bottom:.15rem;}
+  .gate-cell .gl{font-size:9px;text-transform:uppercase;letter-spacing:.07em;font-weight:700;color:var(--ink-3);}
+  .gate-cell.gc-pass{background:var(--pass-bg);} .gate-cell.gc-pass .gn{color:var(--pass);}
+  .gate-cell.gc-pend{background:var(--pend-bg);} .gate-cell.gc-pend .gn{color:var(--pend);}
+  .gate-cell.gc-info{background:var(--info-bg);} .gate-cell.gc-info .gn{color:var(--info);}
+
+  /* Architecture stack */
+  .arch-stack{display:flex;flex-direction:column;gap:0;margin-bottom:1.25rem;border:1px solid var(--paper-3);border-radius:var(--radius);overflow:hidden;}
+  .arch-layer{padding:.75rem 1rem;border-bottom:1px solid var(--paper-3);}
+  .arch-layer:last-child{border-bottom:none;}
+  .arch-layer .al-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem;}
+  .arch-layer .al-items{display:flex;flex-wrap:wrap;gap:.35rem;}
+  .arch-layer .al-item{font-size:11px;font-weight:600;padding:.15rem .5rem;border-radius:var(--radius);border:1px solid;}
+  .al-exec{background:var(--gold-dim);border-color:var(--gold) !important;} .al-exec .al-label{color:var(--gold-text);}
+  .al-exec .al-item{color:var(--gold-text);border-color:var(--gold);}
+  .al-platform{background:var(--info-bg);} .al-platform .al-label{color:var(--info);}
+  .al-platform .al-item{color:var(--info);border-color:var(--info);}
+  .al-modules{background:var(--paper-2);} .al-modules .al-label{color:var(--ink-3);}
+  .al-modules .al-item{color:var(--ink-2);border-color:var(--paper-3);}
+  .al-infra{background:var(--paper);} .al-infra .al-label{color:var(--ink-3);}
+  .al-infra .al-item{color:var(--ink-3);border-color:var(--paper-3);font-family:var(--mono);font-size:10px;}
+
+  /* Code blocks */
+  .code-block{font-family:var(--mono);font-size:11px;background:var(--paper-2);border-left:3px solid var(--gold);padding:.65rem .9rem;border-radius:0 var(--radius) var(--radius) 0;color:var(--ink-2);line-height:1.6;overflow-x:auto;white-space:pre;margin-bottom:.75rem;}
+  .code-block.green{border-left-color:var(--pass);}
+  .code-block.blue{border-left-color:var(--info);}
+
+  /* Dashboard widget grid */
+  .widget-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.85rem;}
+  .widget{border:1px solid var(--paper-3);border-radius:var(--radius);overflow:hidden;}
+  .widget .wh{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.35rem .6rem;border-bottom:1px solid var(--paper-3);}
+  .widget.w-gold .wh{background:var(--gold-dim);color:var(--gold-text);}
+  .widget.w-info .wh{background:var(--info-bg);color:var(--info);}
+  .widget.w-pass .wh{background:var(--pass-bg);color:var(--pass);}
+  .widget.w-pend .wh{background:var(--pend-bg);color:var(--pend);}
+  .widget ul{list-style:none;padding:.4rem .6rem;margin:0;background:var(--paper-2);}
+  .widget ul li{font-size:11px;color:var(--ink-2);padding:.12rem 0;border-bottom:1px solid var(--paper-3);}
+  .widget ul li:last-child{border-bottom:none;}
+
+  /* Predictive risk cards */
+  .risk-cards{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.75rem;}
+  .risk-card{border:1px solid var(--paper-3);border-radius:var(--radius);padding:.65rem .8rem;background:var(--paper-2);}
+  .risk-card .rc-trigger{font-size:11.5px;font-weight:600;color:var(--ink);margin-bottom:.25rem;}
+  .risk-card .rc-arrow{font-size:10px;color:var(--gold);margin:.1rem 0;}
+  .risk-card .rc-rec{font-size:11px;color:var(--ink-3);}
+
+  /* KPI table */
+  .ev-wrap{overflow-x:auto;margin-bottom:.75rem;}
+  .ev{width:100%;border-collapse:collapse;}
+  .ev th{background:var(--paper-2);font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:.4rem .6rem;text-align:left;border:1px solid var(--paper-3);}
+  .ev td{padding:.45rem .6rem;border:1px solid var(--paper-3);vertical-align:middle;font-size:12px;color:var(--ink-2);}
+  .ev td:first-child{font-weight:600;color:var(--ink);background:var(--paper-2);}
+  .ev td.target{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--pass);}
+
+  /* Chips */
+  .chip{display:inline-flex;align-items:center;padding:.12rem .4rem;border-radius:var(--radius);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+  .chip.pass{background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass);}
+  .chip.pend{background:var(--pend-bg);color:var(--pend);border:1px solid var(--pend);}
+  .chip.info{background:var(--info-bg);color:var(--info);border:1px solid var(--info);}
+
+  /* Digital twin events */
+  .event-list{list-style:none;padding:0;margin-bottom:.75rem;}
+  .event-list li{font-size:12px;color:var(--ink-2);padding:.35rem 0;border-bottom:1px solid var(--paper-3);display:flex;gap:.75rem;align-items:baseline;}
+  .event-list li:last-child{border-bottom:none;}
+  .event-tag{font-family:var(--mono);font-size:10px;font-weight:700;padding:.1rem .4rem;border-radius:var(--radius);background:var(--info-bg);color:var(--info);border:1px solid var(--info);white-space:nowrap;}
+
+  /* Callout */
+  .callout{padding:.85rem 1rem;margin-bottom:1.1rem;border-radius:0 var(--radius) var(--radius) 0;}
+  .callout.gold{background:var(--gold-dim);border-left:4px solid var(--gold);}
+  .callout h3{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.35rem;}
+  .callout p{font-size:12.5px;color:var(--ink-2);line-height:1.7;}
+
+  /* Success criteria */
+  .sc-list{list-style:none;padding:0;margin-bottom:.75rem;}
+  .sc-list li{font-size:12.5px;color:var(--ink-2);padding:.35rem 0;border-bottom:1px solid var(--paper-3);display:flex;gap:.6rem;}
+  .sc-list li:last-child{border-bottom:none;}
+  .sc-list li::before{content:'✓';color:var(--pass);font-weight:700;flex-shrink:0;}
+
+  /* Phase 20 teaser */
+  .next-phase{border:2px solid var(--gold);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;background:var(--gold-dim);}
+  .next-phase .np-eyebrow{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.3rem;}
+  .next-phase h2{font-family:Georgia,'Times New Roman',serif;font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.85rem;}
+  .scope-list{list-style:none;padding:0;margin-bottom:.85rem;}
+  .scope-list li{font-size:12.5px;color:var(--ink-2);padding:.3rem 0;border-bottom:1px solid var(--paper-3);display:flex;gap:.6rem;}
+  .scope-list li:last-child{border-bottom:none;}
+  .scope-list li::before{content:'→';color:var(--gold);font-weight:700;flex-shrink:0;}
+  .outcome-box{background:var(--pass-bg);border:1px solid var(--pass);border-left:4px solid var(--pass);border-radius:0 var(--radius) var(--radius) 0;padding:.75rem 1rem;}
+  .outcome-box p{font-size:12.5px;color:var(--ink-2);line-height:1.7;}
+
+  .footer-rule{border:none;border-top:2px solid var(--gold);margin:2rem 0 0;opacity:.5;}
+
+  @media(max-width:700px){.meta-grid{grid-template-columns:1fr 1fr;}.widget-grid{grid-template-columns:1fr 1fr;}.risk-cards{grid-template-columns:1fr;}}
+  @media print{.print-bar{display:none;}body{font-size:12px;padding-bottom:0;}.doc{padding:1rem .75rem 0;}.masthead h1{font-size:1.3rem;}.section{break-inside:avoid;}@page{margin:1.5cm;}}
+</style>
+
+<div class="print-bar">
+  <span class="brand">YohPal Platform</span>
+  <span class="verdict">Phase 19 — Permanent Enterprise Operations Layer</span>
+  <span class="spacer"></span>
+  <button class="dl-btn" onclick="window.print()">Download PDF</button>
+</div>
+
+<div class="doc">
+
+  <div class="masthead">
+    <div class="eyebrow">Platform Engineering — Enterprise Operations</div>
+    <h1>YohPal Platform Phase 19 — Enterprise Mission Control &amp; Digital Twin</h1>
+    <div class="meta-grid">
+      <div class="m"><strong>Version:</strong> 1.0</div>
+      <div class="m"><strong>Date:</strong> 2026-07-09</div>
+      <div class="m"><strong>Commit:</strong> cbd5237+</div>
+      <div class="m"><strong>Layer:</strong> Permanent Enterprise Operations</div>
+      <div class="m"><strong>Tests:</strong> 21 / 21 passing</div>
+      <div class="m"><strong>Prerequisite:</strong> Phase 18 Governance Adopted</div>
+    </div>
+  </div>
+
+  <!-- Gate bar -->
+  <div class="gate-bar">
+    <div class="gate-cell gc-pass">
+      <div class="gn">5</div>
+      <div class="gl">Model Files Built</div>
+    </div>
+    <div class="gate-cell gc-pass">
+      <div class="gn">21 / 21</div>
+      <div class="gl">Tests Passing</div>
+    </div>
+    <div class="gate-cell gc-pass">
+      <div class="gn">✓</div>
+      <div class="gl">Analyze Clean</div>
+    </div>
+    <div class="gate-cell gc-pend">
+      <div class="gn">Pending</div>
+      <div class="gl">Live Dashboard</div>
+    </div>
+  </div>
+
+  <!-- 1. Architecture -->
+  <div class="section">
+    <div class="sh"><span class="sn">1</span>Four-Layer Platform Architecture</div>
+    <div class="arch-stack">
+      <div class="arch-layer al-exec">
+        <div class="al-label">Executive Mission Control</div>
+        <div class="al-items">
+          <span class="al-item">Executive Dashboard</span>
+          <span class="al-item">Incident Command</span>
+          <span class="al-item">Release Governance</span>
+          <span class="al-item">Enterprise Analytics</span>
+          <span class="al-item">Digital Twin</span>
+          <span class="al-item">AI Operations</span>
+        </div>
+      </div>
+      <div class="arch-layer al-platform">
+        <div class="al-label">Shared Platform</div>
+        <div class="al-items">
+          <span class="al-item">Identity</span>
+          <span class="al-item">Wallet</span>
+          <span class="al-item">Brain</span>
+          <span class="al-item">Search</span>
+          <span class="al-item">Notifications</span>
+          <span class="al-item">Analytics</span>
+          <span class="al-item">Routing</span>
+          <span class="al-item">Deep Links</span>
+        </div>
+      </div>
+      <div class="arch-layer al-modules">
+        <div class="al-label">Modules</div>
+        <div class="al-items">
+          <span class="al-item">Live</span>
+          <span class="al-item">Jobs</span>
+          <span class="al-item">Hustle</span>
+          <span class="al-item">Market</span>
+          <span class="al-item">Wallet</span>
+          <span class="al-item">Brain</span>
+          <span class="al-item">YCIOS</span>
+          <span class="al-item">Future Apps</span>
+        </div>
+      </div>
+      <div class="arch-layer al-infra">
+        <div class="al-label">Infrastructure</div>
+        <div class="al-items">
+          <span class="al-item">Firebase</span>
+          <span class="al-item">Cloud Functions</span>
+          <span class="al-item">Firestore</span>
+          <span class="al-item">Cloud Storage</span>
+          <span class="al-item">Cloud Run</span>
+          <span class="al-item">WebRTC</span>
+          <span class="al-item">FFmpeg</span>
+          <span class="al-item">Mediasoup</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Code: Health Model -->
+  <div class="section">
+    <div class="sh"><span class="sn">2</span>Enterprise Health Model</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.65rem;">Built at <code style="font-family:var(--mono);font-size:11px;">lib/platform/mission_control/health/enterprise_health.dart</code>. Every module publishes an <code style="font-family:var(--mono);font-size:11px;">EnterpriseHealth</code> snapshot to the Firestore <code style="font-family:var(--mono);font-size:11px;">missionControlHealth</code> collection.</p>
+    <div class="code-block">enum HealthStatus { healthy, warning, critical }
+
+class EnterpriseHealth {
+  final String module;
+  final HealthStatus status;
+  final double availability;   // 0–100 %
+  final double latencyMs;
+  final int activeUsers;
+  final int incidents;
+
+  bool get isHealthy      =&gt; status == HealthStatus.healthy;
+  bool get needsAttention =&gt; status != HealthStatus.healthy;
+}</div>
+  </div>
+
+  <!-- 3. Digital Twin -->
+  <div class="section">
+    <div class="sh"><span class="sn">3</span>YohPal Digital Twin</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.65rem;">Built at <code style="font-family:var(--mono);font-size:11px;">lib/platform/mission_control/digital_twin/yohpal_digital_twin.dart</code>. Aggregates live health across all modules into a single ecosystem state. Mission Control streams this object in real time.</p>
+    <div class="code-block">class YohPalDigitalTwin {
+  final List&lt;EnterpriseHealth&gt; modules;
+  final DateTime lastUpdated;
+
+  double get ecosystemAvailability =&gt;
+      modules.isEmpty ? 0 : modules.map((m) =&gt; m.availability).reduce((a,b) =&gt; a+b) / modules.length;
+
+  int  get totalActiveUsers  =&gt; modules.fold(0, (s, m) =&gt; s + m.activeUsers);
+  int  get totalIncidents    =&gt; modules.fold(0, (s, m) =&gt; s + m.incidents);
+
+  List&lt;EnterpriseHealth&gt; get criticalModules =&gt;
+      modules.where((m) =&gt; m.status == HealthStatus.critical).toList();
+
+  HealthStatus get ecosystemStatus {
+    if (modules.any((m) =&gt; m.status == HealthStatus.critical)) return HealthStatus.critical;
+    if (modules.any((m) =&gt; m.status == HealthStatus.warning))  return HealthStatus.warning;
+    return HealthStatus.healthy;
+  }
+}</div>
+  </div>
+
+  <!-- 4. Mission Control Service -->
+  <div class="section">
+    <div class="sh"><span class="sn">4</span>Mission Control Service</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.65rem;">Abstract contract at <code style="font-family:var(--mono);font-size:11px;">operations/mission_control_service.dart</code>. Firebase-backed implementation writes commands to the <code style="font-family:var(--mono);font-size:11px;">missionControlCommands</code> collection, consumed by Cloud Functions.</p>
+    <div class="code-block">abstract class MissionControlService {
+  Stream&lt;YohPalDigitalTwin&gt; watchEcosystem();
+  Future&lt;List&lt;PredictiveRisk&gt;&gt; getPredictiveRisks();
+  Future&lt;void&gt; acknowledgeIncident(String incidentId);
+  Future&lt;void&gt; triggerRollback(String release);
+  Future&lt;void&gt; pauseRollout(String module);
+  Future&lt;void&gt; resumeRollout(String module);
+}</div>
+  </div>
+
+  <!-- 5. Predictive Risk Engine -->
+  <div class="section">
+    <div class="sh"><span class="sn">5</span>Predictive Risk Engine</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.75rem;">The <code style="font-family:var(--mono);font-size:11px;">PredictiveRiskDetector</code> evaluates live telemetry against threshold rules and returns probability-ranked recommendations. Probability is clamped to [0, 1] and sorted highest-first before display.</p>
+    <div class="risk-cards">
+      <div class="risk-card">
+        <div class="rc-trigger">Live latency increasing</div>
+        <div class="rc-arrow">↓</div>
+        <div class="rc-rec">Recommend scaling Cloud Run instances</div>
+      </div>
+      <div class="risk-card">
+        <div class="rc-trigger">Wallet transaction failures rising</div>
+        <div class="rc-arrow">↓</div>
+        <div class="rc-rec">Pause payouts and investigate payment gateway</div>
+      </div>
+      <div class="risk-card">
+        <div class="rc-trigger">AI response latency rising</div>
+        <div class="rc-arrow">↓</div>
+        <div class="rc-rec">Scale YohPal Brain Cloud Function workers</div>
+      </div>
+      <div class="risk-card">
+        <div class="rc-trigger">FFmpeg queue building</div>
+        <div class="rc-arrow">↓</div>
+        <div class="rc-rec">Increase Cloud Run FFmpeg worker instances</div>
+      </div>
+      <div class="risk-card">
+        <div class="rc-trigger">Firestore reads spiking</div>
+        <div class="rc-arrow">↓</div>
+        <div class="rc-rec">Increase client-side cache TTL; review hot documents</div>
+      </div>
+      <div class="risk-card" style="background:var(--paper-2);border-style:dashed;">
+        <div class="rc-trigger" style="color:var(--ink-3);">+ Add custom detectors</div>
+        <div class="rc-arrow">↓</div>
+        <div class="rc-rec" style="color:var(--ink-3);">Implement <code style="font-family:var(--mono);">PredictiveRiskDetector</code> methods as new signals emerge</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Test Evidence -->
+  <div class="section">
+    <div class="sh"><span class="sn">6</span>Build &amp; Test Evidence</div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.35rem;">flutter analyze lib/platform/mission_control/</div>
+    <div class="code-block green">Analyzing mission_control...
+No issues found! (ran in 2.1s)</div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.35rem;">flutter test test/platform/mission_control/ — 21 tests</div>
+    <div class="code-block green">EnterpriseHealth  · isHealthy, needsAttention (warning + critical), copyWith          4 / 4
+YohPalDigitalTwin · ecosystemAvailability (normal + empty), totalActiveUsers,
+                    totalIncidents, ecosystemStatus (critical/warning/healthy),
+                    criticalModules filter, moduleHealth (found + not found)            10 / 10
+PredictiveRisk    · liveLatency (null below + risk above), walletFailures (null + risk),
+                    ffmpegQueue (null + risk), probability clamps to 1.0               7 / 7
+All tests passed!</div>
+  </div>
+
+  <!-- 7. Folder Structure -->
+  <div class="section">
+    <div class="sh"><span class="sn">7</span>Folder Structure</div>
+    <div class="code-block">lib/platform/mission_control/
+  health/
+    enterprise_health.dart          ← EnterpriseHealth, HealthStatus
+  digital_twin/
+    yohpal_digital_twin.dart        ← YohPalDigitalTwin — ecosystem aggregator
+  predictive/
+    predictive_risk.dart            ← PredictiveRisk, PredictiveRiskDetector
+  operations/
+    mission_control_service.dart    ← abstract MissionControlService
+    firestore_mission_control_service.dart  ← Firebase implementation
+  governance/                       ← (Phase 20 — policy automation)
+  dashboard/                        ← (Phase 20 — Flutter dashboard widgets)
+
+test/platform/mission_control/
+  enterprise_health_test.dart       ← 21 tests: health, digital twin, predictive</div>
+  </div>
+
+  <!-- 8. Executive Dashboard Widgets -->
+  <div class="section">
+    <div class="sh"><span class="sn">8</span>Executive Command Dashboard</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.75rem;">Mission Control displays four instrument panels. Each cell maps directly to a Firestore collection or computed <code style="font-family:var(--mono);font-size:11px;">YohPalDigitalTwin</code> property.</p>
+    <div class="widget-grid">
+      <div class="widget w-gold">
+        <div class="wh">Platform Health</div>
+        <ul>
+          <li>Availability %</li>
+          <li>Active users</li>
+          <li>Crash rate</li>
+          <li>Response time</li>
+          <li>Active incidents</li>
+          <li>Predicted risks</li>
+        </ul>
+      </div>
+      <div class="widget w-info">
+        <div class="wh">Modules</div>
+        <ul>
+          <li>Live</li>
+          <li>Jobs</li>
+          <li>Hustle</li>
+          <li>Market</li>
+          <li>Wallet</li>
+          <li>Brain</li>
+          <li>YCIOS</li>
+        </ul>
+      </div>
+      <div class="widget w-pass">
+        <div class="wh">Finance</div>
+        <ul>
+          <li>Wallet balance</li>
+          <li>Gift revenue</li>
+          <li>Creator payouts</li>
+          <li>Transaction success</li>
+          <li>Fraud alerts</li>
+        </ul>
+      </div>
+      <div class="widget w-pend">
+        <div class="wh">Infrastructure</div>
+        <ul>
+          <li>Firestore reads/s</li>
+          <li>Cloud Functions</li>
+          <li>Cloud Run</li>
+          <li>FFmpeg queue</li>
+          <li>Mediasoup rooms</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Digital Twin Event Bus -->
+  <div class="section">
+    <div class="sh"><span class="sn">9</span>Digital Twin Synchronisation Events</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.65rem;">Every module publishes these events. Mission Control consumes all of them to maintain a live ecosystem state without polling.</p>
+    <ul class="event-list">
+      <li><span class="event-tag">ModuleHealthChanged</span> Module availability, latency, or incident count updated</li>
+      <li><span class="event-tag">WalletUpdated</span> Wallet balance or transaction volume changed</li>
+      <li><span class="event-tag">IncidentRaised</span> P0/P1/P2 incident opened — correlates across all modules</li>
+      <li><span class="event-tag">DeploymentCompleted</span> Module release successfully deployed to production</li>
+      <li><span class="event-tag">RolloutPaused</span> Progressive rollout halted — Mission Control takes control</li>
+      <li><span class="event-tag">RolloutResumed</span> Rollout resumed after incident resolution or manual approval</li>
+    </ul>
+  </div>
+
+  <!-- 10. Enterprise KPIs -->
+  <div class="section">
+    <div class="sh"><span class="sn">10</span>Enterprise KPIs</div>
+    <div class="ev-wrap">
+      <table class="ev">
+        <thead><tr><th>KPI</th><th>Target</th><th>Measured By</th></tr></thead>
+        <tbody>
+          <tr><td>Platform Availability</td><td class="target">≥ 99.95 %</td><td>ecosystemAvailability on YohPalDigitalTwin</td></tr>
+          <tr><td>Crash-Free Sessions</td><td class="target">≥ 99.7 %</td><td>missionControlHealth — crashFreeRate field</td></tr>
+          <tr><td>Feed Startup</td><td class="target">≤ 2 s</td><td>latencyMs on Live module health</td></tr>
+          <tr><td>First Video Ready</td><td class="target">≤ 500 ms</td><td>HLS/CDN first-frame latency metric</td></tr>
+          <tr><td>Live Join Time</td><td class="target">≤ 3 s</td><td>WebRTC join latency via Mediasoup</td></tr>
+          <tr><td>Wallet Transaction Success</td><td class="target">≥ 99.99 %</td><td>walletFailureRate on Wallet health</td></tr>
+          <tr><td>FFmpeg Success Rate</td><td class="target">≥ 99 %</td><td>Cloud Run FFmpeg worker job completion</td></tr>
+          <tr><td>AI Success Rate</td><td class="target">≥ 99 %</td><td>executeYohPalBrainTask Cloud Function success rate</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 11. Success Criteria -->
+  <div class="section">
+    <div class="sh"><span class="sn">11</span>Phase 19 Success Criteria</div>
+    <ul class="sc-list">
+      <li>One Mission Control for every YohPal module — no per-module operational console</li>
+      <li>Shared platform services monitored centrally via <code style="font-family:var(--mono);font-size:11px;">missionControlHealth</code></li>
+      <li>Infrastructure monitored centrally — Firestore, Cloud Run, FFmpeg, Mediasoup</li>
+      <li>Wallet monitored centrally — balance, transaction success, fraud alerts</li>
+      <li>AI monitored centrally — BrainGateway success rate and latency</li>
+      <li>Cross-module incidents correlated via event bus — one incident, ecosystem-wide view</li>
+      <li>Predictive recommendations generated from live telemetry — no manual monitoring required</li>
+      <li>Executive dashboard updates in real time from <code style="font-family:var(--mono);font-size:11px;">YohPalDigitalTwin</code> stream</li>
+    </ul>
+  </div>
+
+  <!-- Strategic Recommendation -->
+  <div class="callout gold">
+    <h3>Strategic Recommendation</h3>
+    <p>Phase 19 should be the highest architectural layer of the YohPal ecosystem — the permanent enterprise operations layer. Rather than every application having its own operational console, YohPal has one enterprise Mission Control that supervises Live, Jobs, Hustle, Market, Wallet, Brain, YCIOS, and every future application. It becomes the single operational command centre for engineering, operations, security, finance, product, and executive leadership simultaneously.</p>
+  </div>
+
+  <!-- Phase 20 teaser -->
+  <div class="next-phase">
+    <div class="np-eyebrow">Next Smart Move</div>
+    <h2>YohPal Platform Phase 20 — Enterprise Operating System (YohPal OS)</h2>
+    <ul class="scope-list">
+      <li>Consolidate Mission Control, Digital Twin, Shared Platform Services, Release Governance, AI Operations, and Enterprise Analytics into a unified YohPal Enterprise OS</li>
+      <li>Introduce policy-driven automation for scaling, rollback, incident response, and routine operational tasks — with approval gates for high-impact actions</li>
+      <li>Establish a unified event bus and operational data model used by every YohPal module</li>
+      <li>Produce: YohPal Enterprise OS Architecture, Enterprise Event Model Specification, Automation &amp; Approval Framework, Executive Operating Manual</li>
+    </ul>
+    <div class="outcome-box">
+      <p><strong>Outcome:</strong> YohPal evolves into an enterprise-scale operating platform with centralised governance, automation, observability, and decision support — capable of supporting continued ecosystem growth without fragmenting operations.</p>
+    </div>
+  </div>
+
+  <hr class="footer-rule">
+
+</div>

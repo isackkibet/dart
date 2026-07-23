@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YohPal Live — Implementation Status Report</title>
+<style>
+  :root {
+    --bg: #FAF7F0;
+    --bg-elevated: #FFFFFF;
+    --surface: #F3EEE1;
+    --surface-2: #ECE4D0;
+    --border: #E2D9C3;
+    --border-strong: #CBBE9C;
+    --text: #211D14;
+    --text-muted: #6B6252;
+    --text-faint: #8C8270;
+    --accent: #93700F;
+    --accent-strong: #6E5309;
+    --accent-soft: rgba(147, 112, 15, 0.10);
+    --link: #6E5309;
+
+    --sev-critical: #B3261E;
+    --sev-critical-bg: rgba(179, 38, 30, 0.09);
+    --sev-critical-border: rgba(179, 38, 30, 0.35);
+    --sev-high: #B4590A;
+    --sev-high-bg: rgba(180, 89, 10, 0.09);
+    --sev-high-border: rgba(180, 89, 10, 0.35);
+    --sev-medium: #8A6D00;
+    --sev-medium-bg: rgba(138, 109, 0, 0.10);
+    --sev-medium-border: rgba(138, 109, 0, 0.35);
+    --sev-low: #2A5C8A;
+    --sev-low-bg: rgba(42, 92, 138, 0.08);
+    --sev-low-border: rgba(42, 92, 138, 0.30);
+    --ok: #2E6B47;
+    --ok-bg: rgba(46, 107, 71, 0.09);
+    --partial: #8A6D00;
+    --partial-bg: rgba(138, 109, 0, 0.10);
+
+    --shadow: 0 1px 2px rgba(33, 29, 20, 0.06), 0 8px 24px -12px rgba(33, 29, 20, 0.18);
+    --radius: 10px;
+    --serif: Iowan Old Style, Palatino Linotype, Palatino, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SF Mono, Cascadia Code, Consolas, "Liberation Mono", monospace;
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #14120D; --bg-elevated: #1A170F; --surface: #201C13; --surface-2: #292415;
+    --border: #362F1E; --border-strong: #4A4127; --text: #ECE6D6; --text-muted: #A99C80;
+    --text-faint: #83775F; --accent: #D9B33C; --accent-strong: #E8C863;
+    --accent-soft: rgba(217, 179, 60, 0.12); --link: #E8C863;
+    --sev-critical: #F0847C; --sev-critical-bg: rgba(240, 132, 124, 0.12); --sev-critical-border: rgba(240, 132, 124, 0.35);
+    --sev-high: #F0AA6A; --sev-high-bg: rgba(240, 170, 106, 0.12); --sev-high-border: rgba(240, 170, 106, 0.35);
+    --sev-medium: #E3C74A; --sev-medium-bg: rgba(227, 199, 74, 0.12); --sev-medium-border: rgba(227, 199, 74, 0.35);
+    --sev-low: #7FB0DE; --sev-low-bg: rgba(127, 176, 222, 0.12); --sev-low-border: rgba(127, 176, 222, 0.30);
+    --ok: #7FBE97; --ok-bg: rgba(127, 190, 151, 0.12);
+    --partial: #E3C74A; --partial-bg: rgba(227, 199, 74, 0.12);
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14120D; --bg-elevated: #1A170F; --surface: #201C13; --surface-2: #292415;
+      --border: #362F1E; --border-strong: #4A4127; --text: #ECE6D6; --text-muted: #A99C80;
+      --text-faint: #83775F; --accent: #D9B33C; --accent-strong: #E8C863;
+      --accent-soft: rgba(217, 179, 60, 0.12); --link: #E8C863;
+      --sev-critical: #F0847C; --sev-critical-bg: rgba(240, 132, 124, 0.12); --sev-critical-border: rgba(240, 132, 124, 0.35);
+      --sev-high: #F0AA6A; --sev-high-bg: rgba(240, 170, 106, 0.12); --sev-high-border: rgba(240, 170, 106, 0.35);
+      --sev-medium: #E3C74A; --sev-medium-bg: rgba(227, 199, 74, 0.12); --sev-medium-border: rgba(227, 199, 74, 0.35);
+      --sev-low: #7FB0DE; --sev-low-bg: rgba(127, 176, 222, 0.12); --sev-low-border: rgba(127, 176, 222, 0.30);
+      --ok: #7FBE97; --ok-bg: rgba(127, 190, 151, 0.12);
+      --partial: #E3C74A; --partial-bg: rgba(227, 199, 74, 0.12);
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  a { color: var(--link); }
+  code, .mono { font-family: var(--mono); }
+
+  .masthead { border-bottom: 1px solid var(--border); padding: 40px 28px 28px; background: radial-gradient(1100px 320px at 12% -10%, var(--accent-soft), transparent 60%), var(--bg-elevated); }
+  .masthead-inner { max-width: 1120px; margin: 0 auto; }
+  .kicker { font-family: var(--mono); font-size: 12px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .kicker .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px var(--ok-bg); }
+  h1.title { font-family: var(--serif); font-weight: 600; font-size: clamp(28px, 4vw, 42px); line-height: 1.1; margin: 0 0 10px; text-wrap: balance; letter-spacing: -0.01em; }
+  .subtitle { font-size: 17px; color: var(--text-muted); max-width: 68ch; margin: 0 0 22px; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 10px 28px; font-size: 13px; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 16px; }
+  .meta-row strong { color: var(--text); font-weight: 600; }
+
+  .layout { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 44px; padding: 36px 28px 100px; align-items: start; }
+  nav.toc { position: sticky; top: 24px; font-size: 13.5px; }
+  nav.toc .toc-label { font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.09em; font-size: 11px; color: var(--text-faint); margin-bottom: 10px; }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
+  nav.toc li { counter-increment: toc; }
+  nav.toc a { display: block; padding: 6px 0 6px 22px; position: relative; color: var(--text-muted); text-decoration: none; border-left: 2px solid transparent; margin-left: -1px; }
+  nav.toc a::before { content: counter(toc, decimal-leading-zero); position: absolute; left: 0; font-family: var(--mono); font-size: 11px; color: var(--text-faint); top: 7px; }
+  nav.toc a:hover { color: var(--text); border-left-color: var(--border-strong); }
+
+  main { min-width: 0; }
+  section { margin-bottom: 54px; scroll-margin-top: 20px; }
+  .section-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
+  .section-num { font-family: var(--mono); color: var(--accent); font-size: 14px; }
+  h2 { font-family: var(--serif); font-weight: 600; font-size: 25px; margin: 0; letter-spacing: -0.01em; }
+  .section-dek { color: var(--text-muted); font-size: 15px; max-width: 68ch; margin: 10px 0 22px; }
+  h3 { font-size: 17px; font-weight: 650; margin: 26px 0 10px; }
+  p { margin: 0 0 14px; max-width: 74ch; }
+  ul { margin: 0 0 14px; padding-left: 20px; }
+  li { margin-bottom: 6px; max-width: 72ch; }
+
+  code.chip { display: inline-block; background: var(--surface); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; font-size: 12.5px; color: var(--text); white-space: nowrap; }
+
+  .badge { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; border: 1px solid transparent; line-height: 1.5; white-space: nowrap; }
+  .badge.critical { color: var(--sev-critical); background: var(--sev-critical-bg); border-color: var(--sev-critical-border); }
+  .badge.high { color: var(--sev-high); background: var(--sev-high-bg); border-color: var(--sev-high-border); }
+  .badge.medium { color: var(--sev-medium); background: var(--sev-medium-bg); border-color: var(--sev-medium-border); }
+  .badge.low { color: var(--sev-low); background: var(--sev-low-bg); border-color: var(--sev-low-border); }
+
+  .status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .status.fixed { color: var(--ok); background: var(--ok-bg); }
+  .status.partial { color: var(--partial); background: var(--partial-bg); }
+  .status.open { color: var(--sev-critical); background: var(--sev-critical-bg); }
+
+  .scorecard { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 22px 0 30px; }
+  .stat { background: var(--bg-elevated); padding: 16px 16px 14px; }
+  .stat .n { font-family: var(--serif); font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+  .stat.fixed .n { color: var(--ok); }
+  .stat.open .n { color: var(--sev-critical); }
+  .stat.partial .n { color: var(--partial); }
+  .stat .l { font-size: 11.5px; color: var(--text-muted); margin-top: 6px; }
+
+  .card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin: 16px 0; box-shadow: var(--shadow); }
+  .card.callout { background: var(--surface); box-shadow: none; }
+
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); margin: 16px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 640px; }
+  thead th { text-align: left; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); background: var(--surface); padding: 10px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--surface); }
+  td.status-col { white-space: nowrap; }
+
+  .timeline { border-left: 2px solid var(--border-strong); margin-left: 6px; padding-left: 20px; }
+  .tl-item { position: relative; padding-bottom: 18px; }
+  .tl-item::before { content: ''; position: absolute; left: -25px; top: 4px; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+  .tl-item .tl-title { font-weight: 650; font-size: 14.5px; }
+  .tl-item .tl-meta { font-family: var(--mono); font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+
+  footer.end { max-width: 1120px; margin: 0 auto; padding: 0 28px 60px; color: var(--text-faint); font-size: 12.5px; border-top: 1px solid var(--border); padding-top: 20px; }
+
+  @media (max-width: 940px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { position: static; border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 8px; }
+    nav.toc ol { columns: 2; }
+  }
+
+  .dl-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 40;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--bg);
+    background: var(--accent);
+    border: 1px solid var(--accent-strong);
+    padding: 9px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.12s ease;
+  }
+  .dl-btn:hover { transform: translateY(-1px); }
+  .dl-btn svg { width: 14px; height: 14px; flex: none; }
+  @media (max-width: 640px) {
+    .dl-btn { top: auto; bottom: 18px; right: 18px; padding: 12px; border-radius: 50%; }
+    .dl-btn .dl-label { display: none; }
+  }
+
+  /* Print / "Save as PDF" — triggered by the button below via window.print().
+     Browsers' print-to-PDF renders this media query, so this is what
+     actually determines the PDF's layout. */
+  @media print {
+    .dl-btn { display: none !important; }
+    nav.toc { display: none !important; }
+    .layout { grid-template-columns: 1fr !important; display: block !important; padding: 0 !important; max-width: 100% !important; }
+    .masthead { padding: 0 0 18px; background: none !important; }
+    .masthead-inner { max-width: 100%; }
+    body { background: #fff !important; color: #000 !important; font-size: 11.5pt; }
+    section { page-break-inside: avoid; margin-bottom: 26px; }
+    .card, .tbl-wrap, .timeline { page-break-inside: avoid; }
+    a { color: inherit !important; text-decoration: none !important; }
+    .scorecard { page-break-inside: avoid; }
+  }
+</style>
+
+</head>
+<body>
+<button type="button" class="dl-btn" id="dlBtn" aria-label="Download this report as a PDF">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M5 21h14"></path></svg>
+  <span class="dl-label">Download PDF</span>
+</button>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="kicker"><span class="dot"></span> Implementation Status Report — Follow-up to the Production Readiness Review</div>
+    <h1 class="title">YohPal Live: what shipped, what didn't</h1>
+    <p class="subtitle">A finding-by-finding re-audit of the codebase against every Critical, High, Medium, and Low issue raised in <code class="mono">docs/PRODUCTION_READINESS_REVIEW.html</code>, verified fresh against current source — not against memory of what was worked on.</p>
+    <div class="meta-row">
+      <span><strong>Baseline</strong> Production Readiness Review, 2026-07-09</span>
+      <span><strong>Status as of</strong> 2026-07-10</span>
+      <span><strong>Method</strong> git log + targeted re-grep of every original finding</span>
+      <span><strong>Scope executed</strong> Release Track 1.0B (money/security) + ad hoc auth work</span>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="toc">
+    <div class="toc-label">Contents</div>
+    <ol>
+      <li><a href="#exec">Executive summary</a></li>
+      <li><a href="#auth">Authentication: full progress</a></li>
+      <li><a href="#critical">Critical findings</a></li>
+      <li><a href="#high">High findings</a></li>
+      <li><a href="#medium">Medium findings</a></li>
+      <li><a href="#low">Low findings</a></li>
+      <li><a href="#new">Work done beyond the review</a></li>
+      <li><a href="#next">What to prioritize next</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <section id="exec">
+      <div class="section-head"><span class="section-num">01</span><h2>Executive summary</h2></div>
+      <p class="section-dek">Of the original review's 40 findings, <strong>7 are fully closed and 3 are partially mitigated</strong> — concentrated almost entirely in the Critical, money-and-fraud bucket, which was the right thing to fix first. The High-severity bucket, which is mostly UX reliability and test coverage, is essentially untouched: <strong>0 of 13 fully fixed</strong>. Two features not in the original review at all — Google and Apple Sign-In — were built from scratch this cycle.</p>
+
+      <div class="scorecard">
+        <div class="stat fixed"><div class="n">4/9</div><div class="l">Critical fixed</div></div>
+        <div class="stat partial"><div class="n">1/9</div><div class="l">Critical mitigated</div></div>
+        <div class="stat open"><div class="n">0/13</div><div class="l">High fixed</div></div>
+        <div class="stat fixed"><div class="n">1/14</div><div class="l">Medium fixed</div></div>
+        <div class="stat fixed"><div class="n">1/4</div><div class="l">Low fixed</div></div>
+        <div class="stat"><div class="n">2</div><div class="l">Net-new features (SSO)</div></div>
+      </div>
+
+      <p>The work that happened maps almost exactly to one branch of the release plan the team wrote in response to the review (<code class="chip">apps/mobile_flutter/docs/</code>): <strong>Track 1.0B — Money, Security &amp; Wallet Reconciliation</strong> was executed in full. Tracks 1.0A (account/navigation/observability), 1.0C (feed/live UX recovery), and 1.0D (cleanup/tests/release gate) were not started, with one exception — sign-out, which was technically scoped under 1.0A, got built as a standalone request and is done. On top of that plan, a second wave of work went well beyond it: Google and Apple SSO, a full login/signup visual redesign, and a Terms &amp; Conditions requirement — none of which were asked for by the original review, but which materially improve the auth surface anyway.</p>
+
+      <p>The net effect: <strong>the fraud-and-money risk this app carried is substantially reduced</strong> — gift amounts are now server-validated, rewarded-ad spoofing has a real mitigation, Firestore's most exploitable write rules are closed, and users finally get feedback when a wallet action completes. But the app is <strong>no closer to General Availability than the original review's headline blockers imply</strong> — the crashing Analytics route, the complete absence of crash reporting, hardcoded production infrastructure, and password reset are all still exactly as they were found. Anyone reading only "9 Critical → 4 fixed" without reading which 4 would over-estimate readiness.</p>
+    </section>
+
+    <section id="auth">
+      <div class="section-head"><span class="section-num">02</span><h2>Authentication: full progress</h2></div>
+      <p class="section-dek">Requested separately because more happened here than anywhere else in the codebase this cycle. Organized by what's real and working versus what's still exactly as the original review found it.</p>
+
+      <h3>Shipped and verified working</h3>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-title">Sign-out — Critical finding #1, closed</div><div class="tl-meta">creator_profile_screen.dart · _LogoutButton</div><p style="margin:8px 0 0">Confirm dialog → <code class="chip">AuthController.logout()</code> → pops the nav stack to root so <code class="chip">AuthGate</code>'s reactive swap to <code class="chip">LoginScreen</code> is actually visible, not hidden under a pushed route. This was previously implemented but fully unreachable — <code class="chip">logout()</code> existed with zero call sites anywhere in the UI.</p></div>
+        <div class="tl-item"><div class="tl-title">Google Sign-In — new capability</div><div class="tl-meta">auth_repository.dart · signInWithGoogle()</div><p style="margin:8px 0 0">Real credential exchange via <code class="chip">google_sign_in</code> + Firebase's <code class="chip">GoogleAuthProvider</code>, not a stub. Creates <code class="chip">users</code>/<code class="chip">creatorProfiles</code> Firestore docs only when Firebase reports a genuinely new account, so a returning Google user is treated as login, not signup.</p></div>
+        <div class="tl-item"><div class="tl-title">Apple Sign-In — new capability</div><div class="tl-meta">auth_repository.dart · signInWithApple()</div><p style="margin:8px 0 0">Nonce-secured per Apple/Firebase's required flow. Apple only ever returns the user's name on their very first authorization ever — that's captured and saved immediately, since it's unrecoverable after. Hidden on Android in the UI, where <code class="chip">sign_in_with_apple</code> has no native support without server-side relay infrastructure this project doesn't have.</p></div>
+        <div class="tl-item"><div class="tl-title">A regression was introduced, then caught and fixed in the same cycle</div><div class="tl-meta">auth_repository.dart · signOut()</div><p style="margin:8px 0 0">Adding Google sign-out to <code class="chip">signOut()</code> put it <em>before</em> the real Firebase sign-out call — if the Google call threw for any user who'd never used Google Sign-In, Firebase sign-out never ran, and logout silently stopped working end to end. Fixed by making the Google cleanup best-effort and non-blocking; Firebase sign-out now always executes regardless.</p></div>
+        <div class="tl-item"><div class="tl-title">Terms &amp; Conditions — partially closes High finding #1</div><div class="tl-meta">signup_screen.dart, terms_and_conditions_screen.dart</div><p style="margin:8px 0 0">A real, readable Terms page, gated behind a required checkbox before account creation — the original "no ToS/Privacy link" gap is now half-closed (ToS exists; there's still no separate Privacy Policy link).</p></div>
+        <div class="tl-item"><div class="tl-title">Confirm-password field — Low finding, closed</div><div class="tl-meta">signup_screen.dart</div><p style="margin:8px 0 0">With an actual mismatch check on submit, not a decorative field.</p></div>
+        <div class="tl-item"><div class="tl-title">First/last name split, full visual redesign</div><div class="tl-meta">login_screen.dart, signup_screen.dart</div><p style="margin:8px 0 0">Display name is now first + last name, joined for the backend call. Both screens moved off a boxed card onto a full-bleed background with a shared brand mark and SSO tile row, for visual consistency with each other.</p></div>
+      </div>
+
+      <h3>Still exactly as the original review found it</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th style="width:34%">Gap</th><th style="width:14%">Severity</th><th>Current state</th></tr></thead>
+          <tbody>
+            <tr><td>Password reset</td><td><span class="badge critical">Critical</span></td><td>"Forgot password?" exists on the login screen and is tappable, but it only shows a "coming soon" message. No <code class="chip">sendPasswordResetEmail</code> call anywhere in the codebase.</td></tr>
+            <tr><td>Email verification</td><td><span class="badge high">High</span></td><td>Not implemented for any signup path, including the two new SSO paths.</td></tr>
+            <tr><td>Client-side input validation</td><td><span class="badge high">High</span></td><td>Login still has no <code class="chip">Form</code>/validators at all. Signup validates password-match and terms-acceptance, but not email format or field emptiness before hitting Firebase.</td></tr>
+            <tr><td>Friendly error messages</td><td><span class="badge high">High</span></td><td>Raw Firebase exception strings are still shown verbatim (e.g. <code class="chip">[firebase_auth/invalid-credential] ...</code>). The <code class="chip">AuthErrorMapper</code> class proposed in the team's own 1.0A release patch was never built.</td></tr>
+            <tr><td>Cross-account state clearing on logout</td><td><span class="badge high">High</span></td><td><code class="chip">logout()</code> still only calls <code class="chip">signOut()</code> — no explicit cache clear for feed/wallet/notification token. Real-world risk is lower than the finding implies, since most screens are Firestore-stream-driven and re-key by uid, but it's not addressed as stated.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card callout">
+        <p style="margin:0"><strong>Unverified, not just unfinished:</strong> the SSO implementation has not been exercised on a real device or simulator from this environment — no way to confirm the OAuth round-trip actually completes end to end. It also depends on two things outside the codebase entirely: Google and Apple must be turned on as enabled sign-in providers in the Firebase console, and "Sign in with Apple" must be enabled for the App ID in the Apple Developer portal. Neither can be confirmed from source.</p>
+      </div>
+    </section>
+
+    <section id="critical">
+      <div class="section-head"><span class="section-num">03</span><h2>Critical findings — 4 fixed, 1 mitigated, 4 open</h2></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th style="width:38%">Finding</th><th style="width:12%">Status</th><th>Evidence</th></tr></thead>
+          <tbody>
+            <tr><td>No sign-out control anywhere in the UI</td><td class="status-col"><span class="status fixed">Fixed</span></td><td><code class="chip">creator_profile_screen.dart</code> — see §2</td></tr>
+            <tr><td>Profile → Analytics crashes on a hardcoded wrong route string</td><td class="status-col"><span class="status open">Open</span></td><td><code class="chip">profile_hub_screen.dart:100</code> still pushes <code class="chip">/creator-analytics</code>; registered route is <code class="chip">/creator-profile/analytics</code>. No <code class="chip">onUnknownRoute</code> fallback exists. Unchanged.</td></tr>
+            <tr><td>No crash reporting or global error boundary</td><td class="status-col"><span class="status open">Open</span></td><td><code class="chip">main.dart</code> has no <code class="chip">runZonedGuarded</code>/<code class="chip">FlutterError.onError</code>. No Crashlytics/Sentry dependency in <code class="chip">pubspec.yaml</code>. Unchanged.</td></tr>
+            <tr><td>No password reset / account recovery</td><td class="status-col"><span class="status open">Open</span></td><td>See §2 — stub only.</td></tr>
+            <tr><td>Rewarded-ads reward crediting is spoofable (no ad SDK)</td><td class="status-col"><span class="status partial">Mitigated</span></td><td><code class="chip">rewardedAdProcessor.ts</code> now requires real elapsed time between a <code class="chip">view_start</code> and tier-completion event before crediting. Real fix still needs an actual ad-network SDK with server-side verification (e.g. AdMob SSV) — not present.</td></tr>
+            <tr><td>Firestore <code class="chip">gifts</code> subcollection: client sets its own monetary amount</td><td class="status-col"><span class="status fixed">Fixed</span></td><td><code class="chip">firestore.rules</code>: <code class="chip">gifts</code> create/update/delete now <code class="chip">if false</code>. New <code class="chip">validatedGiftPurchase</code> Cloud Function validates against a server-side catalog and debits the sender's real wallet balance before writing the gift doc.</td></tr>
+            <tr><td>Every money flow has zero reconciliation UX — WalletStatusScreen is an unbuilt placeholder</td><td class="status-col"><span class="status fixed">Fixed</span></td><td>Real <code class="chip">WalletStatusScreen</code>, registered route, plus a <code class="chip">yohpal://wallet-status</code> deep link so returning from the external wallet checkout actually lands somewhere.</td></tr>
+            <tr><td>Production infrastructure URLs hardcoded, no environment split</td><td class="status-col"><span class="status open">Open</span></td><td><code class="chip">app.dart</code> still hardcodes <code class="chip">https://us-central1-yohlab.cloudfunctions.net</code> three times; <code class="chip">yohpal_web_handoff.dart</code> still hardcodes the wallet/ads/subscriptions web domains. No <code class="chip">--dart-define</code> config exists. Unchanged.</td></tr>
+            <tr><td><code class="chip">videoStats</code> / <code class="chip">referralEvents</code> Firestore rules allow unrestricted or unauthenticated writes</td><td class="status-col"><span class="status fixed">Fixed</span></td><td><code class="chip">videoStats</code> now requires the exact field set the real client write uses. <code class="chip">referralEvents</code> now requires auth + ownership (client updated to stamp <code class="chip">userId</code> so the rule has something to check).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="high">
+      <div class="section-head"><span class="section-num">04</span><h2>High findings — 0 fixed, 1 partial, 12 open</h2></div>
+      <p class="section-dek">This is the bucket that didn't get touched. All of it maps to Release Tracks 1.0A (the rest of it), 1.0C, and 1.0D in the team's own plan, none of which were executed this cycle.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th style="width:46%">Finding</th><th style="width:12%">Status</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td>No client validation / ToS link / email verification on signup</td><td class="status-col"><span class="status partial">Partial</span></td><td>ToS added (see §2); validation and email verification still absent.</td></tr>
+            <tr><td>Raw Firebase exception strings shown to users</td><td class="status-col"><span class="status open">Open</span></td><td>See §2.</td></tr>
+            <tr><td>Live streaming has no reconnect/timeout handling</td><td class="status-col"><span class="status open">Open</span></td><td>No LiveKit <code class="chip">RoomEvent</code>/connection-state listener found in <code class="chip">live_stream_controller.dart</code>.</td></tr>
+            <tr><td>Search is fully built, zero navigation entry point</td><td class="status-col"><span class="status open">Open</span></td><td>No reference to <code class="chip">SearchScreen</code>/<code class="chip">AppRoutes.search</code> in any hub screen.</td></tr>
+            <tr><td>Live Discovery is fully built, zero navigation entry point</td><td class="status-col"><span class="status open">Open</span></td><td>No reference to <code class="chip">AppRoutes.live</code> in any hub screen.</td></tr>
+            <tr><td>Feed error state has no retry</td><td class="status-col"><span class="status open">Open</span></td><td>Unaudited this cycle but no commits touched <code class="chip">video_feed_screen.dart</code>.</td></tr>
+            <tr><td>AI publish checklist doesn't gate publishing</td><td class="status-col"><span class="status open">Open</span></td><td><code class="chip">aiPublishStatus</code> is still written in exactly one place and read in zero.</td></tr>
+            <tr><td>Zero accessibility semantics on the feed/engagement rail</td><td class="status-col"><span class="status open">Open</span></td><td>No <code class="chip">Semantics(</code> usage found anywhere in <code class="chip">video_feed</code>, <code class="chip">video_playback</code>, or <code class="chip">engagement</code>.</td></tr>
+            <tr><td>Only 4 test files in the repo</td><td class="status-col"><span class="status open">Open</span></td><td>Still exactly 4 — <code class="chip">widget_test.dart</code> plus 3 old phase tests. No tests were added for the gift-purchase Cloud Function, wallet reconciliation, or either SSO path, despite all being new, money-and-auth-adjacent code.</td></tr>
+            <tr><td>Duplicate/overlapping video-pipeline implementations</td><td class="status-col"><span class="status open">Open</span></td><td><code class="chip">lib/core/video/</code> and <code class="chip">lib/core/video_feed/</code> both still present, unreferenced.</td></tr>
+            <tr><td>Avatar upload is a raw URL text field, not real upload</td><td class="status-col"><span class="status open">Open</span></td><td><code class="chip">edit_creator_profile_screen.dart</code> still reads "Temporary — Storage upload comes in a future phase."</td></tr>
+            <tr><td>Chat send failures aren't caught / surfaced</td><td class="status-col"><span class="status open">Open</span></td><td><code class="chip">chat_room_screen.dart</code> has a <code class="chip">try/finally</code> around send (resets the loading flag) but still no <code class="chip">catch</code> — a failed send gives the user no feedback.</td></tr>
+            <tr><td>Logout doesn't clear cross-account cached state</td><td class="status-col"><span class="status open">Open</span></td><td>See §2.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="medium">
+      <div class="section-head"><span class="section-num">05</span><h2>Medium findings — 1 fixed, 13 open</h2></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th style="width:46%">Finding</th><th style="width:12%">Status</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td>Any signed-in user could edit another user's live-session counters</td><td class="status-col"><span class="status fixed">Fixed</span></td><td><code class="chip">firestore.rules</code>: <code class="chip">giftTotal</code> removed from the client-editable diff on <code class="chip">liveSessions</code>; only <code class="chip">viewerCount</code> remains, and only <code class="chip">validatedGiftPurchase</code> (Admin SDK) moves <code class="chip">giftTotal</code> now.</td></tr>
+            <tr><td>No mute/unmute on video feed</td><td class="status-col"><span class="status open">Open</span></td><td>—</td></tr>
+            <tr><td>No double-tap-to-like / long-press</td><td class="status-col"><span class="status open">Open</span></td><td>—</td></tr>
+            <tr><td>Feed hard-capped at 100 items, no pagination</td><td class="status-col"><span class="status open">Open</span></td><td>—</td></tr>
+            <tr><td>Notification handling while backgrounded is a bare stub</td><td class="status-col"><span class="status open">Open</span></td><td>—</td></tr>
+            <tr><td>Typing indicators are backend-only</td><td class="status-col"><span class="status open">Open</span></td><td>—</td></tr>
+            <tr><td>Chat has no pagination or media messages</td><td class="status-col"><span class="status open">Open</span></td><td>—</td></tr>
+            <tr><td>Video upload: no camera capture, no cancel/retry, no connectivity pre-check</td><td class="status-col"><span class="status open">Open</span></td><td>—</td></tr>
+            <tr><td>"AI Invite Ranker" is a hardcoded heuristic, not AI</td><td class="status-col"><span class="status open">Open</span></td><td>—</td></tr>
+            <tr><td>Gift-sending drops the user's tier selection before web handoff</td><td class="status-col"><span class="status open">Open</span></td><td>This refers to <code class="chip">gift_creator_screen.dart</code> (the "tip a creator" web-handoff flow) — a different screen from the live-stream gift panel that <em>was</em> fixed this cycle. Not the same gap.</td></tr>
+            <tr><td>Create hub's "Multistream Setup"/"Live Commerce Setup" are mislabeled duplicates of Go Live</td><td class="status-col"><span class="status open">Open</span></td><td>—</td></tr>
+            <tr><td><code class="chip">livekit_client</code> pinned to a single-patch-version range</td><td class="status-col"><span class="status open">Open</span></td><td>Still <code class="chip">">=2.3.0 &lt;2.3.2"</code> in <code class="chip">pubspec.yaml</code>.</td></tr>
+            <tr><td>Analytics/telemetry scattered, no shared taxonomy</td><td class="status-col"><span class="status open">Open</span></td><td>—</td></tr>
+            <tr><td>Video controller leak on fast-scroll</td><td class="status-col"><span class="status open">Open</span></td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="low">
+      <div class="section-head"><span class="section-num">06</span><h2>Low findings — 1 fixed, 3 open</h2></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th style="width:46%">Finding</th><th style="width:12%">Status</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td>No confirm-password field on signup</td><td class="status-col"><span class="status fixed">Fixed</span></td><td>See §2.</td></tr>
+            <tr><td>Creator Analytics shows only 3 static numbers, no charts</td><td class="status-col"><span class="status open">Open</span></td><td>—</td></tr>
+            <tr><td>"Coming soon" stubs indistinguishable from working entries</td><td class="status-col"><span class="status open">Open</span></td><td>Login's "Forgot password?" and both SSO tiles are new instances of this same pattern — they look identical to fully working buttons.</td></tr>
+            <tr><td>Dead code: <code class="chip">ChatSdkAdapter</code>, <code class="chip">MessageBubble</code>, <code class="chip">MonetisationService</code>, <code class="chip">WalletLauncherService</code>, etc.</td><td class="status-col"><span class="status open">Open</span></td><td>None of the originally-listed dead code was removed. One additional dead method (<code class="chip">LiveGiftRepository.sendGift</code>) was retired as a side effect of the gift-flow migration — not in the original list, a bonus cleanup.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="new">
+      <div class="section-head"><span class="section-num">07</span><h2>Work done beyond the original review</h2></div>
+      <p class="section-dek">Not findings from the audit — new capabilities and one bug the audit didn't have visibility into, since it never inspected the Cloud Functions backend.</p>
+      <ul>
+        <li><strong>Google + Apple SSO</strong>, described fully in §2.</li>
+        <li><strong>A real backend bug, found and fixed:</strong> <code class="chip">mpesaPayoutTrigger.ts</code> was reading and writing a <code class="chip">wallets/{uid}</code> collection that nothing else in the codebase ever populated — every real balance lives in <code class="chip">walletBalances/{uid}</code>. Every payout request was silently failing "insufficient balance" regardless of a creator's actual balance. Repointed to the correct collection.</li>
+        <li><strong>Login/signup visual redesign:</strong> both screens moved off a boxed card onto a full-bleed themed background, added a shared brand mark, an "or continue with" divider, and the SSO tile row — a UX pass, not a functional fix.</li>
+        <li><strong>Display name split into first/last name</strong> on signup.</li>
+      </ul>
+    </section>
+
+    <section id="next">
+      <div class="section-head"><span class="section-num">08</span><h2>What to prioritize next</h2></div>
+      <p class="section-dek">In order — each depends less on the ones after it than the reverse.</p>
+      <ol style="padding-left: 20px;">
+        <li><strong>Crash reporting.</strong> Nothing else on this list will be observable in production without it, and it's the smallest remaining Critical item.</li>
+        <li><strong>Fix the Analytics route crash.</strong> A one-line fix (<code class="chip">profile_hub_screen.dart:100</code>) sitting on one of five primary navigation destinations.</li>
+        <li><strong>Password reset.</strong> The button already exists and is discoverable — it just doesn't do anything yet. This is now the most visible remaining gap in the auth flow this cycle's work built out.</li>
+        <li><strong>Friendly auth error messages.</strong> Small, contained, and was already scoped and half-designed in the team's own 1.0A plan — never built.</li>
+        <li><strong>Environment config for hardcoded URLs.</strong> Blocks safely rotating infrastructure without an app-store release, and blocks having a real staging environment at all.</li>
+        <li><strong>Wire Search and Live Discovery into navigation.</strong> Both backends already work — this is the highest user-value-per-hour item left on the entire original list.</li>
+        <li><strong>Add test coverage for what just shipped.</strong> The gift-purchase Cloud Function, wallet reconciliation flow, and both SSO paths are new, money- and auth-adjacent, and currently have zero automated coverage.</li>
+      </ol>
+    </section>
+
+  </main>
+</div>
+
+<footer class="end">
+  YohPal Live — Implementation Status Report, verified against <code class="mono">HEAD</code> on 2026-07-10 via fresh re-grep of every finding in the original Production Readiness Review, not from memory of prior work in this thread. Re-verify file:line citations against current <code class="mono">HEAD</code> before acting on them if further commits have landed since.
+</footer>
+
+<script>
+  (function () {
+    var btn = document.getElementById('dlBtn');
+    if (!btn) return;
+    // No PDF-generation library is reachable under this page's CSP, so this
+    // uses the browser's own print pipeline — window.print() with the
+    // @media print rules above — which every browser can turn into a real
+    // PDF via its native "Save as PDF" destination.
+    btn.addEventListener('click', function () {
+      window.print();
+    });
+  })();
+</script>
+</body>
+</html>

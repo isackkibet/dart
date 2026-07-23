@@ -1,0 +1,462 @@
+<title>YohPal Phase 13 — Shared Platform Foundation</title>
+<style>
+  :root {
+    --gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);
+    --ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;
+    --paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;
+    --pass:#1b5e20;--pass-bg:#e8f5e9;
+    --info:#0d47a1;--info-bg:#e8eef7;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+    --radius:2px;--doc-max:900px;
+  }
+  @media(prefers-color-scheme:dark){:root{
+    --gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);
+    --ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;
+    --paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;
+    --pass:#4caf50;--pass-bg:#1b2e1c;--info:#90caf9;--info-bg:#0d1e33;
+  }}
+  :root[data-theme="light"]{--gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);--ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;--paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;--pass:#1b5e20;--pass-bg:#e8f5e9;--info:#0d47a1;--info-bg:#e8eef7;}
+  :root[data-theme="dark"]{--gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);--ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;--paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;--pass:#4caf50;--pass-bg:#1b2e1c;--info:#90caf9;--info-bg:#0d1e33;}
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif;font-size:13.5px;line-height:1.65;background:var(--paper);color:var(--ink);padding-bottom:5rem;}
+
+  .print-bar{position:sticky;top:0;z-index:100;background:var(--paper-2);border-bottom:1px solid var(--paper-3);padding:.45rem 1.5rem;display:flex;align-items:center;gap:1rem;font-size:11px;color:var(--ink-3);}
+  .print-bar .brand{font-weight:700;color:var(--gold-text);letter-spacing:.06em;font-size:12px;}
+  .print-bar .spacer{flex:1;}
+  .print-bar .badge{font-weight:700;font-size:10px;letter-spacing:.08em;padding:.2rem .65rem;border-radius:var(--radius);background:var(--gold-dim);color:var(--gold-text);border:1px solid var(--gold);text-transform:uppercase;}
+  .dl-btn{background:var(--gold);color:#fff;border:none;padding:.3rem 1rem;border-radius:var(--radius);font-size:11px;font-weight:700;letter-spacing:.06em;cursor:pointer;text-transform:uppercase;}
+  .dl-btn:hover{background:var(--gold-2);}
+
+  .doc{max-width:var(--doc-max);margin:0 auto;padding:2.5rem 1.5rem 0;}
+
+  .masthead{border-top:3px solid var(--gold);border-bottom:3px solid var(--gold);padding:1.1rem 0 1rem;margin-bottom:1.75rem;position:relative;}
+  .masthead::after{content:'';display:block;height:1px;background:var(--gold);position:absolute;bottom:5px;left:0;right:0;opacity:.35;}
+  .masthead .eyebrow{font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.3rem;}
+  .masthead h1{font-family:Georgia,'Times New Roman',serif;font-size:1.6rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.65rem;text-wrap:balance;}
+  .meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.25rem .75rem;font-size:11.5px;color:var(--ink-3);}
+  .meta-grid .m{display:flex;gap:.3rem;}
+  .meta-grid strong{color:var(--ink-2);}
+
+  .section{margin-bottom:1.75rem;}
+  .sh{font-family:Georgia,'Times New Roman',serif;font-size:.95rem;font-weight:700;color:var(--ink);padding-bottom:.35rem;border-bottom:1px solid var(--gold);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem;}
+  .sh .sn{background:var(--gold);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:system-ui,sans-serif;}
+
+  /* ── File tree ── */
+  .tree{font-family:var(--mono);font-size:12px;background:var(--paper-2);border:1px solid var(--paper-3);border-radius:var(--radius);padding:1rem 1.25rem;color:var(--ink-2);line-height:1.9;margin-bottom:.75rem;overflow-x:auto;white-space:pre;}
+  .tree .dir{color:var(--gold-text);font-weight:600;}
+  .tree .cmt{color:var(--ink-3);}
+
+  /* ── Code block ── */
+  .code-block{font-family:var(--mono);font-size:11.5px;background:var(--paper-2);border-left:3px solid var(--gold);padding:.75rem 1rem;border-radius:0 var(--radius) var(--radius) 0;color:var(--ink-2);line-height:1.65;overflow-x:auto;white-space:pre;margin-bottom:.75rem;}
+  .code-block .kw{color:var(--info);font-weight:600;}
+  .code-block .cls{color:var(--gold-text);font-weight:600;}
+  .code-block .cmt{color:var(--ink-3);font-style:italic;}
+  .code-block .str{color:var(--pass);}
+
+  /* ── Contract grid ── */
+  .contract-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem;}
+  .contract-card{border:1px solid var(--paper-3);border-radius:var(--radius);background:var(--paper-2);overflow:hidden;}
+  .cc-header{padding:.5rem .85rem;background:var(--gold-dim);border-bottom:1px solid var(--paper-3);}
+  .cc-header .cc-num{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-text);}
+  .cc-header .cc-name{font-size:13.5px;font-weight:700;color:var(--ink);font-family:Georgia,serif;}
+  .cc-header .cc-file{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:.1rem;}
+  .cc-body{padding:.5rem .85rem .75rem;}
+  .cc-body pre{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);line-height:1.6;white-space:pre-wrap;overflow-x:auto;}
+  .cc-body pre .kw{color:var(--info);font-weight:600;}
+  .cc-body pre .cls{color:var(--gold-text);font-weight:600;}
+  .cc-body pre .cmt{color:var(--ink-3);font-style:italic;}
+
+  /* ── Tables ── */
+  .ev{width:100%;border-collapse:collapse;margin-bottom:.75rem;}
+  .ev th{background:var(--paper-2);font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:.4rem .75rem;text-align:left;border:1px solid var(--paper-3);}
+  .ev td{padding:.5rem .75rem;border:1px solid var(--paper-3);vertical-align:top;font-size:12.5px;color:var(--ink-2);}
+  .ev td:first-child{color:var(--ink);font-weight:500;background:var(--paper-2);}
+  .ev td.mono{font-family:var(--mono);font-size:11px;color:var(--ink-3);}
+  .ev td.center{text-align:center;}
+
+  /* ── Chips ── */
+  .chip{display:inline-flex;align-items:center;padding:.15rem .5rem;border-radius:var(--radius);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;}
+  .chip.pass{background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass);}
+  .chip.gold{background:var(--gold-dim);color:var(--gold-text);border:1px solid var(--gold);}
+  .chip.info{background:var(--info-bg);color:var(--info);border:1px solid var(--info);}
+
+  /* ── Rule box ── */
+  .rule-box{background:var(--paper-2);border:1px solid var(--paper-3);border-left:4px solid var(--gold);border-radius:0 var(--radius) var(--radius) 0;padding:.85rem 1rem;margin-bottom:1.5rem;}
+  .rule-box h3{font-size:11px;font-weight:700;color:var(--gold-text);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.5rem;}
+  .rule-box ul{list-style:none;padding:0;}
+  .rule-box ul li{font-size:12.5px;color:var(--ink-2);padding:.2rem 0;display:flex;gap:.5rem;align-items:flex-start;}
+  .rule-box ul li::before{content:'✕';color:#b71c1c;font-weight:700;flex-shrink:0;}
+  .rule-box ul li.ok::before{content:'✓';color:var(--pass);}
+
+  /* ── Next phase box ── */
+  .next-phase{border:2px solid var(--gold);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;background:var(--gold-dim);}
+  .next-phase .np-eyebrow{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.3rem;}
+  .next-phase h2{font-family:Georgia,'Times New Roman',serif;font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.85rem;}
+  .scope-list{list-style:none;padding:0;margin-bottom:.85rem;}
+  .scope-list li{font-size:12.5px;color:var(--ink-2);padding:.3rem 0;border-bottom:1px solid var(--paper-3);display:flex;gap:.6rem;}
+  .scope-list li:last-child{border-bottom:none;}
+  .scope-list li::before{content:'→';color:var(--gold);font-weight:700;flex-shrink:0;}
+  .success-box{background:var(--pass-bg);border:1px solid var(--pass);border-left:4px solid var(--pass);border-radius:0 var(--radius) var(--radius) 0;padding:.75rem 1rem;}
+  .success-box h3{font-size:10px;font-weight:700;color:var(--pass);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.35rem;}
+  .success-box ul{list-style:none;padding:0;}
+  .success-box ul li{font-size:12px;color:var(--ink-2);padding:.15rem 0;display:flex;gap:.5rem;}
+  .success-box ul li::before{content:'✓';color:var(--pass);font-weight:700;}
+
+  .flag-grid{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem;}
+  .flag-chip{font-family:var(--mono);font-size:11px;background:var(--paper-2);border:1px solid var(--paper-3);border-radius:var(--radius);padding:.2rem .6rem;color:var(--ink-2);}
+
+  .footer-rule{border:none;border-top:2px solid var(--gold);margin:2rem 0 0;opacity:.5;}
+
+  @media(max-width:640px){
+    .meta-grid{grid-template-columns:1fr 1fr;}
+    .contract-grid{grid-template-columns:1fr;}
+  }
+  @media print{
+    .print-bar{display:none;}
+    body{font-size:12px;padding-bottom:0;}
+    .doc{padding:1rem .75rem 0;}
+    .masthead h1{font-size:1.3rem;}
+    .section{break-inside:avoid;}
+    @page{margin:1.5cm;}
+  }
+</style>
+
+<div class="print-bar">
+  <span class="brand">YohPal Platform</span>
+  <span class="badge">Phase 13 — Shared Platform Foundation</span>
+  <span class="spacer"></span>
+  <button class="dl-btn" onclick="window.print()">Download PDF</button>
+</div>
+
+<div class="doc">
+
+  <div class="masthead">
+    <div class="eyebrow">Platform Engineering — Service Contract Specifications</div>
+    <h1>YohPal Platform Phase 13 — Shared Platform Foundation</h1>
+    <div class="meta-grid">
+      <div class="m"><strong>Version:</strong> 1.0</div>
+      <div class="m"><strong>Date:</strong> 2026-07-08</div>
+      <div class="m"><strong>Follows:</strong> Phase 12 Convergence Architecture</div>
+      <div class="m"><strong>Delivers:</strong> lib/platform/ service contracts</div>
+      <div class="m"><strong>Location:</strong> apps/mobile_flutter/lib/platform/</div>
+      <div class="m"><strong>Next:</strong> Phase 14 — Implementation &amp; Migration</div>
+    </div>
+  </div>
+
+  <!-- 1. Folder Structure -->
+  <div class="section">
+    <div class="sh"><span class="sn">1</span>Platform Layer — Folder Structure</div>
+    <div class="tree"><span class="dir">lib/platform/</span>
+├── <span class="dir">identity/</span>
+│   ├── yohpal_identity.dart              <span class="cmt"># YohPalIdentity data class</span>
+│   └── yohpal_identity_service.dart      <span class="cmt"># abstract service contract</span>
+├── <span class="dir">wallet/</span>
+│   └── yohpal_wallet_service.dart        <span class="cmt"># abstract wallet contract</span>
+├── <span class="dir">notifications/</span>
+│   └── yohpal_notification_service.dart  <span class="cmt"># push + in-app contract</span>
+├── <span class="dir">search/</span>
+│   └── yohpal_search_service.dart        <span class="cmt"># YohPalSearchResult + abstract contract</span>
+├── <span class="dir">brain/</span>
+│   └── yohpal_brain_gateway.dart         <span class="cmt"># AI gateway — all modules route here</span>
+├── <span class="dir">analytics/</span>
+│   └── yohpal_analytics_service.dart     <span class="cmt"># track() + screenView()</span>
+├── <span class="dir">routing/</span>
+│   └── yohpal_routes.dart                <span class="cmt"># cross-module route constants</span>
+├── <span class="dir">deep_links/</span>
+│   └── yohpal_deep_link_service.dart     <span class="cmt"># yohpal:// URI scheme</span>
+├── <span class="dir">design/</span>                               <span class="cmt"># Phase 14: shared design tokens</span>
+└── platform_registry.dart                <span class="cmt"># YohPalPlatformRegistry — single entry point</span></div>
+  </div>
+
+  <!-- 2. Platform Registry -->
+  <div class="section">
+    <div class="sh"><span class="sn">2</span>Platform Registry</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.65rem">The registry is the single entry point for all platform capabilities. Modules receive it via Provider and access shared services exclusively through it.</p>
+    <div class="code-block"><span class="cmt">// lib/platform/platform_registry.dart</span>
+<span class="cmt">// Usage in a module:</span>
+<span class="cmt">//   final platform  = context.read&lt;YohPalPlatformRegistry&gt;();</span>
+<span class="cmt">//   final identity  = await platform.identity.getCurrentIdentity();</span>
+<span class="cmt">//   final balance   = await platform.wallet.getBalance(identity!.uid);</span>
+
+<span class="kw">class</span> <span class="cls">YohPalPlatformRegistry</span> {
+  <span class="kw">final</span> <span class="cls">YohPalIdentityService</span>     identity;
+  <span class="kw">final</span> <span class="cls">YohPalWalletService</span>       wallet;
+  <span class="kw">final</span> <span class="cls">YohPalNotificationService</span> notifications;
+  <span class="kw">final</span> <span class="cls">YohPalSearchService</span>       search;
+  <span class="kw">final</span> <span class="cls">YohPalBrainGateway</span>        brain;
+  <span class="kw">final</span> <span class="cls">YohPalAnalyticsService</span>    analytics;
+  <span class="kw">final</span> <span class="cls">YohPalDeepLinkService</span>     deepLinks;
+}</div>
+  </div>
+
+  <!-- 3–9. Service Contracts -->
+  <div class="section">
+    <div class="sh"><span class="sn">3</span>Service Contract Specifications</div>
+
+    <div class="contract-grid">
+
+      <div class="contract-card">
+        <div class="cc-header">
+          <div class="cc-num">Contract 1</div>
+          <div class="cc-name">Identity</div>
+          <div class="cc-file">platform/identity/yohpal_identity_service.dart</div>
+        </div>
+        <div class="cc-body"><pre><span class="kw">class</span> <span class="cls">YohPalIdentity</span> {
+  <span class="kw">final</span> <span class="cls">String</span>  uid, email, displayName, role;
+  <span class="kw">final</span> <span class="cls">bool</span>    verified;
+  <span class="kw">final</span> <span class="cls">String</span>? creatorId, businessId;
+}
+
+<span class="kw">abstract class</span> <span class="cls">YohPalIdentityService</span> {
+  <span class="cls">Stream</span>&lt;<span class="cls">YohPalIdentity</span>?&gt; watchCurrentIdentity();
+  <span class="cls">Future</span>&lt;<span class="cls">YohPalIdentity</span>?&gt; getCurrentIdentity();
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; signOut();
+  <span class="cls">Future</span>&lt;<span class="kw">bool</span>&gt; hasRole(<span class="cls">String</span> role);
+}</pre></div>
+      </div>
+
+      <div class="contract-card">
+        <div class="cc-header">
+          <div class="cc-num">Contract 2</div>
+          <div class="cc-name">Wallet</div>
+          <div class="cc-file">platform/wallet/yohpal_wallet_service.dart</div>
+        </div>
+        <div class="cc-body"><pre><span class="kw">abstract class</span> <span class="cls">YohPalWalletService</span> {
+  <span class="cls">Future</span>&lt;<span class="kw">num</span>&gt; getBalance(<span class="cls">String</span> uid);
+
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; credit({
+    required <span class="cls">String</span> uid,
+    required <span class="kw">num</span>    amount,
+    required <span class="cls">String</span> reason,
+    required <span class="cls">String</span> referenceId,
+  });
+
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; debit({...});
+
+  <span class="cls">Future</span>&lt;<span class="cls">List</span>&lt;<span class="cls">Map</span>&lt;<span class="cls">String</span>, <span class="kw">dynamic</span>&gt;&gt;&gt;
+      getTransactions(<span class="cls">String</span> uid);
+}</pre></div>
+      </div>
+
+      <div class="contract-card">
+        <div class="cc-header">
+          <div class="cc-num">Contract 3</div>
+          <div class="cc-name">Notification Hub</div>
+          <div class="cc-file">platform/notifications/yohpal_notification_service.dart</div>
+        </div>
+        <div class="cc-body"><pre><span class="kw">abstract class</span> <span class="cls">YohPalNotificationService</span> {
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; sendInApp({
+    required <span class="cls">String</span>              uid,
+    required <span class="cls">String</span>              title,
+    required <span class="cls">String</span>              body,
+    <span class="cls">Map</span>&lt;<span class="cls">String</span>, <span class="kw">dynamic</span>&gt;?     data,
+  });
+
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; sendPush({
+    required <span class="cls">String</span>              uid,
+    required <span class="cls">String</span>              title,
+    required <span class="cls">String</span>              body,
+    <span class="cls">Map</span>&lt;<span class="cls">String</span>, <span class="kw">dynamic</span>&gt;?     data,
+  });
+}</pre></div>
+      </div>
+
+      <div class="contract-card">
+        <div class="cc-header">
+          <div class="cc-num">Contract 4</div>
+          <div class="cc-name">Search</div>
+          <div class="cc-file">platform/search/yohpal_search_service.dart</div>
+        </div>
+        <div class="cc-body"><pre><span class="kw">class</span> <span class="cls">YohPalSearchResult</span> {
+  <span class="kw">final</span> <span class="cls">String</span> id, type, title, subtitle, route;
+  <span class="cmt">// type: 'creator'|'job'|'product'|'video'|'stream'</span>
+  <span class="cmt">// route: deep link e.g. yohpal://live/creator/123</span>
+}
+
+<span class="kw">abstract class</span> <span class="cls">YohPalSearchService</span> {
+  <span class="cls">Future</span>&lt;<span class="cls">List</span>&lt;<span class="cls">YohPalSearchResult</span>&gt;&gt; search(<span class="cls">String</span> q);
+}</pre></div>
+      </div>
+
+      <div class="contract-card">
+        <div class="cc-header">
+          <div class="cc-num">Contract 5</div>
+          <div class="cc-name">Brain — AI Gateway</div>
+          <div class="cc-file">platform/brain/yohpal_brain_gateway.dart</div>
+        </div>
+        <div class="cc-body"><pre><span class="cmt">// No module calls AI providers directly.
+// All AI requests route through this gateway.</span>
+<span class="kw">abstract class</span> <span class="cls">YohPalBrainGateway</span> {
+  <span class="cls">Future</span>&lt;<span class="cls">Map</span>&lt;<span class="cls">String</span>, <span class="kw">dynamic</span>&gt;&gt; execute({
+    required <span class="cls">String</span>              agent,
+    required <span class="cls">String</span>              task,
+    required <span class="cls">Map</span>&lt;<span class="cls">String</span>, <span class="kw">dynamic</span>&gt; input,
+    <span class="cls">String</span>?                      userId,
+    <span class="cls">String</span>?                      module,
+  });
+}</pre></div>
+      </div>
+
+      <div class="contract-card">
+        <div class="cc-header">
+          <div class="cc-num">Contract 6</div>
+          <div class="cc-name">Analytics</div>
+          <div class="cc-file">platform/analytics/yohpal_analytics_service.dart</div>
+        </div>
+        <div class="cc-body"><pre><span class="kw">abstract class</span> <span class="cls">YohPalAnalyticsService</span> {
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; track({
+    required <span class="cls">String</span>              event,
+    required <span class="cls">String</span>              module,
+    <span class="cls">Map</span>&lt;<span class="cls">String</span>, <span class="kw">dynamic</span>&gt;?     properties,
+  });
+
+  <span class="cls">Future</span>&lt;<span class="kw">void</span>&gt; screenView({
+    required <span class="cls">String</span> screen,
+    required <span class="cls">String</span> module,
+  });
+}</pre></div>
+      </div>
+
+      <div class="contract-card">
+        <div class="cc-header">
+          <div class="cc-num">Contract 7</div>
+          <div class="cc-name">Deep Links</div>
+          <div class="cc-file">platform/deep_links/yohpal_deep_link_service.dart</div>
+        </div>
+        <div class="cc-body"><pre><span class="kw">class</span> <span class="cls">YohPalDeepLink</span> {
+  <span class="kw">final</span> <span class="cls">String</span> module, entity, id;
+}
+<span class="cmt">// yohpal://live/creator/123
+// yohpal://jobs/job/987
+// yohpal://market/product/44
+// yohpal://wallet
+// yohpal://ycios/project/55</span>
+
+<span class="kw">abstract class</span> <span class="cls">YohPalDeepLinkService</span> {
+  <span class="cls">YohPalDeepLink</span>? parse(<span class="cls">String</span> uri);
+  <span class="cls">String</span> build({
+    required <span class="cls">String</span> module,
+    required <span class="cls">String</span> entity,
+    required <span class="cls">String</span> id,
+  });
+}</pre></div>
+      </div>
+
+      <div class="contract-card">
+        <div class="cc-header">
+          <div class="cc-num">Contract 8</div>
+          <div class="cc-name">Routes</div>
+          <div class="cc-file">platform/routing/yohpal_routes.dart</div>
+        </div>
+        <div class="cc-body"><pre><span class="kw">class</span> <span class="cls">YohPalRoutes</span> {
+  <span class="kw">static const</span> live          = <span class="str">'/live'</span>;
+  <span class="kw">static const</span> hustle        = <span class="str">'/hustle'</span>;
+  <span class="kw">static const</span> jobs          = <span class="str">'/jobs'</span>;
+  <span class="kw">static const</span> market        = <span class="str">'/market'</span>;
+  <span class="kw">static const</span> wallet        = <span class="str">'/wallet'</span>;
+  <span class="kw">static const</span> ycios         = <span class="str">'/ycios'</span>;
+  <span class="kw">static const</span> brain         = <span class="str">'/brain'</span>;
+  <span class="kw">static const</span> notifications = <span class="str">'/notifications'</span>;
+  <span class="kw">static const</span> search        = <span class="str">'/search'</span>;
+}</pre></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 10. Module Integration Rule -->
+  <div class="section">
+    <div class="sh"><span class="sn">4</span>Module Integration Rule</div>
+    <div class="rule-box">
+      <h3>Prohibited — duplicate platform services</h3>
+      <ul>
+        <li>LiveWallet · HustleWallet · JobsWallet · MarketWallet</li>
+        <li>LiveAI · JobsAI · HustleAI · YciosAI</li>
+        <li>LiveNotifications · HustleNotifications</li>
+        <li>Module-local authentication logic</li>
+      </ul>
+    </div>
+    <div class="rule-box" style="border-left-color:var(--pass)">
+      <h3 style="color:var(--pass)">Required — one platform, one service each</h3>
+      <ul>
+        <li class="ok">One <strong>YohPalIdentityService</strong> — SSO across Live, Jobs, Hustle, Market, YCIOS</li>
+        <li class="ok">One <strong>YohPalWalletService</strong> — single ledger, single reconciliation</li>
+        <li class="ok">One <strong>YohPalBrainGateway</strong> — all AI calls route here</li>
+        <li class="ok">One <strong>YohPalSearchService</strong> — creators, jobs, products, videos</li>
+        <li class="ok">One <strong>YohPalNotificationService</strong> — push &amp; in-app hub</li>
+        <li class="ok">One <strong>YohPalAnalyticsService</strong> — unified event schema</li>
+        <li class="ok">One <strong>YohPalDeepLinkService</strong> — yohpal:// scheme</li>
+      </ul>
+    </div>
+    <div class="code-block"><span class="cmt">// Every module accesses shared services this way — no exceptions</span>
+<span class="kw">final</span> platform  = context.read&lt;<span class="cls">YohPalPlatformRegistry</span>&gt;();
+<span class="kw">final</span> identity  = platform.identity;
+<span class="kw">final</span> wallet    = platform.wallet;
+<span class="kw">final</span> brain     = platform.brain;
+<span class="kw">final</span> search    = platform.search;
+<span class="kw">final</span> analytics = platform.analytics;</div>
+  </div>
+
+  <!-- 11. Validation Checklist -->
+  <div class="section">
+    <div class="sh"><span class="sn">5</span>Convergence Validation Checklist</div>
+    <table class="ev">
+      <thead><tr><th>Area</th><th>Validation Requirement</th><th class="center">Phase 14 Target</th></tr></thead>
+      <tbody>
+        <tr><td>Identity</td><td>Live, Jobs, Hustle, Market, YCIOS all authenticate via shared YohPalIdentityService</td><td class="center"><span class="chip gold">Required</span></td></tr>
+        <tr><td>Wallet</td><td>All earnings and payments route through shared YohPalWalletService ledger</td><td class="center"><span class="chip gold">Required</span></td></tr>
+        <tr><td>AI (Brain)</td><td>All AI calls route through YohPalBrainGateway — zero direct provider calls in modules</td><td class="center"><span class="chip gold">Required</span></td></tr>
+        <tr><td>Search</td><td>Cross-module search contract used by all modules — one unified index</td><td class="center"><span class="chip gold">Required</span></td></tr>
+        <tr><td>Notifications</td><td>All push &amp; in-app alerts routed through YohPalNotificationService</td><td class="center"><span class="chip gold">Required</span></td></tr>
+        <tr><td>Routing</td><td>YohPalRoutes constants used in place of hard-coded strings across modules</td><td class="center"><span class="chip gold">Required</span></td></tr>
+        <tr><td>Deep Links</td><td>yohpal:// scheme parses and navigates correctly across all modules</td><td class="center"><span class="chip gold">Required</span></td></tr>
+        <tr><td>Design System</td><td>Gold/black design tokens applied universally — no module-local theme overrides</td><td class="center"><span class="chip gold">Required</span></td></tr>
+        <tr><td>Analytics</td><td>All modules report events through YohPalAnalyticsService — one unified schema</td><td class="center"><span class="chip gold">Required</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 12. Developer Deliverables -->
+  <div class="section">
+    <div class="sh"><span class="sn">6</span>Developer Deliverables</div>
+    <table class="ev">
+      <thead><tr><th>Deliverable</th><th>Description</th><th class="center">Status</th></tr></thead>
+      <tbody>
+        <tr><td>Platform Architecture Blueprint</td><td>Phase 12 document — full layer diagram, service list, Before/After</td><td class="center"><span class="chip pass">Done</span></td></tr>
+        <tr><td>Service Contract Specifications</td><td>This document — all 8 abstract interfaces with full signatures</td><td class="center"><span class="chip pass">Done</span></td></tr>
+        <tr><td>lib/platform/ source files</td><td>Dart abstract classes created in apps/mobile_flutter/lib/platform/</td><td class="center"><span class="chip pass">Done</span></td></tr>
+        <tr><td>Integration Guide</td><td>How each module consumes YohPalPlatformRegistry</td><td class="center"><span class="chip info">Phase 14</span></td></tr>
+        <tr><td>Ecosystem Governance Manual</td><td>Rules for adding new modules, extending platform services</td><td class="center"><span class="chip info">Phase 14</span></td></tr>
+        <tr><td>Shared Platform Validation Report</td><td>Evidence that all modules consume shared services end-to-end</td><td class="center"><span class="chip info">Phase 14</span></td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:11.5px;color:var(--ink-3);margin-top:.25rem">Note: The multistreaming audit identified that some modules lacked pubspec.yaml, test/CI coverage, and handover documents. The shared platform foundation directly addresses this — modules inheriting from platform contracts are structurally consistent from the start.</p>
+  </div>
+
+  <!-- Phase 14 Next Smart Move -->
+  <div class="next-phase">
+    <div class="np-eyebrow">Next Smart Move</div>
+    <h2>YohPal Platform Phase 14 — Shared Service Implementation &amp; Module Migration</h2>
+    <ul class="scope-list">
+      <li>Implement Firebase-backed versions of all 7 platform services (Identity, Wallet, Notifications, Search, Brain, Analytics, DeepLinks)</li>
+      <li>Migrate YohPal Live first — prove the pattern in production</li>
+      <li>Then migrate Hustle, Jobs, Market, Wallet, Brain, and YCIOS</li>
+      <li>Add unit + integration tests for every shared service implementation</li>
+      <li>Produce Shared Service Migration Report — module by module evidence</li>
+    </ul>
+    <div class="success-box">
+      <h3>Success Criteria</h3>
+      <ul>
+        <li>Firebase-backed implementation exists for every platform service contract</li>
+        <li>YohPal Live fully migrated — no module-local auth, wallet, or AI</li>
+        <li>All modules migrated and validated against the convergence checklist</li>
+        <li>Test coverage for every shared service</li>
+        <li>YohPal operates as one unified platform in production</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="footer-rule">
+
+</div>

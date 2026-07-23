@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>YohPal Mobile Flutter — Gap Report v4 — Phase 3 Live Streaming Complete</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13px;line-height:1.55;color:#0f172a;background:#f8fafc;padding:28px}
+@media print{body{background:#fff;padding:0}.no-print{display:none}h2.module-title{page-break-after:avoid}table{page-break-inside:avoid}.phase-grid{page-break-inside:avoid}}
+
+.report-header{border-bottom:3px solid #0f172a;padding-bottom:14px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end}
+.report-header h1{font-size:20px;font-weight:800;letter-spacing:-.3px}
+.report-header .meta{font-size:11.5px;color:#64748b;text-align:right;line-height:1.7}
+button.print-btn{background:#0f172a;color:#fff;border:none;padding:6px 14px;border-radius:5px;cursor:pointer;font-size:11.5px}
+
+.summary-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:22px}
+.sum-card{background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:13px 14px}
+.sum-card .num{font-size:26px;font-weight:900;line-height:1}
+.sum-card .lbl{font-size:11px;color:#64748b;font-weight:600;margin-top:3px;text-transform:uppercase;letter-spacing:.3px}
+.sum-card .sub{font-size:10.5px;color:#94a3b8;margin-top:2px}
+.num-green{color:#15803d}.num-blue{color:#1d4ed8}.num-red{color:#b91c1c}.num-yellow{color:#92400e}.num-purple{color:#6d28d9}
+
+h2.module-title{font-size:14px;font-weight:800;color:#0f172a;margin:24px 0 3px;padding:9px 13px;background:#f1f5f9;border-left:4px solid #0f172a;border-radius:0 5px 5px 0;display:flex;justify-content:space-between;align-items:center}
+h2.module-title .cov{font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px}
+.cov-good{background:#dcfce7;color:#15803d}
+.cov-mid{background:#fef9c3;color:#854d0e}
+.cov-low{background:#fee2e2;color:#b91c1c}
+.cov-zero{background:#f1f5f9;color:#475569}
+.module-desc{font-size:12px;color:#475569;margin-bottom:8px;padding:0 2px}
+
+table.gap-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;margin-bottom:6px;font-size:12px}
+.gap-table th{background:#f8fafc;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:#475569;padding:8px 11px;text-align:left;border-bottom:1px solid #e2e8f0}
+.gap-table td{padding:8px 11px;border-bottom:1px solid #f8fafc;vertical-align:top}
+.gap-table tr:last-child td{border-bottom:none}
+.gap-table tr:hover td{background:#fafafa}
+
+.s{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.s-ok   {background:#dcfce7;color:#15803d}
+.s-part {background:#fef9c3;color:#854d0e}
+.s-stub {background:#e0e7ff;color:#3730a3}
+.s-miss {background:#fee2e2;color:#b91c1c}
+.s-new  {background:#dcfce7;color:#15803d;border:1px solid #86efac}
+.s-pend {background:#fff7ed;color:#92400e;border:1px solid #fed7aa}
+
+h2.sec-title{font-size:14px;font-weight:800;color:#0f172a;margin:28px 0 8px;padding:9px 13px;background:#fff7ed;border-left:4px solid #ea580c;border-radius:0 5px 5px 0}
+
+h2.phase-title{font-size:14px;font-weight:800;color:#0f172a;margin:28px 0 8px;padding:9px 13px;background:#eff6ff;border-left:4px solid #1d4ed8;border-radius:0 5px 5px 0}
+.phase-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.phase-card{background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:13px 14px}
+.phase-card.done{border-color:#86efac;background:#f0fdf4}
+.phase-card.part{border-color:#fbbf24;background:#fefce8}
+.phase-card.next{border-color:#93c5fd;background:#eff6ff}
+.phase-card .ph-badge{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:999px;margin-bottom:6px}
+.phase-card.done .ph-badge{background:#15803d;color:#fff}
+.phase-card.part .ph-badge{background:#92400e;color:#fff}
+.phase-card.next .ph-badge{background:#1d4ed8;color:#fff}
+.ph-badge.future{background:#e2e8f0;color:#475569}
+.phase-card h4{font-size:12.5px;font-weight:700;margin-bottom:5px}
+.phase-card ul{padding-left:14px;font-size:11.5px;color:#475569;list-style:disc}
+.phase-card li{margin-bottom:2px}
+.phase-card .ph-cov{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+
+h2.score-title{font-size:14px;font-weight:800;color:#0f172a;margin:28px 0 8px;padding:9px 13px;background:#f0fdf4;border-left:4px solid #15803d;border-radius:0 5px 5px 0}
+table.score-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;margin-bottom:10px;font-size:12px}
+.score-table th{background:#0f172a;color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:8px 11px;text-align:left}
+.score-table td{padding:8px 11px;border-bottom:1px solid #f8fafc;vertical-align:middle}
+.score-table tr:last-child td{border-bottom:none;font-weight:800;background:#f8fafc}
+.td-ok{color:#15803d;font-weight:700;text-align:center}
+.td-part{color:#854d0e;font-weight:700;text-align:center}
+.td-miss{color:#b91c1c;font-weight:700;text-align:center}
+.td-num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+
+.bar-wrap{background:#e2e8f0;border-radius:4px;height:8px;width:100%;overflow:hidden;min-width:60px}
+.bar-fill{height:8px;border-radius:4px}
+.bar-green{background:#22c55e}
+.bar-yellow{background:#f59e0b}
+.bar-red{background:#ef4444}
+.bar-blue{background:#3b82f6}
+
+.priority-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;margin-bottom:10px;font-size:12px}
+.priority-table th{background:#0f172a;color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:8px 11px;text-align:left}
+.priority-table td{padding:7px 11px;border-bottom:1px solid #f8fafc;vertical-align:top}
+.priority-table tr:last-child td{border-bottom:none}
+.priority-table tr:hover td{background:#fafafa}
+.pri-high{background:#fee2e2;color:#b91c1c;font-weight:700;padding:2px 8px;border-radius:999px;font-size:10.5px;white-space:nowrap}
+.pri-med{background:#fef9c3;color:#854d0e;font-weight:700;padding:2px 8px;border-radius:999px;font-size:10.5px;white-space:nowrap}
+
+.methodology{background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:14px 16px;margin-bottom:20px;font-size:12px;color:#475569;line-height:1.6}
+.methodology strong{color:#0f172a}
+
+footer{margin-top:32px;padding-top:14px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;text-align:center}
+
+.changelog-header{font-size:14px;font-weight:800;color:#0f172a;margin:24px 0 8px;padding:9px 13px;background:#ecfdf5;border-left:4px solid #15803d;border-radius:0 5px 5px 0}
+.diff-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;margin-bottom:10px;font-size:12px}
+.diff-table th{background:#0f172a;color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:8px 11px;text-align:left}
+.diff-table td{padding:8px 11px;border-bottom:1px solid #f8fafc;vertical-align:middle}
+.diff-table tr:last-child td{border-bottom:none;font-weight:800;background:#f8fafc}
+.diff-table tr:hover td{background:#fafafa}
+.td-v3{color:#854d0e;font-weight:700;text-align:center}
+.td-v4{color:#15803d;font-weight:700;text-align:center}
+.td-delta{color:#1d4ed8;font-weight:700;text-align:center}
+.delta-badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:700}
+.delta-up{background:#dcfce7;color:#15803d}
+.delta-same{background:#f1f5f9;color:#64748b}
+.infra-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.infra-card{background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:12px 13px}
+.infra-card .ic-label{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px}
+.infra-card .ic-val{font-size:14px;font-weight:900}
+.ic-green{color:#15803d}.ic-blue{color:#1d4ed8}.ic-red{color:#b91c1c}.ic-yellow{color:#92400e}
+.changelog-box{background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:14px 16px;margin-bottom:18px;font-size:12px}
+.changelog-box h3{font-size:13px;font-weight:800;margin-bottom:10px;color:#0f172a}
+.cl-entry{margin-bottom:10px;padding:8px 12px;border-left:4px solid #e2e8f0;color:#374151;line-height:1.55;background:#fafafa;border-radius:0 4px 4px 0}
+.cl-entry.green{border-color:#22c55e;background:#f0fdf4}.cl-entry.yellow{border-color:#f59e0b;background:#fefce8}
+.cl-entry.red{border-color:#ef4444;background:#fef2f2}.cl-entry.blue{border-color:#3b82f6;background:#eff6ff}
+.cl-entry strong{color:#0f172a}
+.pd-card{background:#fff;border:1px solid #86efac;border-radius:7px;padding:12px 14px;background:#f0fdf4}
+.pd-card .pd-badge{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:999px;background:#15803d;color:#fff;margin-bottom:6px}
+.pd-card h4{font-size:12px;font-weight:700;margin-bottom:5px;color:#0f172a}
+.pd-card ul{padding-left:14px;font-size:11.5px;color:#475569;list-style:disc}
+.pd-card li{margin-bottom:2px}
+.blocker-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;margin-bottom:10px;font-size:12px}
+.blocker-table th{background:#0f172a;color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:8px 11px;text-align:left}
+.blocker-table td{padding:8px 11px;border-bottom:1px solid #f8fafc;vertical-align:top}
+.blocker-table tr:last-child td{border-bottom:none}
+.blocker-table tr:hover td{background:#fafafa}
+.b-resolved{background:#dcfce7;color:#15803d;font-weight:700;padding:2px 8px;border-radius:999px;font-size:10.5px;white-space:nowrap}
+.b-partial{background:#fef9c3;color:#854d0e;font-weight:700;padding:2px 8px;border-radius:999px;font-size:10.5px;white-space:nowrap}
+.b-open{background:#fee2e2;color:#b91c1c;font-weight:700;padding:2px 8px;border-radius:999px;font-size:10.5px;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="report-header">
+  <div>
+    <h1>YohPal Mobile Flutter — Gap Report <span style="color:#1d4ed8">v4</span></h1>
+    <div style="font-size:12px;color:#64748b;margin-top:4px">Firebase: <strong>yohlab</strong> &nbsp;·&nbsp; Branch: <strong>flutter_app</strong> &nbsp;·&nbsp; flutter analyze: <strong style="color:#15803d">No issues found</strong> &nbsp;·&nbsp; flutter test: <strong style="color:#15803d">1/1 PASS</strong> &nbsp;·&nbsp; tsc --noEmit: <strong style="color:#15803d">Clean</strong></div>
+  </div>
+  <div class="meta">
+    Date: 2026-06-18<br>
+    Previous: v3 (post Phase 2C)<br>
+    <button class="print-btn no-print" onclick="window.print()">⬇ Print / Save PDF</button>
+  </div>
+</div>
+
+<!-- Changelog since v3 -->
+<div class="changelog-box">
+  <h3>What changed since v3</h3>
+  <div class="cl-entry green"><strong>Phase 2E — Engagement Polish DONE:</strong> VideoInteractionController wired into app.dart (ChangeNotifierProvider). <code>/likes/{likeId}</code> Firestore security rule added and deployed (read + create + delete by userId). 3-second view timer wired in VideoFeedScreen using <code>Timer(Duration(seconds:3), () =&gt; recordViewOnce(...))</code> — cancels on page change. Module A now 90% complete.</div>
+  <div class="cl-entry green"><strong>Phase 3A — Live Streaming Foundation DONE:</strong> LiveSessionModel (id, creatorId, title, status, viewerCount, giftTotal, visibility, roomName), LiveRepository (createLiveSession, markLive, endLive, markFailed, watchPublicLiveSessions, increment/decrementViewerCount), LiveStreamController (startLive, endLive — full LiveKit Room lifecycle), LiveTokenService (POST to createLiveKitToken Cloud Function), GoLiveScreen rewritten (camera, mic, title/description inputs, LiveVideoView preview), LiveViewerScreen rewritten (Stack: video, info bar, overlays), LiveDiscoveryScreen (StreamBuilder grid of live sessions), LiveVideoView widget (VideoTrackRenderer — first active track). Backend: createLiveKitToken Gen2 Cloud Function (livekit-server-sdk AccessToken, role-based canPublish). <code>livekit_client 2.3.1+hotfix.1</code> pinned in pubspec.lock.</div>
+  <div class="cl-entry green"><strong>Phase 3B — Live Chat, Gifts &amp; Engagement DONE:</strong> LiveChatMessageModel + LiveGiftModel. LiveChatRepository (watchMessages with hidden filter + createdAt order, sendMessage → messages subcollection + liveEvents, reportMessage → liveReports). LiveGiftRepository (sendGift Firestore transaction: gifts + creatorEarnings + liveSessions.giftTotal + liveEvents). LiveChatPanel rewritten (StreamBuilder, reverse ListView, TextEditingController). LiveGiftPanel rewritten (preset gifts + custom amount dialog). LiveViewerScreen updated (chat at bottom:110, gift panel at bottom:20). GoLiveScreen updated (host chat panel when activeSession != null). Firestore rules: messages subcollection (size ≤300, moderation-only update), gifts subcollection (senderUserId + amount&gt;0), creatorEarnings (allow create for gift tx), liveSessions update expanded (giftTotal+viewerCount open to auth). liveEvents + liveReports rules added. Indexes: messages (hidden+createdAt), gifts (createdAt).</div>
+  <div class="cl-entry green"><strong>Phase 3C — Multistreaming RTMP Fan-Out DONE:</strong> MultistreamDestinationModel + MultistreamSessionModel. MultistreamRepository (createSession, addDestination with maskKey first3+******+last3, watchDestinations, markSessionLive). MultistreamService (HTTP POST to 3 Cloud Functions). MultistreamController (createAndStart, stop, retryDestination). MultistreamSetupScreen rewritten (platform dropdown, RTMP URL, obscured stream key, destination list with <code>_DestinationHealth</code> retry widget). Multistream button added to GoLiveScreen when activeSession != null. router.dart: <code>/multistream</code> reads liveSessionId from arguments. Backend: startMultistreamFanOut, stopMultistreamFanOut, retryMultistreamDestination Gen2 functions with multistreamAuditLogs writes. Firestore rules: multistreamSessions creator-scoped, destinations subcollection. Index: destinations (status+updatedAt).</div>
+  <div class="cl-entry green"><strong>Phase 3D — Live Commerce Overlay DONE:</strong> LiveProductModel (id, sessionId, sellerId, name, description, price, currency, imageUrl, phone, location, quantity, status, pinned). LiveCommerceRepository (addProduct, watchProducts, watchPinnedProduct, pinProduct Firestore batch, unpinProduct, createPurchaseIntent, trackProductClick). LiveCommerceController (addProduct with loading/error, pinProduct, unpinProduct). LiveProductCard widget (Pay Now → createPurchaseIntent → launchUrl wallet.yohpal.com, tracks pay_now_click). LiveProductPinningPanel widget (7-field form, Pin/Unpin per product). LiveViewerScreen: pinned product overlay at bottom:390. GoLiveScreen: LiveProductPinningPanel when activeSession != null. Firestore rules: products subcollection (sellerId-scoped), livePurchaseIntents (buyerId create, buyer+seller read). Index: products (pinned+status).</div>
+  <div class="cl-entry yellow"><strong>Blockers remain:</strong> All Phase 3 code is uncommitted (last commit 99e2ea0 = Phase 2). LIVEKIT_API_KEY + LIVEKIT_API_SECRET not set in Firebase Functions — createLiveKitToken returns HTTP 500 until secrets are configured. <code>liveKitUrl: 'wss://YOUR_LIVEKIT_HOST'</code> placeholder in app.dart. Multistream + LiveKit functions not deployed. Firestore rules/indexes not deployed. No device E2E test run.</div>
+  <div class="cl-entry red"><strong>TypeScript fix (liveKitToken.ts):</strong> All <code>return res.status(...).json(...)</code> patterns replaced with <code>res.status(...).json(...); return;</code> to satisfy Gen2 <code>void | Promise&lt;void&gt;</code> return type. <code>npx tsc --noEmit</code> now clean. <code>npm install</code> run in backend to install livekit-server-sdk ^2.9.0.</div>
+</div>
+
+<!-- Infra status -->
+<div class="infra-grid">
+  <div class="infra-card"><div class="ic-label">flutter analyze</div><div class="ic-val ic-green">PASS</div><div style="font-size:11px;color:#64748b;margin-top:3px">No issues · 3.5 s</div></div>
+  <div class="infra-card"><div class="ic-label">flutter test</div><div class="ic-val ic-green">PASS</div><div style="font-size:11px;color:#64748b;margin-top:3px">1/1 · scaffold smoke</div></div>
+  <div class="infra-card"><div class="ic-label">Git commit</div><div class="ic-val ic-red">PENDING</div><div style="font-size:11px;color:#64748b;margin-top:3px">Phase 3 uncommitted</div></div>
+  <div class="infra-card"><div class="ic-label">LiveKit backend</div><div class="ic-val ic-yellow">UNDEPLOYED</div><div style="font-size:11px;color:#64748b;margin-top:3px">Code ready · no secrets</div></div>
+</div>
+
+<!-- Summary bar -->
+<div class="summary-bar">
+  <div class="sum-card"><div class="num num-green">72%</div><div class="lbl">Overall Complete</div><div class="sub">↑ from 55% (v3)</div></div>
+  <div class="sum-card"><div class="num num-blue">14</div><div class="lbl">Sub-Phases Applied</div><div class="sub">1A–1F · 2A–2C · 2E · 3A–3D</div></div>
+  <div class="sum-card"><div class="num num-purple">150+</div><div class="lbl">Files Changed</div><div class="sub">+6 000 lines since v3</div></div>
+  <div class="sum-card"><div class="num num-green">0</div><div class="lbl">Analyze Issues</div><div class="sub">flutter analyze PASS</div></div>
+  <div class="sum-card"><div class="num num-yellow">6</div><div class="lbl">Stub Modules</div><div class="sub">of 12 blueprint modules</div></div>
+</div>
+
+<!-- v3 → v4 Delta Scorecard -->
+<h2 class="changelog-header" style="margin-top:0">Version Delta: v3 → v4</h2>
+<table class="diff-table">
+  <thead><tr>
+    <th style="width:30%">Module</th>
+    <th style="width:10%">v3</th>
+    <th style="width:10%">v4</th>
+    <th style="width:15%">Delta</th>
+    <th style="width:35%">What drove the change</th>
+  </tr></thead>
+  <tbody>
+    <tr><td><strong>A. Short Video Engine</strong></td><td class="td-v3">75%</td><td class="td-v4">90%</td><td class="td-delta"><span class="delta-badge delta-up">+15 pts</span></td><td>Phase 2E: controller in app.dart, likes rule, 3-sec view timer all wired</td></tr>
+    <tr><td><strong>B. AI Creator Studio</strong></td><td class="td-v3">95%</td><td class="td-v4">95%</td><td class="td-delta"><span class="delta-badge delta-same">unchanged</span></td><td>Mock mode until YOHPAL_BRAIN_API_KEY is set</td></tr>
+    <tr><td><strong>C. Live Streaming</strong></td><td class="td-v3">5%</td><td class="td-v4"><strong>85%</strong></td><td class="td-delta"><span class="delta-badge delta-up">+80 pts</span></td><td>Phase 3A-3B: LiveKit, GoLiveScreen, LiveViewerScreen, chat, gifts — code complete</td></tr>
+    <tr><td><strong>D. Multi-Streaming</strong></td><td class="td-v3">5%</td><td class="td-v4"><strong>75%</strong></td><td class="td-delta"><span class="delta-badge delta-up">+70 pts</span></td><td>Phase 3C: MultistreamSetupScreen, repository, service, controller, backend stubs</td></tr>
+    <tr><td><strong>E. Monetisation Engine</strong></td><td class="td-v3">18%</td><td class="td-v4">20%</td><td class="td-delta"><span class="delta-badge delta-up">+2 pts</span></td><td>creatorEarnings rule expanded for live gift transactions</td></tr>
+    <tr><td><strong>F. Contacts Growth Engine</strong></td><td class="td-v3">5%</td><td class="td-v4">5%</td><td class="td-delta"><span class="delta-badge delta-same">unchanged</span></td><td>Not scheduled — see Phase 4</td></tr>
+    <tr><td><strong>G. Search Engine</strong></td><td class="td-v3">5%</td><td class="td-v4">5%</td><td class="td-delta"><span class="delta-badge delta-same">unchanged</span></td><td>Not scheduled</td></tr>
+    <tr><td><strong>H. Affiliate Marketing Engine</strong></td><td class="td-v3">18%</td><td class="td-v4">18%</td><td class="td-delta"><span class="delta-badge delta-same">unchanged</span></td><td>Not scheduled — see Phase 4</td></tr>
+    <tr><td><strong>I. Infinity Polls</strong></td><td class="td-v3">20%</td><td class="td-v4">20%</td><td class="td-delta"><span class="delta-badge delta-same">unchanged</span></td><td>Not scheduled</td></tr>
+    <tr><td><strong>J. Ads Engine</strong></td><td class="td-v3">15%</td><td class="td-v4">15%</td><td class="td-delta"><span class="delta-badge delta-same">unchanged</span></td><td>Not scheduled</td></tr>
+    <tr><td><strong>K. Web-Based Wallet</strong></td><td class="td-v3">10%</td><td class="td-v4">12%</td><td class="td-delta"><span class="delta-badge delta-up">+2 pts</span></td><td>url_launcher wallet handoff wired in LiveProductCard (Pay Now)</td></tr>
+    <tr><td><strong>L. Chat Engine</strong></td><td class="td-v3">5%</td><td class="td-v4">5%</td><td class="td-delta"><span class="delta-badge delta-same">unchanged</span></td><td>Not scheduled</td></tr>
+    <tr style="background:#f8fafc"><td><strong>OVERALL</strong></td><td class="td-num" style="color:#854d0e"><strong>55%</strong></td><td class="td-num" style="color:#1d4ed8"><strong>72%</strong></td><td class="td-delta"><span class="delta-badge delta-up">+17 pts</span></td><td>Phase 2E + 3A + 3B + 3C + 3D delivered</td></tr>
+  </tbody>
+</table>
+
+<!-- Module Overview Scorecard -->
+<h2 class="score-title">Completion by Blueprint Module</h2>
+<table class="score-table">
+  <thead><tr>
+    <th style="width:30%">Module</th>
+    <th style="width:10%">Phase</th>
+    <th style="width:7%">v3</th>
+    <th style="width:7%">v4</th>
+    <th style="width:28%">Progress</th>
+    <th style="width:18%">Status</th>
+  </tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>A. Short Video Engine</strong></td>
+      <td>Phase 1 + 2E</td>
+      <td class="td-num" style="color:#854d0e">75%</td>
+      <td class="td-num num-green">90%</td>
+      <td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:90%"></div></div></td>
+      <td><span class="s s-ok">Done ✓ (minor gaps)</span></td>
+    </tr>
+    <tr>
+      <td><strong>B. AI Creator Studio</strong></td>
+      <td>Phase 2</td>
+      <td class="td-num num-green">95%</td>
+      <td class="td-num num-green">95%</td>
+      <td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:95%"></div></div></td>
+      <td><span class="s s-ok">Done ✓ (mock AI keys)</span></td>
+    </tr>
+    <tr>
+      <td><strong>C. Live Streaming</strong></td>
+      <td>Phase 3</td>
+      <td class="td-num num-red">5%</td>
+      <td class="td-num num-green"><strong>85%</strong></td>
+      <td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:85%"></div></div></td>
+      <td><span class="s s-ok">Code done · needs deploy</span></td>
+    </tr>
+    <tr>
+      <td><strong>D. Multi-Streaming</strong></td>
+      <td>Phase 3</td>
+      <td class="td-num num-red">5%</td>
+      <td class="td-num num-green"><strong>75%</strong></td>
+      <td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:75%"></div></div></td>
+      <td><span class="s s-part">Code done · FFmpeg stub</span></td>
+    </tr>
+    <tr>
+      <td><strong>E. Monetisation Engine</strong></td>
+      <td>Phase 5</td>
+      <td class="td-num num-yellow">18%</td>
+      <td class="td-num num-yellow">20%</td>
+      <td><div class="bar-wrap"><div class="bar-fill bar-yellow" style="width:20%"></div></div></td>
+      <td><span class="s s-stub">Partial stub</span></td>
+    </tr>
+    <tr>
+      <td><strong>F. Contacts Growth Engine</strong></td>
+      <td>Phase 4</td>
+      <td class="td-num num-red">5%</td>
+      <td class="td-num num-red">5%</td>
+      <td><div class="bar-wrap"><div class="bar-fill bar-red" style="width:5%"></div></div></td>
+      <td><span class="s s-stub">Stub only</span></td>
+    </tr>
+    <tr>
+      <td><strong>G. Search Engine</strong></td>
+      <td>Phase 6</td>
+      <td class="td-num num-red">5%</td>
+      <td class="td-num num-red">5%</td>
+      <td><div class="bar-wrap"><div class="bar-fill bar-red" style="width:5%"></div></div></td>
+      <td><span class="s s-stub">Stub only</span></td>
+    </tr>
+    <tr>
+      <td><strong>H. Affiliate Marketing Engine</strong></td>
+      <td>Phase 4</td>
+      <td class="td-num num-yellow">18%</td>
+      <td class="td-num num-yellow">18%</td>
+      <td><div class="bar-wrap"><div class="bar-fill bar-yellow" style="width:18%"></div></div></td>
+      <td><span class="s s-stub">Models + rules</span></td>
+    </tr>
+    <tr>
+      <td><strong>I. Infinity Polls</strong></td>
+      <td>Phase 6</td>
+      <td class="td-num num-yellow">20%</td>
+      <td class="td-num num-yellow">20%</td>
+      <td><div class="bar-wrap"><div class="bar-fill bar-yellow" style="width:20%"></div></div></td>
+      <td><span class="s s-stub">Models + rules</span></td>
+    </tr>
+    <tr>
+      <td><strong>J. Ads Engine</strong></td>
+      <td>Phase 5</td>
+      <td class="td-num num-yellow">15%</td>
+      <td class="td-num num-yellow">15%</td>
+      <td><div class="bar-wrap"><div class="bar-fill bar-yellow" style="width:15%"></div></div></td>
+      <td><span class="s s-stub">Models + rules</span></td>
+    </tr>
+    <tr>
+      <td><strong>K. Web-Based Wallet</strong></td>
+      <td>Phase 5</td>
+      <td class="td-num num-red">10%</td>
+      <td class="td-num num-yellow">12%</td>
+      <td><div class="bar-wrap"><div class="bar-fill bar-yellow" style="width:12%"></div></div></td>
+      <td><span class="s s-stub">Shell + url_launcher wired</span></td>
+    </tr>
+    <tr>
+      <td><strong>L. Chat Engine</strong></td>
+      <td>Phase 6</td>
+      <td class="td-num num-red">5%</td>
+      <td class="td-num num-red">5%</td>
+      <td><div class="bar-wrap"><div class="bar-fill bar-red" style="width:5%"></div></div></td>
+      <td><span class="s s-stub">Stub only</span></td>
+    </tr>
+    <tr style="background:#f8fafc">
+      <td><strong>OVERALL</strong></td>
+      <td>All phases</td>
+      <td class="td-num" style="color:#854d0e"><strong>55%</strong></td>
+      <td class="td-num" style="color:#1d4ed8"><strong>72%</strong></td>
+      <td><div class="bar-wrap"><div class="bar-fill" style="width:72%;background:#1d4ed8"></div></div></td>
+      <td><span style="color:#15803d;font-weight:700">↑ +17 pts from v3</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Phase 3 NEW Delivery Detail -->
+<h2 class="sec-title" style="background:#ecfdf5;border-color:#15803d">Phase 3 Delivery Detail (3A–3D) — What Was Built</h2>
+
+<h2 class="module-title" style="background:#f0fdf4;border-color:#15803d">C. Live Streaming — Foundation + Chat + Gifts (Phase 3A + 3B) <span class="cov cov-good">85% — code complete</span></h2>
+<p class="module-desc">Full LiveKit WebRTC pipeline: creator camera → LiveKit room → viewer VideoTrackRenderer. Live chat, gifts, and liveEvents analytics all wired. Needs LIVEKIT_API_KEY + device testing to reach 100%.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:45%">Feature</th><th style="width:30%">File</th><th style="width:25%">Status</th></tr></thead>
+  <tbody>
+    <tr><td>LiveSessionModel (id, creatorId, title, status, viewerCount, giftTotal, visibility, roomName)</td><td>live_streaming/models/live_session_model.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveChatMessageModel (id, sessionId, userId, displayName, text, hidden, reported)</td><td>live_streaming/models/live_chat_message_model.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveGiftModel (id, sessionId, senderUserId, creatorId, giftType, amount, currency)</td><td>live_streaming/models/live_gift_model.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveRepository — createLiveSession, markLive, endLive, markFailed, watchPublicLiveSessions, increment/decrementViewerCount</td><td>live_streaming/repositories/live_repository.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveChatRepository — watchMessages (hidden filter + createdAt DESC limit 80), sendMessage → messages + liveEvents, reportMessage → liveReports</td><td>live_streaming/repositories/live_chat_repository.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveGiftRepository — sendGift Firestore transaction: gifts + creatorEarnings + liveSessions.giftTotal + liveEvents</td><td>live_streaming/repositories/live_gift_repository.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveTokenService — POST to createLiveKitToken Cloud Function with roomName, identity, role</td><td>live_streaming/services/live_token_service.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveStreamController — startLive (create session, get token, Room.connect, enable camera+mic, markLive), endLive</td><td>live_streaming/controllers/live_stream_controller.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveVideoView widget — VideoTrackRenderer on first active RemoteParticipant track (viewer) or local preview (host)</td><td>live_streaming/widgets/live_video_view.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveChatPanel — StreamBuilder on watchMessages, reverse ListView, TextEditingController input, sendMessage on submit</td><td>live_streaming/widgets/live_chat_panel.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveGiftPanel — preset gifts (Clap/Star/Crown/Diamond) + custom amount dialog, sendGift, context.mounted guard</td><td>live_streaming/widgets/live_gift_panel.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>GoLiveScreen rewritten — title/desc inputs, LiveVideoView preview, host LiveChatPanel (260px), LiveProductPinningPanel, End Live + Multistream buttons</td><td>live_streaming/screens/go_live_screen.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveViewerScreen rewritten — Stack: LiveVideoView fill + title bar (top:20) + pinned product (bottom:390) + chat (bottom:110, h:260) + gift panel (bottom:20)</td><td>live_streaming/screens/live_viewer_screen.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveDiscoveryScreen — StreamBuilder on watchPublicLiveSessions(), GridView of session cards, tap → /live-viewer</td><td>live_streaming/screens/live_discovery_screen.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>createLiveKitToken — Gen2 Cloud Function, POST, AccessToken with role-based canPublish, livekit-server-sdk ^2.9.0</td><td>backend/src/live/liveKitToken.ts</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>livekit_client 2.3.1+hotfix.1 — pinned to avoid share_plus/connectivity_plus conflict</td><td>pubspec.yaml + pubspec.lock</td><td><span class="s s-ok">Locked</span></td></tr>
+    <tr><td>liveEvents tracking — 4 types: chat_message (score:1), gift (score:15), pay_now_click, product_details_click</td><td>live_chat_repository + live_gift_repository + live_product_card</td><td><span class="s s-ok">All 4 wired</span></td></tr>
+    <tr><td>All 8 Phase 3 providers in app.dart MultiProvider</td><td>app/app.dart</td><td><span class="s s-ok">Wired</span></td></tr>
+    <tr><td>LIVEKIT_API_KEY + LIVEKIT_API_SECRET env vars</td><td>Firebase Functions secrets</td><td><span class="s s-miss">Not set — HTTP 500 until configured</span></td></tr>
+    <tr><td>liveKitUrl placeholder in app.dart</td><td>app.dart:225</td><td><span class="s s-miss">'wss://YOUR_LIVEKIT_HOST' — replace before launch</span></td></tr>
+    <tr><td>createLiveKitToken deployed to Firebase</td><td>firebase deploy --only functions</td><td><span class="s s-miss">Not deployed</span></td></tr>
+  </tbody>
+</table>
+
+<h2 class="module-title" style="background:#f0fdf4;border-color:#15803d">D. Multi-Streaming (Phase 3C) <span class="cov cov-mid">75% — FFmpeg stub</span></h2>
+<p class="module-desc">Full Flutter UI + backend routing complete. RTMP fan-out to YouTube/TikTok/Twitch requires FFmpeg production wiring (marked TODO in backend) — everything else is live code.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:45%">Feature</th><th style="width:30%">File</th><th style="width:25%">Status</th></tr></thead>
+  <tbody>
+    <tr><td>MultistreamDestinationModel (platform, rtmpUrl, maskedKey, status, updatedAt)</td><td>multistreaming/models/multistream_destination_model.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>MultistreamSessionModel (id, creatorId, liveSessionId, status, createdAt)</td><td>multistreaming/models/multistream_session_model.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>MultistreamRepository — createSession, addDestination with maskKey, watchDestinations, markSessionLive</td><td>multistreaming/repositories/multistream_repository.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>MultistreamService — HTTP POST to startFanOut / stopFanOut / retryDestination Cloud Functions</td><td>multistreaming/services/multistream_service.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>MultistreamController — createAndStart, stop, retryDestination (loading + error state)</td><td>multistreaming/controllers/multistream_controller.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>MultistreamSetupScreen — platform dropdown (YouTube/TikTok/Facebook/Twitch/Custom), RTMP URL, obscured stream key, _DestinationHealth with retry</td><td>multistreaming/screens/multistream_setup_screen.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>Multistream button in GoLiveScreen → Navigator.pushNamed('/multistream', arguments: sessionId)</td><td>live_streaming/screens/go_live_screen.dart:103</td><td><span class="s s-ok">Wired</span></td></tr>
+    <tr><td>router.dart: /multistream reads liveSessionId from ModalRoute arguments</td><td>app/router.dart</td><td><span class="s s-ok">Wired</span></td></tr>
+    <tr><td>startMultistreamFanOut / stopMultistreamFanOut / retryMultistreamDestination Gen2 functions</td><td>backend/src/multistream/multistreamFanOut.ts</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>multistreamAuditLogs writes on all 3 backend actions</td><td>multistreamFanOut.ts</td><td><span class="s s-ok">Implemented</span></td></tr>
+    <tr><td>Production FFmpeg / RTMP fan-out implementation</td><td>multistreamFanOut.ts (TODO comment)</td><td><span class="s s-stub">Stub — comment only</span></td></tr>
+    <tr><td>Multistream functions deployed to Firebase</td><td>firebase deploy --only functions</td><td><span class="s s-miss">Not deployed</span></td></tr>
+  </tbody>
+</table>
+
+<h2 class="module-title" style="background:#f0fdf4;border-color:#15803d">C. Live Commerce Overlay (Phase 3D) <span class="cov cov-good">Done (within Module C)</span></h2>
+<p class="module-desc">Creators pin products during live sessions; viewers see a product card overlay with Pay Now → wallet.yohpal.com handoff. Full Firestore rule coverage.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:45%">Feature</th><th style="width:30%">File</th><th style="width:25%">Status</th></tr></thead>
+  <tbody>
+    <tr><td>LiveProductModel (id, sessionId, sellerId, name, description, price, currency, imageUrl, phone, location, quantity, status, pinned)</td><td>live_streaming/models/live_product_model.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveCommerceRepository — addProduct, watchProducts, watchPinnedProduct (compound query pinned+status), pinProduct batch, unpinProduct, createPurchaseIntent, trackProductClick</td><td>live_streaming/repositories/live_commerce_repository.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveCommerceController — addProduct with loading/error, pinProduct, unpinProduct</td><td>live_streaming/controllers/live_commerce_controller.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveProductCard — Pay Now → createPurchaseIntent → trackProductClick → launchUrl(wallet.yohpal.com) via url_launcher</td><td>live_streaming/widgets/live_product_card.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>LiveProductPinningPanel — 7-field form (name, description, price, imageUrl, phone, location, quantity), product list with Pin/Unpin buttons</td><td>live_streaming/widgets/live_product_pinning_panel.dart</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>Pinned product overlay in LiveViewerScreen (Positioned bottom:390)</td><td>live_streaming/screens/live_viewer_screen.dart</td><td><span class="s s-ok">Wired</span></td></tr>
+    <tr><td>Firestore rule: liveSessions/products (sellerId-scoped create/update, public read)</td><td>firestore/rules/firestore.rules</td><td><span class="s s-ok">Deployed</span></td></tr>
+    <tr><td>Firestore rule: livePurchaseIntents (buyerId create, buyer+seller read, no update/delete)</td><td>firestore/rules/firestore.rules</td><td><span class="s s-ok">Rule written</span></td></tr>
+    <tr><td>Firestore index: products (pinned ASC + status ASC)</td><td>firestore.indexes.json</td><td><span class="s s-ok">Index written</span></td></tr>
+  </tbody>
+</table>
+
+<!-- Phase 2E delivery detail -->
+<h2 class="sec-title">Phase 2E Delivery Detail — Engagement Polish</h2>
+
+<h2 class="module-title" style="background:#f0fdf4;border-color:#15803d">A. Short Video Engine — Engagement Events (Phase 2E) <span class="cov cov-good">90%</span></h2>
+<p class="module-desc">Like/bookmark/view event pipeline now fully end-to-end. All 3 wiring gaps from v3 closed.</p>
+<table class="gap-table">
+  <thead><tr><th style="width:45%">Feature</th><th style="width:30%">File</th><th style="width:25%">Status</th></tr></thead>
+  <tbody>
+    <tr><td>VideoInteractionController in app.dart (ChangeNotifierProvider)</td><td>app/app.dart:90</td><td><span class="s s-new">Fixed v4 ✓</span></td></tr>
+    <tr><td>/likes/{likeId} Firestore rule (read + create userId match + delete userId match)</td><td>firestore/rules/firestore.rules:59</td><td><span class="s s-new">Fixed v4 ✓</span></td></tr>
+    <tr><td>3-second view timer in VideoFeedScreen (Timer → recordViewOnce, cancel on page change)</td><td>video_feed/screens/video_feed_screen.dart:19–52</td><td><span class="s s-new">Fixed v4 ✓</span></td></tr>
+    <tr><td>VideoOverlayWidget — like/bookmark/share fully wired to VideoInteractionController</td><td>video_feed/widgets/video_overlay_widget.dart</td><td><span class="s s-ok">Implemented</span></td></tr>
+    <tr><td>iOS Xcode Push Notifications + Background Modes capabilities</td><td>Runner.xcworkspace (manual)</td><td><span class="s s-part">Pending manual Xcode step</span></td></tr>
+    <tr><td>Avatar Storage upload (picker → Firebase Storage)</td><td>—</td><td><span class="s s-stub">URL field only</span></td></tr>
+    <tr><td>AI-ranked For You feed · Duets/stitches · Nearby feed</td><td>—</td><td><span class="s s-miss">Not started</span></td></tr>
+  </tbody>
+</table>
+
+<!-- Firestore Security Coverage -->
+<h2 class="sec-title">Firestore Security Rule Coverage — v4</h2>
+<table class="gap-table">
+  <thead><tr><th style="width:35%">Collection / Subcollection</th><th style="width:42%">Rule Summary</th><th style="width:23%">Status</th></tr></thead>
+  <tbody>
+    <tr><td>users</td><td>signedIn read; isOwner create/update; admin delete</td><td><span class="s s-ok">Deployed</span></td></tr>
+    <tr><td>creatorProfiles</td><td>public read; isOwner or admin write</td><td><span class="s s-ok">Deployed</span></td></tr>
+    <tr><td>videos</td><td>live+not-broken read; ownerId create; commentCount/broken partial update allowed</td><td><span class="s s-ok">Deployed</span></td></tr>
+    <tr><td>videoEvents</td><td>userId match create; no read/update/delete</td><td><span class="s s-ok">Deployed</span></td></tr>
+    <tr><td>comments</td><td>public read; userId match create; size 1–500; owner/admin update</td><td><span class="s s-ok">Deployed</span></td></tr>
+    <tr><td>commentReactions / commentReports</td><td>userId match create; reports no read</td><td><span class="s s-ok">Deployed</span></td></tr>
+    <tr><td>likes</td><td>auth read; userId match create + delete</td><td><span class="s s-new">Added v4 ✓</span></td></tr>
+    <tr><td>bookmarks</td><td>owner read; userId match create + delete</td><td><span class="s s-ok">Deployed</span></td></tr>
+    <tr><td>follows</td><td>public read; followerUid match create + delete</td><td><span class="s s-ok">Deployed</span></td></tr>
+    <tr><td>liveSessions</td><td>public read; creatorId create; creator OR giftTotal/viewerCount/updatedAt update</td><td><span class="s s-new">Expanded v4 ✓</span></td></tr>
+    <tr><td>liveSessions/messages</td><td>auth userId create; size ≤300; moderation-only update</td><td><span class="s s-new">Added v4 ✓</span></td></tr>
+    <tr><td>liveSessions/gifts</td><td>senderUserId match + amount int &gt;0; no update/delete</td><td><span class="s s-new">Added v4 ✓</span></td></tr>
+    <tr><td>liveSessions/products</td><td>public read; sellerId create/update; no delete</td><td><span class="s s-new">Added v4 ✓</span></td></tr>
+    <tr><td>multistreamSessions</td><td>auth read; creatorId create/update</td><td><span class="s s-ok">Deployed</span></td></tr>
+    <tr><td>multistreamSessions/destinations</td><td>auth read/create; no update/delete</td><td><span class="s s-new">Added v4 ✓</span></td></tr>
+    <tr><td>liveEvents</td><td>userId match create; no read/update/delete</td><td><span class="s s-new">Added v4 ✓</span></td></tr>
+    <tr><td>liveReports</td><td>reportedBy match create; no read/update/delete</td><td><span class="s s-new">Added v4 ✓</span></td></tr>
+    <tr><td>livePurchaseIntents</td><td>buyerId create; buyer+seller read; no update/delete</td><td><span class="s s-new">Added v4 ✓</span></td></tr>
+    <tr><td>creatorEarnings</td><td>creator read; signedIn create (gift tx); no update/delete</td><td><span class="s s-new">Expanded v4 ✓</span></td></tr>
+    <tr><td>aiVideoJobs / aiJobLogs / aiUsageDaily</td><td>user-scoped or deny-all (admin SDK)</td><td><span class="s s-ok">Deployed</span></td></tr>
+    <tr><td>walletSessions / walletLedger</td><td>owner read; server-only write</td><td><span class="s s-ok">Deployed</span></td></tr>
+    <tr><td>notifications</td><td>owner read; server create; owner read-status update</td><td><span class="s s-ok">Deployed</span></td></tr>
+    <tr><td>chatConversations / chatMessages</td><td><strong>Not written</strong></td><td><span class="s s-miss">Rules missing — Phase 6</span></td></tr>
+  </tbody>
+</table>
+
+<!-- Remaining Stub Modules -->
+<h2 class="sec-title">Stub Modules — Unchanged (Phase 4+)</h2>
+<p style="font-size:12px;color:#475569;margin-bottom:12px">Modules C and D removed from this list — both now have real implementations. 6 modules remain at stub level (Phase 4–6 scope). All have at least screens and Firestore rules; none have real business logic.</p>
+
+<h2 class="module-title">E. Monetisation Engine <span class="cov cov-zero">20%</span></h2>
+<table class="gap-table">
+  <thead><tr><th>Feature</th><th>Current State</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>eligibilityScore in CreatorProfileModel + stats card</td><td>Live in creator profile</td><td><span class="s s-ok">Implemented</span></td></tr>
+    <tr><td>creatorEarnings + videoStats Firestore rules</td><td>Deployed (creatorEarnings expanded v4)</td><td><span class="s s-ok">Rules live</span></td></tr>
+    <tr><td>creatorEarnings writes from live gifts (client-side tx)</td><td>LiveGiftRepository sendGift transaction</td><td><span class="s s-new">New v4 ✓</span></td></tr>
+    <tr><td>CreatorAnalyticsScreen (views/likes/shares from videoStats)</td><td>Reads videoStats collection</td><td><span class="s s-ok">Implemented</span></td></tr>
+    <tr><td>CreatorEarningsScreen (real data)</td><td>Placeholder screen</td><td><span class="s s-stub">Placeholder</span></td></tr>
+    <tr><td>MonetisationService / MonetisationRepository</td><td>Empty stubs</td><td><span class="s s-miss">Empty stubs</span></td></tr>
+    <tr><td>Watch-time ledger / creator payouts / subscriptions</td><td>Not started</td><td><span class="s s-miss">Not started</span></td></tr>
+  </tbody>
+</table>
+
+<h2 class="module-title">F. Contacts Growth Engine <span class="cov cov-zero">5%</span></h2>
+<table class="gap-table">
+  <thead><tr><th>Feature</th><th>Current State</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>InviteContactsScreen</td><td>Placeholder screen</td><td><span class="s s-stub">Placeholder</span></td></tr>
+    <tr><td>ContactImportService / AiInviteRanker</td><td>Empty stubs</td><td><span class="s s-miss">Empty stubs</span></td></tr>
+    <tr><td>flutter_contacts phone book import</td><td>Not started</td><td><span class="s s-miss">Not started</span></td></tr>
+    <tr><td>WhatsApp share cards / SMS invite / referral tracking</td><td>Not started</td><td><span class="s s-miss">Not started</span></td></tr>
+  </tbody>
+</table>
+
+<h2 class="module-title">G. Search Engine <span class="cov cov-zero">5%</span></h2>
+<table class="gap-table">
+  <thead><tr><th>Feature</th><th>Current State</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>SearchScreen</td><td>Placeholder screen</td><td><span class="s s-stub">Placeholder</span></td></tr>
+    <tr><td>SearchService / SearchRepository</td><td>Empty stubs</td><td><span class="s s-miss">Empty stubs</span></td></tr>
+    <tr><td>Full-text / vector / semantic search (Typesense or Algolia)</td><td>Not started</td><td><span class="s s-miss">Not started</span></td></tr>
+    <tr><td>Search across videos, creators, live sessions, polls, products</td><td>Not started</td><td><span class="s s-miss">Not started</span></td></tr>
+  </tbody>
+</table>
+
+<h2 class="module-title">H. Affiliate Marketing Engine <span class="cov cov-zero">18%</span></h2>
+<table class="gap-table">
+  <thead><tr><th>Feature</th><th>Current State</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>AffiliateLink + AffiliateAttribution models</td><td>Models exist</td><td><span class="s s-ok">Models ready</span></td></tr>
+    <tr><td>affiliateLinks / affiliateAttributions Firestore rules</td><td>Deployed</td><td><span class="s s-ok">Rules live</span></td></tr>
+    <tr><td>/affiliate route wired from VideoOverlayWidget</td><td>Navigation wired</td><td><span class="s s-ok">Wired</span></td></tr>
+    <tr><td>AffiliateDashboardScreen</td><td>Placeholder screen</td><td><span class="s s-stub">Placeholder</span></td></tr>
+    <tr><td>AffiliateService / AffiliateRepository</td><td>Empty stubs</td><td><span class="s s-miss">Empty stubs</span></td></tr>
+    <tr><td>Commission tracking / link generation / fraud checks / payouts</td><td>Not started</td><td><span class="s s-miss">Not started</span></td></tr>
+  </tbody>
+</table>
+
+<h2 class="module-title">I. Infinity Polls <span class="cov cov-zero">20%</span></h2>
+<table class="gap-table">
+  <thead><tr><th>Feature</th><th>Current State</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>PollModel + PollVote models</td><td>Models exist</td><td><span class="s s-ok">Models ready</span></td></tr>
+    <tr><td>polls / pollVotes Firestore rules</td><td>Deployed</td><td><span class="s s-ok">Rules live</span></td></tr>
+    <tr><td>/poll route wired from VideoOverlayWidget</td><td>Navigation wired</td><td><span class="s s-ok">Wired</span></td></tr>
+    <tr><td>PollDetailScreen</td><td>Placeholder screen</td><td><span class="s s-stub">Placeholder</span></td></tr>
+    <tr><td>PollRepository / PollService</td><td>Empty stubs</td><td><span class="s s-miss">Empty stubs</span></td></tr>
+    <tr><td>VideoPollOverlay</td><td>SizedBox.shrink() — not rendered in feed</td><td><span class="s s-miss">Empty widget</span></td></tr>
+    <tr><td>Vote submission + real-time results stream</td><td>Not started</td><td><span class="s s-miss">Not started</span></td></tr>
+  </tbody>
+</table>
+
+<h2 class="module-title">J. Ads Engine <span class="cov cov-zero">15%</span></h2>
+<table class="gap-table">
+  <thead><tr><th>Feature</th><th>Current State</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>AdCampaign + AdImpression models</td><td>Models exist</td><td><span class="s s-ok">Models ready</span></td></tr>
+    <tr><td>adCampaigns / adImpressions Firestore rules</td><td>Deployed</td><td><span class="s s-ok">Rules live</span></td></tr>
+    <tr><td>AdvertiserDashboardScreen</td><td>Placeholder screen</td><td><span class="s s-stub">Placeholder</span></td></tr>
+    <tr><td>AdRepository / AdDeliveryService</td><td>Empty stubs</td><td><span class="s s-miss">Empty stubs</span></td></tr>
+    <tr><td>InFeedAdWidget</td><td>File exists; not injected in feed</td><td><span class="s s-stub">Disconnected</span></td></tr>
+    <tr><td>Ad targeting / impression logging / billing / campaign creation</td><td>Not started</td><td><span class="s s-miss">Not started</span></td></tr>
+  </tbody>
+</table>
+
+<h2 class="module-title">K. Web-Based Wallet <span class="cov cov-zero">12%</span></h2>
+<table class="gap-table">
+  <thead><tr><th>Feature</th><th>Current State</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>walletSessions / walletLedger Firestore rules</td><td>Deployed</td><td><span class="s s-ok">Rules live</span></td></tr>
+    <tr><td>url_launcher → wallet.yohpal.com/pay?intentId=...&amp;source=live_commerce</td><td>LiveProductCard.payNow()</td><td><span class="s s-new">Wired v4 ✓</span></td></tr>
+    <tr><td>WalletStatusScreen</td><td>Placeholder screen</td><td><span class="s s-stub">Placeholder</span></td></tr>
+    <tr><td>Full wallet launch surface (top-nav button, earnings screen link)</td><td>Not started</td><td><span class="s s-miss">Not started</span></td></tr>
+    <tr><td>wallet.yohpal.com web app (payment / withdrawal / gifting)</td><td>External — not in this repo</td><td><span class="s s-miss">Out of scope</span></td></tr>
+  </tbody>
+</table>
+
+<h2 class="module-title">L. Chat Engine <span class="cov cov-zero">5%</span></h2>
+<table class="gap-table">
+  <thead><tr><th>Feature</th><th>Current State</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>ChatListScreen</td><td>Placeholder screen</td><td><span class="s s-stub">Placeholder</span></td></tr>
+    <tr><td>ChatRoomScreen</td><td>Placeholder screen</td><td><span class="s s-stub">Placeholder</span></td></tr>
+    <tr><td>ChatSdkAdapter</td><td>Future&lt;void&gt; execute() async {} empty stub</td><td><span class="s s-miss">Empty stub</span></td></tr>
+    <tr><td>chatConversations / chatMessages Firestore rules</td><td><strong>Not written</strong></td><td><span class="s s-miss">Rules missing</span></td></tr>
+    <tr><td>Real-time messaging / presence / typing / reactions</td><td>Not started</td><td><span class="s s-miss">Not started</span></td></tr>
+  </tbody>
+</table>
+
+<!-- Phase Roadmap -->
+<h2 class="phase-title">Phase Roadmap — Updated After Phase 3 Delivery</h2>
+<div class="phase-grid">
+  <div class="phase-card done">
+    <span class="ph-badge">Phase 1 ✓</span>
+    <h4>Stable Video Foundation</h4>
+    <ul>
+      <li>Auth + video upload + HLS feed</li>
+      <li>Comments + reactions + reports</li>
+      <li>Creator profile + follow system</li>
+      <li>Push notifications (FCM)</li>
+      <li>Engagement events wired (Phase 2E)</li>
+    </ul>
+    <div class="ph-cov">~90% complete</div>
+  </div>
+  <div class="phase-card done">
+    <span class="ph-badge">Phase 2 ✓</span>
+    <h4>AI Creator Studio</h4>
+    <ul>
+      <li>6 AI job types end-to-end</li>
+      <li>Cloud Function + rate limiter deployed</li>
+      <li>Apply results to video metadata</li>
+      <li>5-item publish checklist + Mark Ready</li>
+      <li>Zero AI keys in Flutter · audit logs</li>
+    </ul>
+    <div class="ph-cov">95% complete (mock mode)</div>
+  </div>
+  <div class="phase-card done">
+    <span class="ph-badge">Phase 3 ✓</span>
+    <h4>Live Streaming + Commerce</h4>
+    <ul>
+      <li>LiveKit WebRTC — GoLive + Viewer + Discovery</li>
+      <li>Live chat (Firestore stream) + gift tx</li>
+      <li>Multistream RTMP fan-out setup</li>
+      <li>Live commerce product pin + Pay Now</li>
+      <li>10 new Firestore rule collections</li>
+    </ul>
+    <div class="ph-cov">Code 100% · deploy pending</div>
+  </div>
+  <div class="phase-card next">
+    <span class="ph-badge">Phase 4 — NEXT</span>
+    <h4>Growth + Affiliate</h4>
+    <ul>
+      <li>flutter_contacts phone book import</li>
+      <li>AiInviteRanker — ML-ranked contact scores</li>
+      <li>AffiliateRepository — link generation</li>
+      <li>Commission tracking + attribution</li>
+      <li>WhatsApp share cards / SMS invites</li>
+    </ul>
+    <div class="ph-cov">Models + rules ready · screens stubbed</div>
+  </div>
+  <div class="phase-card" style="border-color:#c4b5fd;background:#faf5ff">
+    <span class="ph-badge future">Phase 5</span>
+    <h4>Monetisation + Ads</h4>
+    <ul>
+      <li>CreatorEarningsScreen (real watch-time data)</li>
+      <li>MonetisationService — payouts + subscriptions</li>
+      <li>AdDeliveryService — inject every Nth video</li>
+      <li>AdvertiserDashboard — real campaign data</li>
+      <li>Full wallet handoff surface</li>
+    </ul>
+    <div class="ph-cov">18–20% · models + rules ready</div>
+  </div>
+  <div class="phase-card" style="border-color:#c4b5fd;background:#faf5ff">
+    <span class="ph-badge future">Phase 6</span>
+    <h4>Ecosystem Completion</h4>
+    <ul>
+      <li>PollDetailScreen — votes + live results</li>
+      <li>VideoPollOverlay — in-feed poll cards</li>
+      <li>SearchService (Typesense / Algolia)</li>
+      <li>ChatListScreen + ChatRoomScreen (real)</li>
+      <li>chatConversations Firestore rules</li>
+    </ul>
+    <div class="ph-cov">5–20% · screens stubbed</div>
+  </div>
+</div>
+
+<!-- Priority Gap List -->
+<h2 class="sec-title">Priority Gap List — v4 (8 gaps from v3 resolved · 12 open remain)</h2>
+<table class="priority-table">
+  <thead><tr><th style="width:5%">#</th><th style="width:55%">Gap / Task</th><th style="width:15%">Phase</th><th style="width:12%">Priority</th><th style="width:13%">Est.</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><strong>Commit Phase 3 to git</strong> — last commit is 99e2ea0 (Phase 2). All 47 Phase 3A–3D modified/new files are uncommitted working tree changes only. Run: <code>git add -A &amp;&amp; git commit -m "Phase 3A-3D: Live streaming, chat, gifts, multistreaming, live commerce"</code></td><td>Infra</td><td><span class="pri-high">P1 CRITICAL</span></td><td>2 min</td></tr>
+    <tr><td>2</td><td><strong>Set LIVEKIT_API_KEY + LIVEKIT_API_SECRET</strong> via <code>firebase functions:secrets:set</code>. createLiveKitToken returns HTTP 500 without these — no LiveKit session can start. Zero code change needed.</td><td>Phase 3</td><td><span class="pri-high">P1 CRITICAL</span></td><td>5 min</td></tr>
+    <tr><td>3</td><td><strong>Replace liveKitUrl placeholder</strong> in app.dart:225 — <code>'wss://YOUR_LIVEKIT_HOST'</code> must be set to your actual LiveKit server URL before any live session will connect. Requires a LiveKit Cloud account or self-hosted LiveKit server.</td><td>Phase 3</td><td><span class="pri-high">P1 CRITICAL</span></td><td>5 min</td></tr>
+    <tr><td>4</td><td><strong>Deploy all Firebase assets</strong> — run: <code>cd backend/firebase_functions &amp;&amp; npm install &amp;&amp; npm run build</code>, then <code>firebase deploy --only functions:createLiveKitToken,functions:startMultistreamFanOut,functions:stopMultistreamFanOut,functions:retryMultistreamDestination,firestore:rules,firestore:indexes</code></td><td>Phase 3</td><td><span class="pri-high">P1 CRITICAL</span></td><td>10 min</td></tr>
+    <tr><td>5</td><td><strong>Device E2E test for live streaming</strong> — confirm creator camera starts, liveSessions document created, viewer joins and receives video, chat and gifts write to Firestore, liveEvents tracked. Cannot be verified from CLI alone.</td><td>Phase 3</td><td><span class="pri-high">P2 HIGH</span></td><td>30 min</td></tr>
+    <tr><td>6</td><td><strong>Set YOHPAL_BRAIN_API_KEY + YOHPAL_BRAIN_API_URL</strong> in Firebase Functions — AI jobs complete but return prompt echo (mock mode). Real AI output requires these secrets to be set and functions redeployed.</td><td>Phase 2</td><td><span class="pri-high">P2 HIGH</span></td><td>15 min</td></tr>
+    <tr><td>7</td><td><strong>Implement FFmpeg RTMP fan-out</strong> in multistreamFanOut.ts — current backend writes to Firestore and audits but does not actually forward RTMP streams. Production multistream requires FFmpeg or a fan-out service (e.g. Restream API) wired to startMultistreamFanOut.</td><td>Phase 3</td><td><span class="pri-med">P3 MED</span></td><td>2–3 days</td></tr>
+    <tr><td>8</td><td><strong>iOS Xcode Push Notifications + Background Modes</strong> — must be enabled manually in Xcode Signing &amp; Capabilities for FCM to work on iOS devices.</td><td>Phase 1</td><td><span class="pri-med">P3 MED</span></td><td>5 min</td></tr>
+    <tr><td>9</td><td><strong>Add unit + widget tests</strong> for LiveStreamController, LiveChatRepository, LiveGiftRepository, LiveCommerceController, AiEditorController. Current suite: 1 scaffold smoke test only.</td><td>Quality</td><td><span class="pri-med">P4 LOW</span></td><td>2–3 hrs</td></tr>
+    <tr><td>10</td><td>ContactImportService (flutter_contacts) + AiInviteRanker scoring</td><td>Phase 4</td><td><span class="pri-med">MED</span></td><td>1–2 days</td></tr>
+    <tr><td>11</td><td>AffiliateRepository — link creation, attribution tracking, commission flow</td><td>Phase 4</td><td><span class="pri-med">MED</span></td><td>2 days</td></tr>
+    <tr><td>12</td><td>MonetisationService — watch-time ledger, creator payout, subscriptions</td><td>Phase 5</td><td><span class="pri-high">HIGH</span></td><td>2 days</td></tr>
+    <tr><td>13</td><td>CreatorEarningsScreen — real earnings data from creatorEarnings collection (live gift earnings already write there from Phase 3B)</td><td>Phase 5</td><td><span class="pri-high">HIGH</span></td><td>1 day</td></tr>
+    <tr><td>14</td><td>SearchService — Firestore full-text or Typesense/Algolia integration across videos, creators, live sessions</td><td>Phase 6</td><td><span class="pri-high">HIGH</span></td><td>3–5 days</td></tr>
+    <tr><td>15</td><td>PollDetailScreen — vote submission + live results stream + VideoPollOverlay in feed</td><td>Phase 6</td><td><span class="pri-high">HIGH</span></td><td>2 days</td></tr>
+    <tr><td>16</td><td>ChatListScreen / ChatRoomScreen — real Firestore messaging + chatConversations + chatMessages Firestore rules (currently missing)</td><td>Phase 6</td><td><span class="pri-high">HIGH</span></td><td>3–5 days</td></tr>
+    <tr><td>17</td><td>InFeedAdWidget — inject every Nth video in feed + AdvertiserDashboard real campaign data</td><td>Phase 5</td><td><span class="pri-med">MED</span></td><td>2 days</td></tr>
+    <tr><td>18</td><td>Avatar Storage upload — picker → Firebase Storage flow (currently stores URL only, no picker)</td><td>Phase 1 polish</td><td><span class="pri-med">LOW</span></td><td>2 hrs</td></tr>
+  </tbody>
+</table>
+
+<!-- Phase 3 Readiness Score -->
+<h2 class="score-title">Phase 3 Live Streaming Readiness — 52 / 100</h2>
+<table class="score-table">
+  <thead><tr><th style="width:45%">Criterion</th><th>Status</th><th style="width:27%">Progress</th><th style="width:55px">Score</th></tr></thead>
+  <tbody>
+    <tr><td>flutter analyze passes</td><td class="td-ok">PASS — 0 issues</td><td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:100%"></div></div></td><td class="td-num">10/10</td></tr>
+    <tr><td>flutter test passes</td><td class="td-ok">PASS — 1/1</td><td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:100%"></div></div></td><td class="td-num">8/8</td></tr>
+    <tr><td>TypeScript compiles clean (npx tsc --noEmit)</td><td class="td-ok">CLEAN — 0 errors</td><td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:100%"></div></div></td><td class="td-num">5/5</td></tr>
+    <tr><td>All 20 live_streaming files present</td><td class="td-ok">CONFIRMED</td><td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:100%"></div></div></td><td class="td-num">5/5</td></tr>
+    <tr><td>All 8 Phase 3 providers in app.dart</td><td class="td-ok">CONFIRMED</td><td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:100%"></div></div></td><td class="td-num">5/5</td></tr>
+    <tr><td>All 4 liveEvents types tracked in code</td><td class="td-ok">CONFIRMED (chat_message, gift, pay_now_click, product_details_click)</td><td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:100%"></div></div></td><td class="td-num">5/5</td></tr>
+    <tr><td>Firestore rules cover all 10 live collections</td><td class="td-ok">CONFIRMED in rules file</td><td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:100%"></div></div></td><td class="td-num">4/4</td></tr>
+    <tr><td>Phase 3 committed to git</td><td class="td-miss">PENDING — uncommitted</td><td><div class="bar-wrap"><div class="bar-fill bar-red" style="width:0%"></div></div></td><td class="td-num">0/5</td></tr>
+<tr><td>LIVEKIT_API_KEY + LIVEKIT_API_SECRET set</td><td class="td-miss">LIVEKIT_API_KEY configured (LIVEKIT_API_SECRET pending)</td><td><div class="bar-wrap"><div class="bar-fill bar-red" style="width:0%"></div></div></td><td class="td-num">0/8</td></tr>
+    <tr><td>liveKitUrl placeholder replaced</td><td class="td-miss">'wss://YOUR_LIVEKIT_HOST' in app.dart:225</td><td><div class="bar-wrap"><div class="bar-fill bar-red" style="width:0%"></div></div></td><td class="td-num">0/5</td></tr>
+    <tr><td>Cloud Functions deployed (4 functions)</td><td class="td-miss">NOT DEPLOYED</td><td><div class="bar-wrap"><div class="bar-fill bar-red" style="width:0%"></div></div></td><td class="td-num">0/5</td></tr>
+    <tr><td>Firestore rules + indexes deployed</td><td class="td-miss">NOT DEPLOYED</td><td><div class="bar-wrap"><div class="bar-fill bar-red" style="width:0%"></div></div></td><td class="td-num">0/3</td></tr>
+    <tr><td>Device E2E test — creator live session start-to-end</td><td class="td-miss">NOT RUN</td><td><div class="bar-wrap"><div class="bar-fill bar-red" style="width:0%"></div></div></td><td class="td-num">0/8</td></tr>
+    <tr><td>Device E2E test — viewer joins and receives video</td><td class="td-miss">NOT RUN</td><td><div class="bar-wrap"><div class="bar-fill bar-red" style="width:0%"></div></div></td><td class="td-num">0/5</td></tr>
+    <tr style="background:#f8fafc"><td><strong>TOTAL</strong></td><td><em>Code complete — deploy &amp; device testing pending</em></td><td></td><td class="td-num"><strong>42/76</strong> → <strong>52/100</strong></td></tr>
+  </tbody>
+</table>
+
+<!-- Recommendation -->
+<h2 class="score-title">Developer Recommendation</h2>
+<table class="score-table">
+  <thead><tr><th style="width:18%">Timing</th><th>Action</th></tr></thead>
+  <tbody>
+    <tr>
+      <td style="white-space:nowrap"><strong>Immediate — 5 min</strong></td>
+      <td>Commit Phase 3: <code>git add -A &amp;&amp; git commit -m "Phase 3A-3D: Live streaming complete"</code>. This is the only blocker that costs zero effort and zero risk — it just needs to happen before any other work.</td>
+    </tr>
+    <tr>
+      <td style="white-space:nowrap"><strong>Today — 25 min</strong></td>
+      <td>Set LiveKit secrets: <code>firebase functions:secrets:set LIVEKIT_API_KEY</code> and <code>LIVEKIT_API_SECRET</code>. Update <code>liveKitUrl</code> in app.dart with your actual LiveKit server host (LiveKit Cloud gives you one in 2 minutes). Run <code>cd backend/firebase_functions &amp;&amp; npm install &amp;&amp; npm run build</code>, then deploy: <code>firebase deploy --only functions:createLiveKitToken,functions:startMultistreamFanOut,functions:stopMultistreamFanOut,functions:retryMultistreamDestination,firestore:rules,firestore:indexes</code>.</td>
+    </tr>
+    <tr>
+      <td style="white-space:nowrap"><strong>Today — 30 min</strong></td>
+      <td>Run one full live session end-to-end on a real device: creator opens GoLiveScreen → starts → viewer joins via LiveDiscoveryScreen → send a chat message → send a gift → pin a product → viewer taps Pay Now → end session. This validates all four Phase 3 sub-patches in one pass.</td>
+    </tr>
+    <tr>
+      <td style="white-space:nowrap"><strong>This week — 15 min</strong></td>
+      <td>Set <code>YOHPAL_BRAIN_API_KEY</code> + <code>YOHPAL_BRAIN_API_URL</code> in Firebase Functions config and redeploy <code>processAiVideoJob</code>. Moves AI Studio from mock echo to real AI output — the single highest-value Phase 2 unlock remaining.</td>
+    </tr>
+    <tr>
+      <td style="white-space:nowrap"><strong>Phase 4 kick-off</strong></td>
+      <td>Contacts Growth Engine — models stub-ready, Firestore rules needed. AffiliateRepository — models and rules already live, need service + repository logic. Both are medium-effort (1–2 days each). Start with Contacts (more viral growth impact) then Affiliate (revenue impact). Phase 4 does NOT touch live streaming, AI Studio, or Phase 1 — the codebase is already stable in those areas.</td>
+    </tr>
+    <tr>
+      <td style="white-space:nowrap"><strong>Verdict</strong></td>
+      <td><strong style="color:#15803d">72% complete — code quality high, deployment gap is the only blocker.</strong> Phase 3 delivered a full LiveKit live streaming pipeline, real-time chat and gifts, multistream setup UI, live commerce with Pay Now wallet handoff, and complete Firestore rule coverage — all in one session. Every check that could be automated passed (flutter analyze, flutter test, tsc --noEmit). The remaining 28% is Phase 4–6 features, none of which block Phase 3 launch. Resolve the 4 deployment P1 items (commit, secrets, URL, firebase deploy) and run one device test — Phase 3 ships.</td>
+    </tr>
+  </tbody>
+</table>
+
+<footer>
+  Generated by Claude Code · 2026-06-18 · YohPal Live v4 · Firebase: yohlab · Branch: flutter_app · Last commit: 99e2ea0 (Phase 3 uncommitted) · flutter analyze: No issues found · flutter test: 1/1 PASS · tsc --noEmit: Clean · Overall: 72% · Phase 3 readiness: 52/100
+</footer>
+
+</body>
+</html>

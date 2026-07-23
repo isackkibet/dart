@@ -1,0 +1,788 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function isAdmin() { return signedIn() && request.auth.token.admin == true; }
+    function isCreator() { return signedIn() && request.auth.token.creator == true; }
+
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create, update: if isOwner(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /creatorProfiles/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    match /mediaWorkerJobs/{jobId} {
+      allow read: if signedIn() && resource.data.creatorId == request.auth.uid;
+      allow write: if false; // Only Cloud Functions
+    }
+
+    match /pilotUsers/{uid} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /pilotMetrics/{metricId} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    match /pilotReports/{reportId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /videos/{videoId} {
+      allow read: if true;
+      allow create: if signedIn();
+      allow update, delete: if signedIn() && request.auth.uid == resource.data.userId;
+    }
+
+    match /videoEvents/{eventId} {
+      allow read: if false;
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 500;
+      allow update: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+      allow delete: if false;
+    }
+    match /commentReactions/{reactionId} {
+      allow read: if true;
+      allow create, update: if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+      allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+    }
+    match /commentReports/{reportId} {
+      allow create: if signedIn()
+        && request.resource.data.reportedBy == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+    match /likes/{likeId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+      allow update: if false;
+    }
+    match /bookmarks/{bookmarkId} {
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+      allow update: if false;
+    }
+    match /follows/{followId} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.followerUid == request.auth.uid;
+      allow delete: if signedIn() && resource.data.followerUid == request.auth.uid;
+      allow update: if false;
+    }
+    match /liveSessions/{sessionId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.creatorId == request.auth.uid;
+      // `giftTotal` is intentionally NOT in the client-allowed diff below —
+      // it is only ever moved by validatedGiftPurchase (Cloud Function,
+      // Admin SDK, bypasses rules) now that gift amounts are server-
+      // validated. `viewerCount` stays client-writable for live join/leave
+      // presence tracking (see LiveRepository.joinSession/leaveSession).
+      allow update: if request.auth != null
+        && (resource.data.creatorId == request.auth.uid
+          || request.resource.data.diff(resource.data).changedKeys()
+              .hasOnly(['viewerCount', 'updatedAt']));
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if true;
+        allow create: if request.auth != null
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 300;
+        allow update: if request.auth != null
+          && request.resource.data.diff(resource.data).changedKeys()
+              .hasOnly(['reported', 'reportReason', 'reportedBy', 'reportedAt']);
+        allow delete: if false;
+      }
+
+      // Gifts are no longer client-writable. A client-set `amount` with no
+      // balance check was a direct wallet-fraud vector (Production
+      // Readiness Review, Critical #6). Every gift now goes through the
+      // validatedGiftPurchase callable, which validates the gift type
+      // against a server-side price catalog, checks and debits the
+      // sender's walletBalances.available, and writes this document with
+      // the Admin SDK — which is not subject to these rules. Reads stay
+      // open so the live gift feed keeps working.
+      match /gifts/{giftId} {
+        allow read: if true;
+        allow create, update, delete: if false;
+      }
+
+      match /products/{productId} {
+        allow read: if true;
+        allow create: if request.auth != null
+          && request.resource.data.sellerId == request.auth.uid;
+        allow update: if request.auth != null
+          && resource.data.sellerId == request.auth.uid;
+        allow delete: if false;
+      }
+    }
+    match /multistreamSessions/{sessionId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.creatorId == request.auth.uid;
+      allow update: if request.auth != null
+        && resource.data.creatorId == request.auth.uid;
+      allow delete: if false;
+
+      match /destinations/{destinationId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null;
+        allow update, delete: if false;
+      }
+    }
+    match /walletSessions/{id} { allow read: if signedIn() && resource.data.userId == request.auth.uid; allow create: if signedIn(); allow update, delete: if false; }
+    match /walletLedger/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /walletBalances/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+    match /walletTransactions/{transactionId} {
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+      allow create, update, delete: if false;
+    }
+    match /walletWithdrawals/{withdrawalId} {
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+      allow create, update, delete: if false;
+    }
+    match /subscriptionPlans/{planId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+    match /subscriptionPlanRequests/{requestId} {
+      allow create: if request.auth != null
+        && request.resource.data.creatorId == request.auth.uid;
+      allow read: if request.auth != null
+        && resource.data.creatorId == request.auth.uid;
+      allow update, delete: if false;
+    }
+    // Previously any signed-in user could write ANY field to ANY video's
+    // stats doc (Production Readiness Review, Medium #3) — including
+    // overwriting `creatorId` or setting counters to an arbitrary value in
+    // one write, not just incrementing them. Restricted to the exact field
+    // set VideoInteractionService actually writes (likes/bookmarks/shares/
+    // views/engagementScore via FieldValue.increment, always merge:true),
+    // and the document's own id must match `videoId`. This does not fully
+    // rate-limit *how much* a counter can move per write — that requires
+    // moving crediting server-side the same way giftRevenueProcessor
+    // aggregates from videoEvents, which is a larger follow-up, not part of
+    // this patch.
+    match /videoStats/{videoId} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null
+        && request.resource.data.videoId == videoId
+        && request.resource.data.keys().hasOnly([
+          'videoId', 'creatorId', 'likes', 'bookmarks', 'shares', 'views',
+          'engagementScore', 'updatedAt',
+        ]);
+      allow delete: if false;
+    }
+    match /affiliateLinks/{linkId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.ownerUserId == request.auth.uid;
+      allow update: if request.auth != null
+        && resource.data.ownerUserId == request.auth.uid;
+      allow delete: if false;
+    }
+    match /affiliateAttributions/{attributionId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null
+        && (resource.data.affiliateUserId == request.auth.uid
+          || resource.data.viewerUserId == request.auth.uid
+          || resource.data.referredUserId == request.auth.uid);
+      allow update, delete: if false;
+    }
+    match /affiliateCommissions/{commissionId} {
+      allow read: if request.auth != null
+        && resource.data.affiliateUserId == request.auth.uid;
+      allow create: if request.auth != null;
+      allow update, delete: if false;
+    }
+    // adCampaigns/adImpressions previously had a second, conflicting `match`
+    // block later in this file (owner-scoped reads). Removed as the stale
+    // duplicate: AdsRepository.watchActiveCampaigns() (apps/mobile_flutter)
+    // queries all active campaigns with no advertiserId filter, so public
+    // read + backend-only write (below) is what the app actually needs.
+    match /adCampaigns/{campaignId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+    match /adImpressions/{impressionId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if false;
+    }
+    match /adEngagementEvents/{eventId} {
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+    match /aiVideoJobs/{jobId} {
+      allow read: if signedIn() && resource.data.userId == request.auth.uid;
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false; // backend only via Admin SDK
+    }
+    match /aiJobLogs/{id} { allow read, write: if false; } // backend only
+    match /aiUsageDaily/{id} { allow read, write: if false; } // backend only
+    match /creatorEarnings/{earningId} {
+      allow read: if request.auth != null
+        && resource.data.creatorId == request.auth.uid;
+      allow create, update, delete: if false;
+    }
+    match /monetisationEvents/{eventId} {
+      allow read: if request.auth != null
+        && resource.data.creatorId == request.auth.uid;
+      allow create, update, delete: if false;
+    }
+    match /payoutRequests/{payoutId} {
+      allow read: if request.auth != null
+        && resource.data.creatorId == request.auth.uid;
+      allow create, update, delete: if false;
+    }
+    match /creatorSubscriptions/{subscriptionId} {
+      allow read: if request.auth != null
+        && (resource.data.creatorId == request.auth.uid
+          || resource.data.subscriberId == request.auth.uid);
+      allow create, update, delete: if false;
+    }
+    match /liveEvents/{eventId} {
+      allow read: if false;
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+    match /liveReports/{id} {
+      allow create: if request.auth != null
+        && request.resource.data.reportedBy == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+    match /revenueProcessedGifts/{giftId} {
+      allow read, write: if false; // Admin SDK only — idempotency locks
+    }
+    match /revenueAuditLogs/{logId} {
+      allow read, write: if false; // Admin SDK only — revenue audit trail
+    }
+    match /livePurchaseIntents/{intentId} {
+      allow create: if request.auth != null
+        && request.resource.data.buyerId == request.auth.uid;
+      allow read: if request.auth != null
+        && (resource.data.buyerId == request.auth.uid
+          || resource.data.sellerId == request.auth.uid);
+      allow update, delete: if false;
+    }
+    match /users/{userId}/importedContacts/{contactId} {
+      allow read, create, update: if request.auth != null
+        && request.auth.uid == userId;
+      allow delete: if request.auth != null
+        && request.auth.uid == userId;
+    }
+    match /referralLinks/{linkId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.ownerUserId == request.auth.uid;
+      allow update: if request.auth != null
+        && resource.data.ownerUserId == request.auth.uid;
+      allow delete: if false;
+    }
+    // `allow create: if true` accepted unauthenticated writes from anyone
+    // (Production Readiness Review, Medium #4) — a zero-barrier referral-
+    // fraud/spam vector. Now requires auth and ownership of the event, and
+    // ContactsRepository.trackReferralEvent now stamps `userId` on write to
+    // make that ownership check possible.
+    match /referralEvents/{eventId} {
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.keys().hasOnly([
+          'userId', 'referralLinkId', 'type', 'contactPhone', 'createdAt',
+        ]);
+      allow read: if request.auth != null;
+      allow update, delete: if false;
+    }
+    match /notifications/{id} {
+      allow read: if signedIn() && resource.data.userId == request.auth.uid;
+      allow create: if false; // server-side only via Admin SDK
+      allow update: if signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).changedKeys().hasOnly(['read', 'readAt']);
+      allow delete: if false;
+    }
+    // polls previously had a second, conflicting `match` block later in this
+    // file (status/creatorId-based, admin-only create). Removed as the stale
+    // duplicate: apps/mobile_flutter/lib/features/polls/repositories/
+    // poll_repository.dart queries `visible == true` and increments
+    // `voteCounts.$option`, matching this block, not the other one.
+    match /polls/{pollId} {
+      allow read: if resource.data.visible == true || signedIn();
+      allow create, delete: if false;
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).changedKeys()
+            .hasOnly(['voteCounts', 'updatedAt']);
+      match /votes/{userId} {
+        allow read: if signedIn() && request.auth.uid == userId;
+        allow create: if signedIn()
+          && request.auth.uid == userId
+          && request.resource.data.userId == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+    match /pollEvents/{eventId} {
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+    match /pollVotes/{voteId} {
+      // Voter and poll creator can read; only backend creates (via admin SDK)
+      allow read: if isSignedIn() && (
+        resource.data.voterId == request.auth.uid || isAdmin()
+      );
+      // Write-once: voters submit via backend, so only admin SDK creates
+      allow create: if isAdmin();
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+    match /businessAccounts/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /trendingSearches/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /users/{userId}/recentSearches/{searchId} {
+      allow read, write: if signedIn() && request.auth.uid == userId;
+    }
+    match /chatConversations/{conversationId} {
+      allow read: if signedIn()
+        && request.auth.uid in resource.data.participantIds;
+      allow create: if signedIn()
+        && request.auth.uid in request.resource.data.participantIds
+        && request.resource.data.participantIds.size() == 2;
+      allow update: if signedIn()
+        && request.auth.uid in resource.data.participantIds
+        && request.resource.data.diff(resource.data).changedKeys()
+            .hasOnly(['lastMessage', 'lastSenderId', 'updatedAt',
+                      'unreadCounts', 'typing']);
+      allow delete: if false;
+      match /chatMessages/{messageId} {
+        allow read: if signedIn()
+          && request.auth.uid in get(/databases/$(database)/documents/chatConversations/$(conversationId)).data.participantIds;
+        allow create: if signedIn()
+          && request.resource.data.senderId == request.auth.uid
+          && request.auth.uid in get(/databases/$(database)/documents/chatConversations/$(conversationId)).data.participantIds;
+        allow update, delete: if false;
+      }
+    }
+    match /searchIndexAuditLogs/{logId} {
+      allow read, write: if false; // Admin SDK only — search indexing audit trail
+    }
+    match /searchBackfillStatus/{statusId} {
+      allow read, write: if false; // Admin SDK only — backfill job status
+    }
+    match /adBillingAuditLogs/{logId} {
+      allow read, write: if false; // Admin SDK only — ad billing audit trail
+    }
+    match /adBillingProcessedEvents/{eventId} {
+      allow read, write: if false; // Admin SDK only — idempotency lock for ad billing
+    }
+
+    // ── Phase 7F: Creator Revenue Intelligence ────────────────────────────
+    match /creatorRevenueAuditLogs/{logId} {
+      allow read, write: if false; // Admin SDK only — creator revenue audit trail
+    }
+    match /creatorAdRevenueProcessedEvents/{eventId} {
+      allow read, write: if false; // Admin SDK only — idempotency lock for creator ad revenue
+    }
+    match /couponCommissionProcessed/{couponId} {
+      allow read, write: if false; // Admin SDK only — idempotency lock for coupon commission
+    }
+    match /creatorReputationScores/{creatorId} {
+      allow read: if true;
+      allow write: if false; // Admin SDK only — reputation score computed by CF
+    }
+
+    // ── Phase 7D: Advanced Ads Monetisation ──────────────────────────────
+    match /rewardedAdCampaigns/{campaignId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+    match /rewardedAdEvents/{eventId} {
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+    match /viewerRewards/{rewardId} {
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+      allow create, update, delete: if false;
+    }
+    match /smartCoupons/{couponId} {
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+      allow create, update, delete: if false;
+    }
+    match /viewerAdEarningStats/{userId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /creatorAdEarningStats/{creatorId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /rewardedAdAuditLogs/{logId} {
+      allow read, write: if false;
+    }
+    match /rewardedAdProcessedEvents/{eventId} {
+      allow read, write: if false;
+    }
+
+    // ── Phase 1J: Scrollable Engagement Rail ─────────────────────────────────
+    // privateLikes — visible only to the creator (creatorId) and the sender (userId)
+    match /privateLikes/{likeId} {
+      allow read: if signedIn()
+        && (request.auth.uid == resource.data.userId
+          || request.auth.uid == resource.data.creatorId);
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.userId != request.resource.data.creatorId;
+      allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+      allow update: if false;
+    }
+
+    // privateComments — subcollection under videos/{videoId}/privateComments
+    // Only the sender and the video creator can read; only the sender can write
+    match /videos/{videoId}/privateComments/{commentId} {
+      allow read: if signedIn()
+        && (request.auth.uid == resource.data.userId
+          || request.auth.uid == resource.data.creatorId);
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 500;
+      allow update, delete: if false;
+    }
+
+    // privateComments (root) — sender writes, creator reads (visibleToCreatorOnly)
+    match /privateComments/{commentId} {
+      allow read: if signedIn()
+        && (request.auth.uid == resource.data.userId
+          || request.auth.uid == resource.data.creatorId);
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.visibleToCreatorOnly == true
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 500;
+      allow update, delete: if false;
+    }
+
+    // videoReports — creator-only write, no read (admin reviews via console)
+    match /videoReports/{reportId} {
+      allow create: if signedIn()
+        && request.resource.data.reportedBy == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+
+    // userNotInterested — owner-only read/write
+    match /userNotInterested/{docId} {
+      allow read, write: if signedIn()
+        && resource.data.userId == request.auth.uid;
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+    }
+
+    // userBlocks — owner-only read/write
+    match /userBlocks/{docId} {
+      allow read: if signedIn()
+        && (resource.data.userId == request.auth.uid
+          || resource.data.blockedUid == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+      allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+      allow update: if false;
+    }
+
+    // ── Phase 1L: Zero-Wait Video Playback Engine ────────────────────────
+    match /videoPlaybackDiagnostics/{diagnosticId} {
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+    match /videoProcessingLogs/{logId} {
+      allow read, write: if false; // Admin SDK only — CF writes
+    }
+
+    // ── YCIOS — AI Creator Intelligence OS (Phase 1) ──────────────────────
+
+    // yciosProjects — creator owns; delete forbidden (archive instead)
+    match /yciosProjects/{projectId} {
+      allow read: if signedIn()
+        && resource.data.creatorId == request.auth.uid;
+      allow create: if signedIn()
+        && request.resource.data.creatorId == request.auth.uid;
+      allow update: if signedIn()
+        && resource.data.creatorId == request.auth.uid;
+      allow delete: if false;
+    }
+
+    // yciosProjectVersions — immutable; creator reads only
+    match /yciosProjectVersions/{versionId} {
+      allow read: if signedIn()
+        && resource.data.creatorId == request.auth.uid;
+      allow create: if signedIn()
+        && request.resource.data.creatorId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // yciosAssets — creator full access
+    match /yciosAssets/{assetId} {
+      allow read: if signedIn()
+        && resource.data.creatorId == request.auth.uid;
+      allow create: if signedIn()
+        && request.resource.data.creatorId == request.auth.uid;
+      allow update, delete: if signedIn()
+        && resource.data.creatorId == request.auth.uid;
+    }
+
+    // yciosRenderJobs — creator reads; CF writes via Admin SDK
+    match /yciosRenderJobs/{jobId} {
+      allow read: if signedIn()
+        && resource.data.creatorId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // yciosCreativeMemory — creator reads; CF writes via Admin SDK
+    match /yciosCreativeMemory/{memoryId} {
+      allow read: if signedIn()
+        && resource.data.creatorId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // yciosAgentTasks — creator reads; CF writes via Admin SDK
+    match /yciosAgentTasks/{taskId} {
+      allow read: if signedIn()
+        && resource.data.creatorId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // yciosCredits — creator reads; CF writes via Admin SDK (financial compliance)
+    match /yciosCredits/{creditId} {
+      allow read: if signedIn()
+        && resource.data.creatorId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // appPerformanceDiagnostics — Phase 1P: user creates own diagnostics; no client reads
+    match /appPerformanceDiagnostics/{diagnosticId} {
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+
+    // contextActionEvents — Phase 1R: user creates own impression/acceptance/dismissal events
+    match /contextActionEvents/{eventId} {
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+
+    match /streamRoutePolicies/{policyId} {
+      allow read: if isCreator() || isAdmin();
+      allow create, update: if isCreator() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /streamHealth/{sessionId} {
+      allow read: if isCreator() || isAdmin();
+      allow create, update: if isCreator() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /trafficCampaigns/{campaignId} {
+      allow read: if isCreator() || isAdmin();
+      allow create, update: if isCreator() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /conversionEvents/{conversionId} {
+      allow read: if isCreator() || isAdmin();
+      allow create: if signedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    match /giftEvents/{giftId} {
+      allow read: if isCreator() || isAdmin();
+      allow create: if signedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    match /paidMessages/{messageId} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    match /paymentIdempotencyKeys/{keyId} {
+      allow read, write: if false;
+    }
+
+    match /ledgerEntries/{entryId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /trafficEvents/{eventId} {
+      allow read: if isCreator() || isAdmin();
+      allow create: if signedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    match /growthRecommendations/{recommendationId} {
+      allow read: if isCreator() || isAdmin();
+      allow create, update: if isCreator() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /safeModeToggles/{toggleId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /autoResponseRules/{ruleId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /alertThresholds/{thresholdId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /sessionReplays/{replayId} {
+      allow read: if isCreator() || isAdmin();
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /clipSegments/{clipId} {
+      allow read: if isCreator() || isAdmin();
+      allow create, update: if isCreator() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /socialConnectors/{connectorId} {
+      // Creators can only read their own connectors; tokens written only by backend
+      allow read: if isSignedIn() && (
+        resource.data.creatorId == request.auth.uid || isAdmin()
+      );
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /connectorHealthLogs/{logId} {
+      allow read: if isSignedIn() && (
+        resource.data.triggeredBy == request.auth.uid || isAdmin()
+      );
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    match /mediaJobs/{jobId} {
+      // Creators can read their own jobs; only backend may write
+      allow read: if isSignedIn() && (
+        resource.data.creatorId == request.auth.uid || isAdmin()
+      );
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── Carried forward from the previously-deployed firestore.rules ────
+    // apps/yohpal_live autonomy/growth console — confirmed live consumers in
+    // functions/src/modules/{autonomy,commandCenter,multistream}.router.ts
+    // and apps/yohpal_live/lib/features/{autonomy,multistream_v2}/data/*.
+    // These 5 collections existed only in the deployed file and are not
+    // duplicates of anything above.
+    match /liveDestinations/{destinationId} {
+      allow read: if signedIn();
+      allow create, update: if isCreator() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /autonomyPolicies/{policyId} {
+      allow read: if isCreator() || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /autonomyDecisions/{decisionId} {
+      allow read: if isCreator() || isAdmin();
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /revenueEvents/{eventId} {
+      allow read: if isCreator() || isAdmin();
+      allow create: if signedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    match /commandCenterIncidents/{incidentId} {
+      allow read, write: if isAdmin();
+    }
+    // ── end carried-forward section ──────────────────────────────────────
+
+    match /adClicks/{clickId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    match /chatMessages/{messageId} {
+      // Signed-in viewers can read non-deleted messages
+      allow read: if isSignedIn() && resource.data.isDeleted == false;
+      // Only backend (admin SDK) may write — enforces rate-limit and mute checks
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /chatMutes/{muteId} {
+      // Only backend reads/writes mute records
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}

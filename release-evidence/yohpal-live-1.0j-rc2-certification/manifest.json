@@ -1,0 +1,35 @@
+{
+  "release": "YOHPAL LIVE RELEASE 1.0J-RC2",
+  "candidate": {
+    "releaseBranch": "release/yohpal-live-1.0j-rc2",
+    "commitHash": "REPLACE_WITH_FULL_40_CHARACTER_SHA",
+    "annotatedTag": "yohpal-live-v1.0j-rc2",
+    "workingTree": "CLEAN",
+    "androidBuildId": "REPLACE",
+    "androidSha256": "REPLACE",
+    "iosBuildId": "REPLACE",
+    "iosSha256": "REPLACE",
+    "backendRevision": "REPLACE",
+    "environment": "certification"
+  },
+  "gates": {
+    "creatorIdentity": "PENDING",
+    "creatorGrid": "PENDING",
+    "categoryPrivacy": "PENDING",
+    "recommended100NoRepeat": "PENDING",
+    "following100NoRepeat": "PENDING",
+    "restartPersistence": "PENDING",
+    "crossDeviceSync": "PENDING",
+    "intentionalReplay": "PENDING",
+    "iosFeedParity": "PENDING",
+    "androidFeedParity": "PENDING",
+    "immersiveFeedRegression": "PENDING",
+    "engagementRegression": "PENDING",
+    "creatorAggregateReconciliation": "PENDING",
+    "minorSafetyRegression": "PENDING",
+    "accessibility": "PENDING",
+    "crashlytics": "PENDING",
+    "security": "PENDING",
+    "defectRegister": "PENDING"
+  }
+}

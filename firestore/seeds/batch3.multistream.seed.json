@@ -1,0 +1,28 @@
+{
+  "liveSessions": [
+    {
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "title": "Demo AI Multistream",
+      "description": "Demo session for YohPal Live multistreaming.",
+      "category": "demo",
+      "status": "draft",
+      "streamMode": "teaser",
+      "createdBy": "REPLACE_WITH_CREATOR_UID",
+      "updatedBy": "REPLACE_WITH_CREATOR_UID"
+    }
+  ],
+  "liveDestinations": [
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "platform": "youtube",
+      "destinationName": "Demo YouTube Channel",
+      "streamMode": "teaser",
+      "status": "enabled",
+      "ctaEnabled": true,
+      "delaySeconds": 20,
+      "createdBy": "REPLACE_WITH_CREATOR_UID",
+      "updatedBy": "REPLACE_WITH_CREATOR_UID"
+    }
+  ]
+}

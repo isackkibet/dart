@@ -1,0 +1,154 @@
+--- PAGE 1 ---
+Daniel Macharia <danielmacharia43@gmail.com>
+Live Streaming Gap Report (6 Jul 2026).
+Daniel Macharia <danielmacharia43@gmail.com> Mon, 6 Jul at 19:34
+To: <daniel@ics.ac.ke>
+I’ve reviewed the Live Streaming Gap Report (6 Jul 2026).
+This is the first YohPal module that I would not approve for production in its current state.
+Unlike the main YohPal Live application, whose recent reports show it approaching production readiness, the Live Streaming module still
+contains four unresolved blocking defects in the Flutter client, even though the server-side stack (mediasoup SFU, signaling, Docker,
+TURN, JWT authentication, tests, Android foreground service, and DevOps scripts) is reported as complete.
+Executive Assessment
+Server Side
+The report indicates the backend is production-ready:
+mediasoup SFU
+Signaling handlers
+JWT authentication
+Docker/TURN stack
+Smoke tests
+Android foreground service
+DevOps scripts
+No further server architecture work is required at this stage.
+Flutter Client
+This is where the remaining blockers exist.
+The report identifies:
+4 Blocking issues
+1 Medium issue
+1 New Medium finding
+and concludes:
+“Module not ready for integration or testing.”
+Priority Analysis
+BLOCKER 1
+Missing
+flutter/pubspec.yaml
+Without this:
+module cannot compile
+package cannot resolve
+CI cannot build
+This must be fixed first.
+BLOCKER 2
+Infinite recursion
+YohPalPeerFactory.createPeerConnection()
+The factory method recursively calls itself, resulting in a StackOverflow every time a peer connection is created. This affects both
+
+--- PAGE 2 ---
+broadcaster and viewer controllers.
+BLOCKER 3
+DTLS echo bug
+This is the most serious streaming issue.
+Instead of sending the client’s DTLS fingerprint, the Flutter client echoes the server’s fingerprint back during connectTransport, preventing
+the DTLS handshake from completing.
+The result is:
+no media flow
+viewers receive no video
+broadcasters cannot stream
+The report estimates this fix at approximately 2 hours.
+BLOCKER 4
+Deprecated
+Color.withOpacity()
+Nine occurrences remain.
+Current impact:
+build warnings
+Future impact:
+Flutter 4 build failure
+These should be replaced with:
+withValues(alpha: ...)
+Medium
+Signaling requests currently have no timeout.
+If the server never replies:
+the UI can remain loading indefinitely.
+Adding a timeout prevents controllers from hanging.
+New Finding
+YohPalRemoteMediaAttacher is currently unused.
+The report recommends either:
+wiring it into the viewer consume flow, or
+removing it after the DTLS fix is completed.
+My Recommendation
+I would not integrate Live Streaming into the production application yet.
+I would first complete a dedicated stabilization sprint focused only on Live Streaming.
+This avoids introducing instability into the otherwise production-ready YohPal Live application.
+Revised Readiness
+
+--- PAGE 3 ---
+Component Readiness
+Main YohPal Live App 99–100%
+Theme System 98%
+Zero-Wait Feed 99%
+Wallet 100%
+YCIOS 98%
+Live Streaming Flutter Client ≈75%
+Live Streaming Server 100%
+The Live Streaming Flutter client is now the primary engineering blocker.
+NEXT SMART MOVE
+Build: YOHPAL LIVE STREAMING PHASE LS-1 — CLIENT STABILIZATION SPRINT
+Scope:
+Sprint A — Build Foundation
+- Create flutter/pubspec.yaml
+- Verify standalone module build
+- Verify dependency resolution
+Sprint B — RTC Stability
+- Rename YohPalPeerFactory.createPeerConnection()
+to buildPeerConnection()
+- Update all broadcaster/viewer call sites
+- Eliminate recursion
+Sprint C — DTLS Transport Fix
+- Generate client SDP
+- Extract client fingerprint
+- Send client DTLS parameters
+- Validate media flow
+- Verify broadcaster → viewer stream
+Sprint D — Flutter Modernization
+- Replace all Color.withOpacity()
+with withValues(alpha:)
+- Remove Flutter 4 deprecation warnings
+Sprint E — Signaling Stability
+- Add timeout(Duration(seconds:10))
+to signaling requests
+- Display retry UI
+- Prevent indefinite loading
+Sprint F — Remote Media
+- Integrate YohPalRemoteMediaAttacher
+into viewer consume flow
+- Remove dead code
+- Validate remote renderer
+Sprint G — Certification
+- flutter analyze
+- flutter test
+- Android streaming test
+- iPhone streaming test
+- 30-minute continuous live stream
+- Multiple viewers
+
+--- PAGE 4 ---
+- Reconnection tests
+- Background/foreground transitions
+Deliverables:
+- Live Streaming Stabilization Report
+- Streaming Performance Report
+- WebRTC Certification Report
+- DTLS Validation Report
+- Android/iOS Streaming Benchmark
+- Live Streaming Production Certificate
+Success Criteria:
+Standalone module builds successfully
+No recursion
+DTLS handshake succeeds
+Media flows correctly
+No Flutter 4 deprecation warnings
+Signaling cannot hang indefinitely
+Remote media attaches correctly
+Android and iOS streaming validated
+Ready for integration into YohPal Live
+Outcome:
+The Live Streaming module becomes production-ready and can then be integrated into the already mature YohPal
+Live platform without introducing instability.

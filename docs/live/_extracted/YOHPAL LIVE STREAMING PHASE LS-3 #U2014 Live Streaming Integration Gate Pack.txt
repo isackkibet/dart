@@ -1,0 +1,366 @@
+--- PAGE 1 ---
+Daniel Macharia <danielmacharia43@gmail.com>
+YOHPAL LIVE STREAMING PHASE LS-3 — Live Streaming Integration Gate Pack.
+Daniel Macharia <danielmacharia43@gmail.com> Mon, 6 Jul at 19:36
+To: <daniel@ics.ac.ke>
+Below is the YOHPAL LIVE STREAMING PHASE LS-3 — Live Streaming Integration Gate Pack.
+This must only proceed after LS-2 evidence is returned, because the latest audit states the module is not ready for integration or testing
+until Flutter client blockers such as pubspec, peer factory recursion, DTLS flow, deprecated APIs, signaling timeout, and remote media
+handling are closed.
+YOHPAL LIVE STREAMING PHASE LS-3 — Live Streaming Integration
+Gate
+1. Required Feature Flag
+lib/features/live_streaming/live_streaming_flags.dart
+class LiveStreamingFlags {
+static const bool enabled = bool.fromEnvironment(
+'YOHPAL_LIVE_STREAMING_ENABLED',
+defaultValue: false,
+);
+static const bool giftsEnabled = bool.fromEnvironment(
+'YOHPAL_LIVE_GIFTS_ENABLED',
+defaultValue: false,
+);
+static const bool chatEnabled = bool.fromEnvironment(
+'YOHPAL_LIVE_CHAT_ENABLED',
+defaultValue: true,
+);
+}
+2. Navigation Gate
+Add route constant
+class AppRoutes {
+static const liveStreaming = '/live-streaming';
+static const goLive = '/go-live';
+static const liveViewer = '/live-viewer';
+}
+Navigation guard
+import 'package:flutter/material.dart';
+import 'live_streaming_flags.dart';
+class LiveStreamingGate extends StatelessWidget {
+final Widget child;
+const LiveStreamingGate({
+super.key,
+required this.child,
+});
+@override
+Widget build(BuildContext context) {
+if (!LiveStreamingFlags.enabled) {
+return const Scaffold(
+body: Center(
+child: Text('Live Streaming is coming soon.'),
+),
+);
+}
+return child;
+}
+
+--- PAGE 2 ---
+}
+3. Live Streaming Hub Screen
+lib/features/live_streaming/screens/live_streaming_hub_screen.dart
+import 'package:flutter/material.dart';
+import '../live_streaming_flags.dart';
+class LiveStreamingHubScreen extends StatelessWidget {
+const LiveStreamingHubScreen({super.key});
+@override
+Widget build(BuildContext context) {
+if (!LiveStreamingFlags.enabled) {
+return const Scaffold(
+body: Center(child: Text('Live Streaming is currently disabled.')),
+);
+}
+return Scaffold(
+appBar: AppBar(title: const Text('YohPal Live Streaming')),
+body: ListView(
+padding: const EdgeInsets.all(16),
+children: [
+ElevatedButton.icon(
+onPressed: () {
+Navigator.pushNamed(context, '/go-live');
+},
+icon: const Icon(Icons.videocam),
+label: const Text('Go Live'),
+),
+const SizedBox(height: 12),
+ElevatedButton.icon(
+onPressed: () {
+Navigator.pushNamed(context, '/live-viewer');
+},
+icon: const Icon(Icons.live_tv),
+label: const Text('Watch Live'),
+),
+],
+),
+);
+}
+}
+4. Creator Starts Live Flow
+lib/features/live_streaming/screens/go_live_screen.dart
+import 'package:flutter/material.dart';
+class GoLiveScreen extends StatefulWidget {
+const GoLiveScreen({super.key});
+@override
+State<GoLiveScreen> createState() => _GoLiveScreenState();
+}
+class _GoLiveScreenState extends State<GoLiveScreen> {
+bool _starting = false;
+bool _live = false;
+String? _error;
+Future<void> _startLive() async {
+setState(() {
+_starting = true;
+_error = null;
+});
+try {
+// TODO: Wire to LS-2 validated YohPalBroadcasterController.
+// await broadcasterController.startBroadcast();
+setState(() {
+_live = true;
+});
+} catch (e) {
+setState(() {
+_error = 'Unable to start live stream. Please try again.';
+});
+
+--- PAGE 3 ---
+} finally {
+setState(() {
+_starting = false;
+});
+}
+}
+Future<void> _endLive() async {
+// TODO: await broadcasterController.stopBroadcast();
+setState(() => _live = false);
+}
+@override
+Widget build(BuildContext context) {
+return Scaffold(
+appBar: AppBar(
+title: const Text('Go Live'),
+),
+body: Padding(
+padding: const EdgeInsets.all(16),
+child: Column(
+children: [
+if (_error != null)
+Text(
+_error!,
+style: const TextStyle(color: Colors.red),
+),
+const Spacer(),
+Icon(
+_live ? Icons.radio_button_checked : Icons.videocam,
+size: 80,
+color: Theme.of(context).colorScheme.primary,
+),
+const SizedBox(height: 24),
+Text(
+_live ? 'You are live' : 'Ready to go live?',
+style: Theme.of(context).textTheme.headlineSmall,
+),
+const Spacer(),
+ElevatedButton(
+onPressed: _starting ? null : (_live ? _endLive : _startLive),
+child: Text(
+_starting
+? 'Starting...'
+: _live
+? 'End Stream'
+: 'Start Live',
+),
+),
+],
+),
+),
+);
+}
+}
+5. Viewer Joins Live Flow
+lib/features/live_streaming/screens/live_viewer_screen.dart
+import 'package:flutter/material.dart';
+import '../widgets/live_chat_panel.dart';
+import '../widgets/live_gift_button.dart';
+class LiveViewerScreen extends StatefulWidget {
+const LiveViewerScreen({super.key});
+@override
+State<LiveViewerScreen> createState() => _LiveViewerScreenState();
+}
+class _LiveViewerScreenState extends State<LiveViewerScreen> {
+bool _joining = true;
+bool _connected = false;
+String? _error;
+@override
+void initState() {
+super.initState();
+_joinLive();
+}
+Future<void> _joinLive() async {
+try {
+
+--- PAGE 4 ---
+// TODO: Wire to LS-2 validated YohPalViewerController.
+// await viewerController.joinAndConsume();
+setState(() {
+_connected = true;
+});
+} catch (_) {
+setState(() {
+_error = 'Unable to join live stream.';
+});
+} finally {
+setState(() {
+_joining = false;
+});
+}
+}
+@override
+Widget build(BuildContext context) {
+if (_joining) {
+return const Scaffold(
+body: Center(child: CircularProgressIndicator()),
+);
+}
+if (_error != null) {
+return Scaffold(
+appBar: AppBar(title: const Text('Live')),
+body: Center(child: Text(_error!)),
+);
+}
+return Scaffold(
+appBar: AppBar(title: const Text('Live Now')),
+body: Column(
+children: [
+Expanded(
+child: Container(
+color: Colors.black,
+alignment: Alignment.center,
+child: Text(
+_connected
+? 'Remote video renderer here'
+: 'Connecting...',
+style: const TextStyle(color: Colors.white),
+),
+),
+),
+const LiveChatPanel(),
+const LiveGiftButton(),
+],
+),
+);
+}
+}
+6. Live Chat Widget
+lib/features/live_streaming/widgets/live_chat_panel.dart
+import 'package:flutter/material.dart';
+import '../live_streaming_flags.dart';
+class LiveChatPanel extends StatelessWidget {
+const LiveChatPanel({super.key});
+@override
+Widget build(BuildContext context) {
+if (!LiveStreamingFlags.chatEnabled) {
+return const SizedBox.shrink();
+}
+return Container(
+height: 120,
+padding: const EdgeInsets.all(12),
+decoration: BoxDecoration(
+color: Theme.of(context).colorScheme.surface,
+border: Border(
+top: BorderSide(
+color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+),
+),
+),
+child: const Column(
+
+--- PAGE 5 ---
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+Text('Live Chat'),
+SizedBox(height: 8),
+Text('Chat messages will appear here.'),
+],
+),
+);
+}
+}
+7. Gift Button
+lib/features/live_streaming/widgets/live_gift_button.dart
+import 'package:flutter/material.dart';
+import '../live_streaming_flags.dart';
+class LiveGiftButton extends StatelessWidget {
+const LiveGiftButton({super.key});
+@override
+Widget build(BuildContext context) {
+if (!LiveStreamingFlags.giftsEnabled) {
+return const SizedBox.shrink();
+}
+return Padding(
+padding: const EdgeInsets.all(12),
+child: ElevatedButton.icon(
+onPressed: () {
+// TODO: Wire to wallet/gift service after finance validation.
+},
+icon: const Icon(Icons.card_giftcard),
+label: const Text('Send Gift'),
+),
+);
+}
+}
+8. Route Registration
+routes: {
+AppRoutes.liveStreaming: (_) => const LiveStreamingGate(
+child: LiveStreamingHubScreen(),
+),
+AppRoutes.goLive: (_) => const LiveStreamingGate(
+child: GoLiveScreen(),
+),
+AppRoutes.liveViewer: (_) => const LiveStreamingGate(
+child: LiveViewerScreen(),
+),
+}
+9. Build Flags
+Disabled by default
+flutter run
+Enable live streaming for internal QA
+flutter run \
+--dart-define=YOHPAL_LIVE_STREAMING_ENABLED=true \
+--dart-define=YOHPAL_LIVE_CHAT_ENABLED=true \
+--dart-define=YOHPAL_LIVE_GIFTS_ENABLED=false
+Enable full controlled test
+flutter run \
+--dart-define=YOHPAL_LIVE_STREAMING_ENABLED=true \
+--dart-define=YOHPAL_LIVE_CHAT_ENABLED=true \
+--dart-define=YOHPAL_LIVE_GIFTS_ENABLED=true
+LS-3 Integration Validation Checklist
+
+--- PAGE 6 ---
+Gate Required Evidence Status
+LS-2 evidence received Git hash, DTLS proof, Android/iPhone proof Pending
+Live Streaming route visible Only when flag enabled Pending
+Go Live opens Creator can start live Pending
+Viewer joins Viewer can enter stream Pending
+Remote media visible Viewer receives broadcaster stream Pending
+Chat visible Chat panel loads Pending
+Gift button gated Gift hidden unless enabled Pending
+Creator ends stream Stream closes cleanly Pending
+Feature flag rollback Disabling flag hides module Pending
+Executive Rule
+Live Streaming must remain disabled in production until LS-2 is fully signed off.
+The latest audit confirms the server layer is complete, but the Flutter client was not yet integration-ready due to unresolved blocking issues.
+Next Smart Move
+Execute: YOHPAL LIVE STREAMING PHASE LS-4 — CONTROLLED STREAMING QA REPORT
+Developers must return:
+1. LS-2 signed validation report
+2. LS-3 integration commit hash
+3. Feature flag proof
+4. Creator Go Live proof
+5. Viewer receives media proof
+6. Chat proof
+7. Gift gate proof
+8. Android streaming proof
+9. iPhone streaming proof
+10. 30-minute stream stability proof
+Outcome:
+Management receives final evidence that Live Streaming is safely integrated behind a feature flag and ready for
+controlled internal QA.

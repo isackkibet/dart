@@ -1,0 +1,20 @@
+{
+  "release": "YohPal Mesh Live v1.0.1 — Canonical Root Merge",
+  "generatedAt": "2026-07-18",
+  "status": "INTEGRATION_CANDIDATE_NOT_CERTIFIED",
+  "checks": {
+    "meshControlDependencyInstall": "PASS",
+    "meshContractsBuild": "PASS",
+    "meshControlTypeScriptBuild": "PASS",
+    "meshControlApiTest": "PASS: 1/1",
+    "existingMediasoupSmokeTest": "PASS",
+    "existingMediasoupContractTest": "PASS",
+    "fullLiveStreamingModuleTest": "BLOCKED: Docker and Docker Compose unavailable",
+    "flutterAnalyze": "BLOCKED: Flutter unavailable",
+    "physicalDeviceWebRTC": "NOT_EXECUTED",
+    "turnFallback": "NOT_EXECUTED",
+    "canonicalSfuProgramComposition": "NOT_EXECUTED",
+    "protectedCi": "NOT_EXECUTED"
+  },
+  "certificationDecision": "NOT_ISSUED"
+}

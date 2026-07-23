@@ -1,0 +1,75 @@
+# DAILY DEVELOPMENT REPORT
+
+**Date:** 10 July 2026
+**Developer:** Ian Macharia
+**Project:** YohPal Live
+
+## 1. Completed Today
+
+* Reviewed the Release 1.0 patch documents (1.0A–1.0E, starter pack, Executive Verdict) against the current codebase, corrected several assumptions in them against real file paths and collections, and produced an implementation plan splitting the work into parallel tracks.
+* Implemented Release Track 1.0B — Money, Security & Wallet Reconciliation, in full:
+  * Added a server-validated gift purchase flow (`validatedGiftPurchase` Cloud Function) that checks a real price catalog and debits the sender's wallet balance before crediting a creator — closing the "client sets its own gift amount" fraud gap.
+  * Added elapsed-time verification to rewarded-ad crediting (`rewardedAdProcessor`) plus a `verifyRewardedAd` callable, mitigating spoofed ad-reward claims.
+  * Hardened Firestore rules for `gifts`, `videoStats`, `referralEvents`, and `liveSessions` so client writes can no longer set arbitrary values or edit other users' data.
+  * Replaced the unbuilt `WalletStatusScreen` placeholder with a real screen and a `yohpal://wallet-status` deep link, so users get feedback after returning from a wallet top-up/withdrawal on YohPal Web.
+  * Found and fixed a live backend bug: the M-Pesa payout function was reading/writing a `wallets` collection nothing else in the codebase populated, so every payout request failed "insufficient balance" regardless of actual balance.
+* Implemented and wired sign-out end to end (confirm dialog, loading state, correct navigation back to the login screen) — previously fully coded but unreachable from any screen.
+* Implemented real Google and Apple Sign-In (native credential exchange via Firebase, not stubs), including iOS URL scheme and Apple Sign In entitlement configuration, and platform-appropriate hiding of Apple's option on Android.
+* Caught and fixed a regression introduced by the SSO work: Google sign-out was blocking the underlying Firebase sign-out on failure, which broke logout for any user who had never used Google Sign-In.
+* Redesigned the login and signup screens: removed the boxed card layout, added the brand mark, restyled the form fields, added a "Forgot password" entry point (stubbed), an "or continue with" divider, and the Google/Apple sign-in tiles.
+* Added a required Terms & Conditions acceptance step to signup, including a real Terms & Conditions screen, plus a confirm-password field and a first/last name split on the signup form.
+* Wrote a full implementation status report re-verifying the codebase against every Critical/High/Medium/Low finding in the Production Readiness Review, published as both an HTML artifact and a PDF in `docs/`.
+
+## 2. In Progress
+
+* None actively in progress — today's scoped work (Release Track 1.0B plus the auth/SSO work) is complete and verified (`flutter analyze` clean, all 25 existing tests passing, TypeScript build and Cloud Functions test suite passing).
+
+## 3. Blockers / Risks
+
+* Release Tracks 1.0A (remaining items), 1.0C, and 1.0D have not been started. Notably, the Critical Analytics-route crash and the complete absence of crash reporting are both still unresolved and were not touched today.
+* No automated test coverage was added for any of today's new code — the gift-purchase Cloud Function, wallet reconciliation flow, and both SSO paths currently ship with zero tests.
+* Google and Apple Sign-In have not been exercised on a real device or simulator; correctness of the OAuth round-trip is unverified. Both also depend on Firebase console (provider enablement) and Apple Developer portal (Sign in with Apple capability) configuration outside the codebase, which could not be confirmed from source.
+* Production infrastructure URLs remain hardcoded with no environment split, so none of today's backend changes can be rotated or staged without an app release.
+
+## 4. Files / Components Changed
+
+* `backend/firebase_functions/src/revenue/validatedGiftPurchase.ts` (new), `mpesaPayoutTrigger.ts` (bug fix)
+* `backend/firebase_functions/src/ads/verifyRewardedAd.ts` (new), `rewardedAdProcessor.ts` (elapsed-time check)
+* `firestore/rules/firestore.rules` — gifts, videoStats, referralEvents, liveSessions
+* `lib/features/wallet_web/screens/wallet_status_screen.dart`, `lib/core/deep_links/yohpal_deep_link_service.dart` (new)
+* `lib/features/creator_profile/screens/creator_profile_screen.dart` — sign-out
+* `lib/features/auth/repositories/auth_repository.dart`, `auth_controller.dart` — Google/Apple sign-in, sign-out fix
+* `lib/features/auth/screens/login_screen.dart`, `signup_screen.dart`, `terms_and_conditions_screen.dart` (new)
+* `lib/features/auth/widgets/sso_button_row.dart`, `sso_divider.dart` (new)
+* `lib/features/live_streaming/widgets/live_gift_panel.dart`, `repositories/live_gift_repository.dart`
+* `lib/features/ads/controllers/rewarded_ads_controller.dart`, `repositories/rewarded_ads_repository.dart`
+* `ios/Runner/Info.plist`, `ios/Runner/Runner.entitlements`, `pubspec.yaml`
+* `docs/IMPLEMENTATION_STATUS_REPORT.html`, `docs/IMPLEMENTATION_STATUS_REPORT.pdf`
+
+## 5. Testing Status
+
+* `flutter analyze`: clean (one pre-existing, unrelated deprecation notice).
+* `flutter test`: 25/25 passing — unchanged from before today, no new tests added.
+* Cloud Functions: `tsc` build clean, Jest suite 36/36 passing.
+* Google/Apple Sign-In: not yet tested on a real device.
+
+## 6. Next Actions (Next 24 Hours)
+
+* Add crash reporting (Crashlytics) and a global error boundary in `main.dart` — highest-leverage remaining Critical item.
+* Fix the Analytics route crash on the Profile tab (`profile_hub_screen.dart:100`).
+* Implement password reset — the "Forgot password" entry point already exists and is discoverable, it just doesn't do anything yet.
+* Add automated test coverage for the gift-purchase flow, wallet reconciliation, and both SSO paths.
+* Wire Search and Live Discovery into navigation — both backends already work, this is the highest-value item remaining on the original review.
+* Verify Google/Apple Sign-In on a real device, and confirm Firebase console + Apple Developer portal configuration.
+
+## 7. Overall Project Status
+
+**Current Project Completion (against Production Readiness Review findings)**
+
+* Critical findings: 4 of 9 fixed, 1 mitigated, 4 still open (Analytics crash, no crash reporting, no password reset, hardcoded env config)
+* High findings: 0 of 13 fully fixed, 1 partial
+* Medium findings: 1 of 14 fixed
+* Low findings: 1 of 4 fixed
+* Release Track 1.0B: Completed
+* Release Tracks 1.0A / 1.0C / 1.0D: Not started
+* Authentication (sign-out, Google/Apple SSO, Terms & Conditions): Implemented, pending device verification

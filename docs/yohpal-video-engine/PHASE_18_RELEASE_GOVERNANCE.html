@@ -1,0 +1,676 @@
+<title>YohPal Platform Phase 18 — Unified Ecosystem Release Governance</title>
+<style>
+  :root {
+    --gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);
+    --ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;
+    --paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;
+    --pass:#1b5e20;--pass-bg:#e8f5e9;
+    --pend:#78350f;--pend-bg:#fef3c7;
+    --fail:#b71c1c;--fail-bg:#fce4e4;
+    --info:#0d47a1;--info-bg:#e8eef7;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+    --radius:2px;--doc-max:900px;
+  }
+  @media(prefers-color-scheme:dark){:root{
+    --gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);
+    --ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;
+    --paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;
+    --pass:#4caf50;--pass-bg:#1b2e1c;
+    --pend:#fbbf24;--pend-bg:#1f1600;
+    --fail:#ef5350;--fail-bg:#2d1212;
+    --info:#90caf9;--info-bg:#0d1e33;
+  }}
+  :root[data-theme="light"]{--gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);--ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;--paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;--pass:#1b5e20;--pass-bg:#e8f5e9;--pend:#78350f;--pend-bg:#fef3c7;--fail:#b71c1c;--fail-bg:#fce4e4;--info:#0d47a1;--info-bg:#e8eef7;}
+  :root[data-theme="dark"]{--gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);--ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;--paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;--pass:#4caf50;--pass-bg:#1b2e1c;--pend:#fbbf24;--pend-bg:#1f1600;--fail:#ef5350;--fail-bg:#2d1212;--info:#90caf9;--info-bg:#0d1e33;}
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif;font-size:13.5px;line-height:1.65;background:var(--paper);color:var(--ink);padding-bottom:5rem;}
+
+  .print-bar{position:sticky;top:0;z-index:100;background:var(--paper-2);border-bottom:1px solid var(--paper-3);padding:.45rem 1.5rem;display:flex;align-items:center;gap:1rem;font-size:11px;color:var(--ink-3);}
+  .print-bar .brand{font-weight:700;color:var(--gold-text);letter-spacing:.06em;font-size:12px;}
+  .print-bar .spacer{flex:1;}
+  .print-bar .verdict{font-weight:700;font-size:10px;letter-spacing:.08em;padding:.2rem .65rem;border-radius:var(--radius);background:var(--gold-dim);color:var(--gold-text);border:1px solid var(--gold);text-transform:uppercase;}
+  .dl-btn{background:var(--gold);color:#fff;border:none;padding:.3rem 1rem;border-radius:var(--radius);font-size:11px;font-weight:700;letter-spacing:.06em;cursor:pointer;text-transform:uppercase;}
+  .dl-btn:hover{background:var(--gold-2);}
+
+  .doc{max-width:var(--doc-max);margin:0 auto;padding:2.5rem 1.5rem 0;}
+
+  .masthead{border-top:3px solid var(--gold);border-bottom:3px solid var(--gold);padding:1.1rem 0 1rem;margin-bottom:1.75rem;position:relative;}
+  .masthead::after{content:'';display:block;height:1px;background:var(--gold);position:absolute;bottom:5px;left:0;right:0;opacity:.35;}
+  .masthead .eyebrow{font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.3rem;}
+  .masthead h1{font-family:Georgia,'Times New Roman',serif;font-size:1.6rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.65rem;text-wrap:balance;}
+  .meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.25rem .75rem;font-size:11.5px;color:var(--ink-3);}
+  .meta-grid .m{display:flex;gap:.3rem;}
+  .meta-grid strong{color:var(--ink-2);}
+
+  .applies{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.5rem;}
+  .mod-tag{font-size:10px;font-weight:700;letter-spacing:.05em;padding:.2rem .6rem;border-radius:var(--radius);border:1px solid var(--gold);color:var(--gold-text);background:var(--gold-dim);text-transform:uppercase;}
+
+  .section{margin-bottom:1.75rem;}
+  .sh{font-family:Georgia,'Times New Roman',serif;font-size:.95rem;font-weight:700;color:var(--ink);padding-bottom:.35rem;border-bottom:1px solid var(--gold);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem;}
+  .sh .sn{background:var(--gold);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:system-ui,sans-serif;}
+
+  /* Objectives strip */
+  .obj-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--paper-3);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem;}
+  .obj-cell{padding:.65rem .5rem;text-align:center;border-right:1px solid var(--paper-3);background:var(--gold-dim);}
+  .obj-cell:last-child{border-right:none;}
+  .obj-cell .oi{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.25rem;}
+  .obj-cell .ov{font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.3;}
+
+  /* Release lifecycle */
+  .lifecycle{display:flex;flex-direction:column;align-items:flex-start;gap:0;margin-bottom:1rem;padding-left:.5rem;}
+  .lc-stage{display:flex;align-items:center;gap:.75rem;padding:.35rem 0;}
+  .lc-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+  .lc-label{font-size:12.5px;font-weight:600;color:var(--ink-2);}
+  .lc-connector{width:2px;height:14px;background:var(--gold);margin-left:4px;opacity:.45;}
+  .lc-note{font-size:10.5px;color:var(--ink-3);font-style:italic;margin-top:.2rem;margin-left:1.5rem;}
+
+  /* 9 gates */
+  .gates-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem;}
+  .gate-card{border:1px solid var(--paper-3);border-radius:var(--radius);overflow:hidden;}
+  .gate-card .gc-head{background:var(--paper-2);padding:.45rem .75rem;display:flex;align-items:center;gap:.5rem;border-bottom:1px solid var(--paper-3);}
+  .gate-card .gc-num{background:var(--gold);color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .gate-card .gc-title{font-size:12px;font-weight:700;color:var(--ink);}
+  .gate-card .gc-body{padding:.5rem .75rem;}
+  .gate-card ul{list-style:none;padding:0;margin:0;}
+  .gate-card ul li{font-size:11.5px;color:var(--ink-2);padding:.18rem 0;display:flex;gap:.5rem;align-items:baseline;}
+  .gate-card ul li::before{content:'·';color:var(--gold);font-weight:700;flex-shrink:0;}
+  .pass-fail{font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--ink-3);padding:.3rem .75rem;background:var(--paper-2);border-top:1px solid var(--paper-3);text-align:right;}
+
+  /* Release matrix */
+  .matrix-wrap{overflow-x:auto;margin-bottom:.75rem;}
+  .matrix{width:100%;border-collapse:collapse;font-size:11px;}
+  .matrix th{background:var(--paper-2);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:.4rem .45rem;border:1px solid var(--paper-3);text-align:center;white-space:nowrap;}
+  .matrix th.left{text-align:left;min-width:80px;}
+  .matrix td{padding:.4rem .45rem;border:1px solid var(--paper-3);text-align:center;vertical-align:middle;}
+  .matrix td.module{font-weight:700;color:var(--ink);background:var(--paper-2);text-align:left;white-space:nowrap;font-size:12px;}
+  .chk{display:inline-block;width:13px;height:13px;border:1.5px solid var(--paper-3);border-radius:2px;background:var(--paper);}
+
+  /* Risk register */
+  .ev-wrap{overflow-x:auto;margin-bottom:.75rem;}
+  .ev{width:100%;border-collapse:collapse;}
+  .ev th{background:var(--paper-2);font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:.4rem .6rem;text-align:left;border:1px solid var(--paper-3);white-space:nowrap;}
+  .ev td{padding:.45rem .6rem;border:1px solid var(--paper-3);vertical-align:middle;font-size:12px;color:var(--ink-2);}
+  .ev td:first-child{font-weight:600;background:var(--paper-2);color:var(--ink);}
+
+  /* Chips */
+  .chip{display:inline-flex;align-items:center;padding:.12rem .4rem;border-radius:var(--radius);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+  .chip.pass{background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass);}
+  .chip.pend{background:var(--pend-bg);color:var(--pend);border:1px solid var(--pend);}
+  .chip.fail{background:var(--fail-bg);color:var(--fail);border:1px solid var(--fail);}
+  .chip.gold{background:var(--gold-dim);color:var(--gold-text);border:1px solid var(--gold);}
+
+  /* Rollback levels */
+  .rollback-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-bottom:.75rem;}
+  .rb-card{border-radius:var(--radius);overflow:hidden;border:1px solid var(--paper-3);}
+  .rb-head{padding:.5rem .75rem;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;}
+  .rb-l1 .rb-head{background:var(--pass-bg);color:var(--pass);border-bottom:1px solid var(--pass);}
+  .rb-l2 .rb-head{background:var(--pend-bg);color:var(--pend);border-bottom:1px solid var(--pend);}
+  .rb-l3 .rb-head{background:var(--fail-bg);color:var(--fail);border-bottom:1px solid var(--fail);}
+  .rb-body{padding:.5rem .75rem;background:var(--paper-2);}
+  .rb-body p{font-size:12px;color:var(--ink-2);margin-bottom:.25rem;font-weight:600;}
+  .rb-body ul{list-style:none;padding:0;}
+  .rb-body ul li{font-size:11.5px;color:var(--ink-3);padding:.1rem 0;}
+
+  /* Approval workflow */
+  .workflow{display:flex;flex-direction:column;gap:0;margin-bottom:.75rem;max-width:380px;}
+  .wf-step{display:flex;align-items:center;gap:.75rem;}
+  .wf-node{width:10px;height:10px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+  .wf-label{font-size:12.5px;color:var(--ink-2);}
+  .wf-label em{font-size:10.5px;color:var(--ink-3);font-style:normal;margin-left:.35rem;}
+  .wf-line{width:2px;height:16px;background:var(--gold);margin-left:4px;opacity:.4;}
+
+  /* Certificate */
+  .cert{border:2px solid var(--gold);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;background:var(--gold-dim);}
+  .cert-head{font-family:Georgia,'Times New Roman',serif;font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid var(--gold);}
+  .cert-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3rem .75rem;font-size:11.5px;color:var(--ink-3);margin-bottom:.85rem;}
+  .cert-meta strong{color:var(--ink-2);}
+  .cert-tables{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+  .cert-table{width:100%;border-collapse:collapse;}
+  .cert-table th{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);background:rgba(0,0,0,.04);padding:.3rem .5rem;border:1px solid var(--paper-3);text-align:left;}
+  .cert-table td{padding:.35rem .5rem;border:1px solid var(--paper-3);font-size:11.5px;color:var(--ink-2);}
+  .cert-table td:first-child{background:var(--paper-2);font-weight:600;color:var(--ink);}
+
+  /* Governance rules */
+  .rule-list{list-style:none;padding:0;margin-bottom:.75rem;}
+  .rule-list li{font-size:12.5px;color:var(--ink-2);padding:.35rem 0 .35rem 1rem;border-bottom:1px solid var(--paper-3);position:relative;}
+  .rule-list li:last-child{border-bottom:none;}
+  .rule-list li::before{content:'✕';color:var(--fail);font-weight:700;font-size:10px;position:absolute;left:0;top:.45rem;}
+
+  /* Strategic note */
+  .strategic{background:var(--gold-dim);border:1px solid var(--gold);border-left:4px solid var(--gold);border-radius:0 var(--radius) var(--radius) 0;padding:.85rem 1rem;margin-bottom:1.25rem;}
+  .strategic h3{font-size:10px;font-weight:700;color:var(--gold-text);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.4rem;}
+  .strategic p{font-size:12.5px;color:var(--ink-2);line-height:1.7;}
+
+  /* Phase 19 teaser */
+  .next-phase{border:2px solid var(--gold);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;background:var(--gold-dim);}
+  .next-phase .np-eyebrow{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.3rem;}
+  .next-phase h2{font-family:Georgia,'Times New Roman',serif;font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.85rem;}
+  .scope-list{list-style:none;padding:0;margin-bottom:.85rem;}
+  .scope-list li{font-size:12.5px;color:var(--ink-2);padding:.3rem 0;border-bottom:1px solid var(--paper-3);display:flex;gap:.6rem;}
+  .scope-list li:last-child{border-bottom:none;}
+  .scope-list li::before{content:'→';color:var(--gold);font-weight:700;flex-shrink:0;}
+  .outcome-box{background:var(--pass-bg);border:1px solid var(--pass);border-left:4px solid var(--pass);border-radius:0 var(--radius) var(--radius) 0;padding:.75rem 1rem;}
+  .outcome-box p{font-size:12.5px;color:var(--ink-2);line-height:1.7;}
+
+  .rev-table{width:100%;border-collapse:collapse;margin-top:.5rem;}
+  .rev-table th{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);background:var(--paper-2);padding:.35rem .6rem;border:1px solid var(--paper-3);text-align:left;}
+  .rev-table td{padding:.4rem .6rem;border:1px solid var(--paper-3);font-size:12px;color:var(--ink-2);}
+
+  .footer-rule{border:none;border-top:2px solid var(--gold);margin:2rem 0 0;opacity:.5;}
+
+  @media(max-width:700px){.meta-grid{grid-template-columns:1fr 1fr;}.obj-strip{grid-template-columns:1fr 1fr;}.gates-grid{grid-template-columns:1fr;}.rollback-grid{grid-template-columns:1fr;}.cert-tables{grid-template-columns:1fr;}.cert-meta{grid-template-columns:1fr 1fr;}}
+  @media print{.print-bar{display:none;}body{font-size:11.5px;padding-bottom:0;}.doc{padding:1rem .75rem 0;}.masthead h1{font-size:1.3rem;}.section{break-inside:avoid;}@page{margin:1.5cm;}}
+</style>
+
+<div class="print-bar">
+  <span class="brand">YohPal Platform</span>
+  <span class="verdict">Phase 18 — Final Governance Layer</span>
+  <span class="spacer"></span>
+  <button class="dl-btn" onclick="window.print()">Download PDF</button>
+</div>
+
+<div class="doc">
+
+  <div class="masthead">
+    <div class="eyebrow">Platform Engineering — Production Governance</div>
+    <h1>YohPal Platform Phase 18 — Unified Ecosystem Release Governance</h1>
+    <div class="meta-grid">
+      <div class="m"><strong>Version:</strong> 1.0</div>
+      <div class="m"><strong>Date:</strong> 2026-07-09</div>
+      <div class="m"><strong>Status:</strong> Governance Framework</div>
+      <div class="m"><strong>Gates:</strong> 9 unified release gates</div>
+      <div class="m"><strong>Modules:</strong> 7 + future</div>
+      <div class="m"><strong>Prerequisite:</strong> Phase 17 Validated</div>
+    </div>
+  </div>
+
+  <!-- Applies to -->
+  <div class="applies">
+    <span class="mod-tag">YohPal Live</span>
+    <span class="mod-tag">YohPal Hustle</span>
+    <span class="mod-tag">YohPal Jobs</span>
+    <span class="mod-tag">YohPal Market</span>
+    <span class="mod-tag">YohPal Wallet</span>
+    <span class="mod-tag">YohPal Brain</span>
+    <span class="mod-tag">YCIOS</span>
+    <span class="mod-tag">Future Modules</span>
+  </div>
+
+  <!-- 1. Purpose -->
+  <div class="section">
+    <div class="sh"><span class="sn">1</span>Purpose</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.85rem;">This document establishes one production governance model for every YohPal application. No module may enter production outside of this framework.</p>
+    <div class="obj-strip">
+      <div class="obj-cell"><div class="oi">01</div><div class="ov">One Release Process</div></div>
+      <div class="obj-cell"><div class="oi">02</div><div class="ov">One Approval Workflow</div></div>
+      <div class="obj-cell"><div class="oi">03</div><div class="ov">One Production Standard</div></div>
+      <div class="obj-cell"><div class="oi">04</div><div class="ov">One Rollback Framework</div></div>
+      <div class="obj-cell"><div class="oi">05</div><div class="ov">One Executive Approval</div></div>
+    </div>
+  </div>
+
+  <!-- 2. Release Lifecycle -->
+  <div class="section">
+    <div class="sh"><span class="sn">2</span>Ecosystem Release Lifecycle</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.85rem;">No module may skip a stage without an approved exception recorded in the Risk Register.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 2rem;">
+      <div class="lifecycle">
+        <div class="lc-stage"><div class="lc-dot"></div><div class="lc-label">Architecture Review</div></div>
+        <div class="lc-connector"></div>
+        <div class="lc-stage"><div class="lc-dot"></div><div class="lc-label">Development</div></div>
+        <div class="lc-connector"></div>
+        <div class="lc-stage"><div class="lc-dot"></div><div class="lc-label">Code Review</div></div>
+        <div class="lc-connector"></div>
+        <div class="lc-stage"><div class="lc-dot"></div><div class="lc-label">Automated Testing</div></div>
+        <div class="lc-connector"></div>
+        <div class="lc-stage"><div class="lc-dot"></div><div class="lc-label">Security Review</div></div>
+      </div>
+      <div class="lifecycle">
+        <div class="lc-stage"><div class="lc-dot"></div><div class="lc-label">Staging</div></div>
+        <div class="lc-connector"></div>
+        <div class="lc-stage"><div class="lc-dot"></div><div class="lc-label">Controlled Pilot</div></div>
+        <div class="lc-connector"></div>
+        <div class="lc-stage"><div class="lc-dot"></div><div class="lc-label">Production Approval</div></div>
+        <div class="lc-connector"></div>
+        <div class="lc-stage"><div class="lc-dot"></div><div class="lc-label">Progressive Rollout</div></div>
+        <div class="lc-connector"></div>
+        <div class="lc-stage"><div class="lc-dot"></div><div class="lc-label">Mission Control Monitoring → Production Review</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Nine Release Gates -->
+  <div class="section">
+    <div class="sh"><span class="sn">3</span>Unified Release Gates</div>
+    <div class="gates-grid">
+
+      <div class="gate-card">
+        <div class="gc-head"><span class="gc-num">1</span><span class="gc-title">Architecture</span></div>
+        <div class="gc-body"><ul>
+          <li>Architecture Decision Records (ADRs) filed</li>
+          <li>Blueprint alignment confirmed</li>
+          <li>Platform service usage (no duplicates)</li>
+          <li>Dependency review complete</li>
+        </ul></div>
+        <div class="pass-fail">PASS / FAIL</div>
+      </div>
+
+      <div class="gate-card">
+        <div class="gc-head"><span class="gc-num">2</span><span class="gc-title">Build</span></div>
+        <div class="gc-body"><ul>
+          <li>flutter analyze — no blocking issues</li>
+          <li>flutter test — all tests pass</li>
+          <li>npm run build — no errors (where applicable)</li>
+          <li>npm test — passes (where applicable)</li>
+        </ul></div>
+        <div class="pass-fail">PASS / FAIL</div>
+      </div>
+
+      <div class="gate-card">
+        <div class="gc-head"><span class="gc-num">3</span><span class="gc-title">Security</span></div>
+        <div class="gc-body"><ul>
+          <li>Firestore rules reviewed</li>
+          <li>Storage rules reviewed</li>
+          <li>Secret management verified</li>
+          <li>Authentication &amp; authorization confirmed</li>
+          <li>Dependency vulnerabilities scanned</li>
+          <li>OWASP checks completed</li>
+        </ul></div>
+        <div class="pass-fail">PASS / FAIL</div>
+      </div>
+
+      <div class="gate-card">
+        <div class="gc-head"><span class="gc-num">4</span><span class="gc-title">Data</span></div>
+        <div class="gc-body"><ul>
+          <li>Firestore indexes deployed</li>
+          <li>Schema migrations tested</li>
+          <li>Backup readiness confirmed</li>
+          <li>Rollback compatibility verified</li>
+          <li>Data integrity validated</li>
+        </ul></div>
+        <div class="pass-fail">PASS / FAIL</div>
+      </div>
+
+      <div class="gate-card">
+        <div class="gc-head"><span class="gc-num">5</span><span class="gc-title">Wallet &amp; Finance</span></div>
+        <div class="gc-body"><ul>
+          <li>Wallet reconciliation verified</li>
+          <li>Creator payouts confirmed accurate</li>
+          <li>Gift accounting balanced</li>
+          <li>Revenue ledger reviewed</li>
+          <li>Refund handling tested</li>
+          <li>Fraud monitoring active</li>
+        </ul></div>
+        <div class="pass-fail">PASS / FAIL</div>
+      </div>
+
+      <div class="gate-card">
+        <div class="gc-head"><span class="gc-num">6</span><span class="gc-title">AI Governance</span></div>
+        <div class="gc-body"><ul>
+          <li>YohPal Brain availability confirmed</li>
+          <li>AI safety controls active</li>
+          <li>Prompt validation in place</li>
+          <li>AI audit logs enabled</li>
+          <li>AI performance within SLA</li>
+          <li>Responsible AI compliance signed off</li>
+        </ul></div>
+        <div class="pass-fail">PASS / FAIL</div>
+      </div>
+
+      <div class="gate-card">
+        <div class="gc-head"><span class="gc-num">7</span><span class="gc-title">UX</span></div>
+        <div class="gc-body"><ul>
+          <li>Day Mode &amp; Night Mode verified</li>
+          <li>Accessibility checked</li>
+          <li>Startup performance within target</li>
+          <li>Zero-wait playback confirmed</li>
+          <li>Visual QA signed off</li>
+          <li>Responsive layouts verified</li>
+        </ul></div>
+        <div class="pass-fail">PASS / FAIL</div>
+      </div>
+
+      <div class="gate-card">
+        <div class="gc-head"><span class="gc-num">8</span><span class="gc-title">Documentation</span></div>
+        <div class="gc-body"><ul>
+          <li>Master Blueprint updated</li>
+          <li>API documentation current</li>
+          <li>Deployment Runbook updated</li>
+          <li>Environment Variable Matrix current</li>
+          <li>Release Notes written</li>
+          <li>Developer Handover complete</li>
+          <li>User Documentation updated</li>
+        </ul></div>
+        <div class="pass-fail">PASS / FAIL</div>
+      </div>
+
+      <div class="gate-card" style="grid-column:1/-1;">
+        <div class="gc-head"><span class="gc-num">9</span><span class="gc-title">Operations</span></div>
+        <div class="gc-body" style="display:grid;grid-template-columns:1fr 1fr;">
+          <ul>
+            <li>Mission Control monitoring active</li>
+            <li>Alerts configured and tested</li>
+            <li>Rollback procedure confirmed</li>
+          </ul>
+          <ul>
+            <li>Disaster recovery plan current</li>
+            <li>Support readiness confirmed</li>
+            <li>Incident response plan active</li>
+          </ul>
+        </div>
+        <div class="pass-fail">PASS / FAIL</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 4. Unified Release Matrix -->
+  <div class="section">
+    <div class="sh"><span class="sn">4</span>Unified Release Matrix</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.75rem;">Every cell must be ticked before a module enters the approval workflow. A single unticked cell blocks the release.</p>
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th class="left">Module</th>
+            <th>Arch</th><th>Build</th><th>Security</th><th>Data</th>
+            <th>Wallet</th><th>AI</th><th>UX</th><th>Docs</th><th>Ops</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="module">Live</td>
+            <td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td>
+            <td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td>
+          </tr>
+          <tr><td class="module">Hustle</td>
+            <td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td>
+            <td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td>
+          </tr>
+          <tr><td class="module">Jobs</td>
+            <td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td>
+            <td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td>
+          </tr>
+          <tr><td class="module">Market</td>
+            <td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td>
+            <td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td>
+          </tr>
+          <tr><td class="module">Wallet</td>
+            <td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td>
+            <td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td>
+          </tr>
+          <tr><td class="module">Brain</td>
+            <td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td>
+            <td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td>
+          </tr>
+          <tr><td class="module">YCIOS</td>
+            <td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td>
+            <td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 5. Risk Register -->
+  <div class="section">
+    <div class="sh"><span class="sn">5</span>Ecosystem Risk Register</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.75rem;">Every release must include a completed risk register entry. Risk categories: Technical · Security · Financial · Operational · AI · Legal · Performance · Infrastructure.</p>
+    <div class="ev-wrap">
+      <table class="ev">
+        <thead><tr><th>Risk ID</th><th>Module</th><th>Category</th><th>Severity</th><th>Mitigation</th><th>Owner</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>R-001</td>
+            <td>All</td>
+            <td>Technical</td>
+            <td><span class="chip pend">Medium</span></td>
+            <td>Shared platform service outage — fallback to read-only mode</td>
+            <td>Engineering Lead</td>
+            <td><span class="chip pend">Open</span></td>
+          </tr>
+          <tr>
+            <td>R-002</td>
+            <td>Wallet / Live</td>
+            <td>Financial</td>
+            <td><span class="chip fail">High</span></td>
+            <td>All wallet writes backend-only; UnsupportedError enforced on client</td>
+            <td>Finance Lead</td>
+            <td><span class="chip pass">Mitigated</span></td>
+          </tr>
+          <tr>
+            <td>R-003</td>
+            <td>All</td>
+            <td>AI</td>
+            <td><span class="chip pend">Medium</span></td>
+            <td>All AI calls routed through BrainGateway; no direct SDK imports in modules</td>
+            <td>AI Lead</td>
+            <td><span class="chip pass">Mitigated</span></td>
+          </tr>
+          <tr>
+            <td>R-004</td>
+            <td>All</td>
+            <td>Security</td>
+            <td><span class="chip fail">High</span></td>
+            <td>Firestore rules reviewed per release; user manages deployment directly</td>
+            <td>Security Lead</td>
+            <td><span class="chip pend">Open per release</span></td>
+          </tr>
+          <tr>
+            <td>R-005</td>
+            <td>All</td>
+            <td>Operational</td>
+            <td><span class="chip pend">Medium</span></td>
+            <td>Mission Control monitors all modules; rollback procedures documented</td>
+            <td>DevOps Lead</td>
+            <td><span class="chip pend">Open</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 6. Rollback Plan -->
+  <div class="section">
+    <div class="sh"><span class="sn">6</span>Cross-Module Rollback Plan</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.75rem;">Mission Control coordinates all rollback activities. Escalation is Level 1 → Level 2 → Level 3 as impact widens.</p>
+    <div class="rollback-grid">
+      <div class="rb-card rb-l1">
+        <div class="rb-head">Level 1 — Single Module</div>
+        <div class="rb-body">
+          <p>Example: Live only</p>
+          <ul><li>Revert module release tag</li><li>Restore previous build</li><li>No shared platform impact</li><li>Mission Control notified</li></ul>
+        </div>
+      </div>
+      <div class="rb-card rb-l2">
+        <div class="rb-head">Level 2 — Shared Platform</div>
+        <div class="rb-body">
+          <p>Affects: Identity · Wallet · Brain · Search</p>
+          <ul><li>All modules impacted simultaneously</li><li>Revert platform layer commit</li><li>Finance &amp; Security leads notified</li><li>Executive informed within 15 min</li></ul>
+        </div>
+      </div>
+      <div class="rb-card rb-l3">
+        <div class="rb-head">Level 3 — Full Ecosystem</div>
+        <div class="rb-body">
+          <p>Restore previous ecosystem release</p>
+          <ul><li>All seven modules rolled back</li><li>Previous release tag restored</li><li>Executive Sponsor authorises</li><li>Incident report required within 24h</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Approval Workflow -->
+  <div class="section">
+    <div class="sh"><span class="sn">7</span>Release Approval Workflow</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+      <div class="workflow">
+        <div class="wf-step"><div class="wf-node"></div><div class="wf-label">Engineering Lead</div></div>
+        <div class="wf-line"></div>
+        <div class="wf-step"><div class="wf-node"></div><div class="wf-label">Architecture Board</div></div>
+        <div class="wf-line"></div>
+        <div class="wf-step"><div class="wf-node"></div><div class="wf-label">Security Lead</div></div>
+        <div class="wf-line"></div>
+        <div class="wf-step"><div class="wf-node"></div><div class="wf-label">QA Lead</div></div>
+        <div class="wf-line"></div>
+        <div class="wf-step"><div class="wf-node"></div><div class="wf-label">DevOps Lead</div></div>
+      </div>
+      <div class="workflow">
+        <div class="wf-step"><div class="wf-node"></div><div class="wf-label">Product Owner</div></div>
+        <div class="wf-line"></div>
+        <div class="wf-step"><div class="wf-node"></div><div class="wf-label">Finance Lead <em>(wallet changes only)</em></div></div>
+        <div class="wf-line"></div>
+        <div class="wf-step"><div class="wf-node"></div><div class="wf-label">Executive Sponsor</div></div>
+        <div class="wf-line"></div>
+        <div class="wf-step"><div class="wf-node" style="background:var(--pass);"></div><div class="wf-label" style="font-weight:700;color:var(--pass);">Production Authorisation</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Executive Release Approval Certificate -->
+  <div class="section">
+    <div class="sh"><span class="sn">8</span>Executive Release Approval Certificate</div>
+    <div class="cert">
+      <div class="cert-head">YohPal Ecosystem — Executive Release Approval Certificate</div>
+      <div class="cert-meta">
+        <div><strong>Release Version:</strong> ___________</div>
+        <div><strong>Release Candidate:</strong> ___________</div>
+        <div><strong>Date:</strong> ___________</div>
+      </div>
+      <div class="cert-tables">
+        <div>
+          <div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.4rem;">Release Gates</div>
+          <table class="cert-table">
+            <thead><tr><th>Gate</th><th>Pass</th><th>Fail</th></tr></thead>
+            <tbody>
+              <tr><td>Architecture</td><td><span class="chk"></span></td><td><span class="chk"></span></td></tr>
+              <tr><td>Build</td><td><span class="chk"></span></td><td><span class="chk"></span></td></tr>
+              <tr><td>Security</td><td><span class="chk"></span></td><td><span class="chk"></span></td></tr>
+              <tr><td>Data</td><td><span class="chk"></span></td><td><span class="chk"></span></td></tr>
+              <tr><td>Wallet &amp; Finance</td><td><span class="chk"></span></td><td><span class="chk"></span></td></tr>
+              <tr><td>AI Governance</td><td><span class="chk"></span></td><td><span class="chk"></span></td></tr>
+              <tr><td>UX</td><td><span class="chk"></span></td><td><span class="chk"></span></td></tr>
+              <tr><td>Documentation</td><td><span class="chk"></span></td><td><span class="chk"></span></td></tr>
+              <tr><td>Operations</td><td><span class="chk"></span></td><td><span class="chk"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.4rem;">Executive Authorisation</div>
+          <table class="cert-table">
+            <thead><tr><th>Role</th><th>Signed</th></tr></thead>
+            <tbody>
+              <tr><td>Engineering Lead</td><td><span class="chk"></span></td></tr>
+              <tr><td>Architecture Board</td><td><span class="chk"></span></td></tr>
+              <tr><td>Security Lead</td><td><span class="chk"></span></td></tr>
+              <tr><td>QA Lead</td><td><span class="chk"></span></td></tr>
+              <tr><td>DevOps Lead</td><td><span class="chk"></span></td></tr>
+              <tr><td>Product Owner</td><td><span class="chk"></span></td></tr>
+              <tr><td>Finance Lead</td><td><span class="chk"></span></td></tr>
+              <tr><td>Executive Sponsor</td><td><span class="chk"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Mission Control -->
+  <div class="section">
+    <div class="sh"><span class="sn">9</span>Mission Control Integration</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.75rem;">Mission Control displays ecosystem-wide health across all modules and shared services in a single operational view.</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.85rem;">
+      <div style="background:var(--paper-2);border:1px solid var(--paper-3);border-radius:var(--radius);padding:.5rem .65rem;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.5rem;">Modules</div>
+        <div style="display:flex;flex-direction:column;gap:.2rem;font-size:11.5px;color:var(--ink-2);">
+          <div>Live</div><div>Hustle</div><div>Jobs</div><div>Market</div><div>Wallet</div><div>Brain</div><div>YCIOS</div>
+        </div>
+      </div>
+      <div style="background:var(--paper-2);border:1px solid var(--paper-3);border-radius:var(--radius);padding:.5rem .65rem;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.5rem;">Platform Metrics</div>
+        <div style="display:flex;flex-direction:column;gap:.2rem;font-size:11.5px;color:var(--ink-2);">
+          <div>Availability</div><div>Performance</div><div>Security</div><div>AI Health</div>
+        </div>
+      </div>
+      <div style="background:var(--paper-2);border:1px solid var(--paper-3);border-radius:var(--radius);padding:.5rem .65rem;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.5rem;">Financial</div>
+        <div style="display:flex;flex-direction:column;gap:.2rem;font-size:11.5px;color:var(--ink-2);">
+          <div>Wallet Balance</div><div>Revenue</div><div>Creator Health</div><div>Payouts</div>
+        </div>
+      </div>
+      <div style="background:var(--paper-2);border:1px solid var(--paper-3);border-radius:var(--radius);padding:.5rem .65rem;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.5rem;">Operations</div>
+        <div style="display:flex;flex-direction:column;gap:.2rem;font-size:11.5px;color:var(--ink-2);">
+          <div>Active Incidents</div><div>Release Status</div><div>Rollback Ready</div><div>Alerts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. Governance Rules -->
+  <div class="section">
+    <div class="sh"><span class="sn">10</span>Governance Rules</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.65rem;">No YohPal module may:</p>
+    <ul class="rule-list">
+      <li>Deploy independently of the release governance process</li>
+      <li>Introduce duplicate platform services (auth, wallet, AI, search, notifications, analytics)</li>
+      <li>Bypass security review or deploy Firestore rules without review</li>
+      <li>Skip documentation updates — no release leaves docs behind</li>
+      <li>Enter production without executive approval and a signed certificate</li>
+    </ul>
+  </div>
+
+  <!-- 11. Success Criteria -->
+  <div class="section">
+    <div class="sh"><span class="sn">11</span>Success Criteria</div>
+    <div class="ev-wrap">
+      <table class="ev">
+        <thead><tr><th>Criterion</th><th>Condition</th></tr></thead>
+        <tbody>
+          <tr><td>One release process</td><td>Every module follows the same 10-stage lifecycle — no exceptions without a Risk Register entry</td></tr>
+          <tr><td>Shared platform mandatory</td><td>No module passes Gate 1 with duplicate identity, wallet, AI, or analytics services</td></tr>
+          <tr><td>Mission Control supervision</td><td>All production rollouts monitored from a single dashboard</td></tr>
+          <tr><td>Executive approval standardised</td><td>Every release carries a signed Executive Release Approval Certificate</td></tr>
+          <tr><td>Rollback unified</td><td>Level 1, 2, 3 rollback procedures tested and documented before first release under this framework</td></tr>
+          <tr><td>Documentation synchronised</td><td>Master Blueprint, API docs, Runbook, and Release Notes updated with every release</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Strategic Recommendation -->
+  <div class="strategic">
+    <h3>Strategic Recommendation</h3>
+    <p>Phase 18 is the final governance layer of the YohPal platform. After adoption, no new module should be launched without passing these nine release gates. All future work — including YohPal Hustle, Jobs, Market, and any future application — flows through this model. This gives YohPal a single operational standard that is auditable, reversible, and executive-visible from day one of every release.</p>
+  </div>
+
+  <!-- Revision History -->
+  <div class="section">
+    <div class="sh">Revision History</div>
+    <table class="rev-table">
+      <thead><tr><th>Version</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>1.0</td><td>Initial Unified Ecosystem Release Governance Framework</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Phase 19 teaser -->
+  <div class="next-phase">
+    <div class="np-eyebrow">Next Smart Move</div>
+    <h2>YohPal Platform Phase 19 — Enterprise Mission Control &amp; Digital Twin</h2>
+    <ul class="scope-list">
+      <li>Expand Mission Control into a single enterprise operations centre</li>
+      <li>Create a real-time digital twin of the entire YohPal ecosystem</li>
+      <li>Monitor all modules, shared platform services, infrastructure, AI, Wallet, Security, and user growth from one console</li>
+      <li>Add predictive risk analysis and automated operational recommendations</li>
+      <li>Cross-module incident correlation — one incident triggers ecosystem-wide impact assessment</li>
+      <li>Produce: Enterprise Operations Manual, Executive Command Dashboard, Ecosystem Digital Twin Blueprint</li>
+    </ul>
+    <div class="outcome-box">
+      <p><strong>Outcome:</strong> YohPal evolves from a unified platform into an enterprise-scale digital ecosystem with centralised operational intelligence, governance, and executive decision support. The entire ecosystem is observable, predictable, and governable from one console.</p>
+    </div>
+  </div>
+
+  <hr class="footer-rule">
+
+</div>

@@ -1,0 +1,42 @@
+{
+  "sessionReplays": [
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "status": "ready",
+      "durationSeconds": 3600,
+      "storageRef": "gs://yohpal-live/replays/REPLACE_WITH_SESSION_ID.mp4",
+      "thumbnailRef": "gs://yohpal-live/replays/thumbnails/REPLACE_WITH_SESSION_ID.jpg",
+      "createdBy": "REPLACE_WITH_CREATOR_UID",
+      "updatedBy": "REPLACE_WITH_CREATOR_UID"
+    }
+  ],
+  "clipSegments": [
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "title": "Gift Spike Moment",
+      "startOffsetSeconds": 720,
+      "endOffsetSeconds": 780,
+      "triggerEventType": "gift_spike",
+      "triggerScore": 0.85,
+      "suggestedPlatforms": ["tiktok", "instagram", "youtube"],
+      "status": "proposed",
+      "createdBy": "REPLACE_WITH_CREATOR_UID",
+      "updatedBy": "REPLACE_WITH_CREATOR_UID"
+    },
+    {
+      "sessionId": "REPLACE_WITH_SESSION_ID",
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "title": "Peak Viewer Moment",
+      "startOffsetSeconds": 1800,
+      "endOffsetSeconds": 1860,
+      "triggerEventType": "peak_viewers",
+      "triggerScore": 0.72,
+      "suggestedPlatforms": ["youtube", "facebook"],
+      "status": "proposed",
+      "createdBy": "REPLACE_WITH_CREATOR_UID",
+      "updatedBy": "REPLACE_WITH_CREATOR_UID"
+    }
+  ]
+}

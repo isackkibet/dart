@@ -1,0 +1,44 @@
+{
+  "socialConnectors": [
+    {
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "platform": "youtube",
+      "status": "connected",
+      "scopes": ["https://www.googleapis.com/auth/youtube.readonly"],
+      "externalUserId": "UC_DEMO_USER_ID",
+      "externalUsername": "yohpal_creator",
+      "externalAvatarUrl": "https://example.com/avatar.jpg",
+      "authCode": "REPLACE_WITH_AUTH_CODE"
+    },
+    {
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "platform": "tiktok",
+      "status": "connected",
+      "scopes": ["user.info.basic", "video.list"],
+      "externalUserId": "TT_DEMO_USER_ID",
+      "externalUsername": "yohpal_tiktok",
+      "externalAvatarUrl": "https://example.com/tt_avatar.jpg",
+      "authCode": "REPLACE_WITH_AUTH_CODE"
+    },
+    {
+      "creatorId": "REPLACE_WITH_CREATOR_UID",
+      "platform": "twitch",
+      "status": "disconnected",
+      "scopes": [],
+      "externalUserId": "",
+      "externalUsername": "",
+      "externalAvatarUrl": "",
+      "authCode": ""
+    }
+  ],
+  "connectorHealthLogs": [
+    {
+      "connectorId": "REPLACE_WITH_CONNECTOR_ID",
+      "platform": "youtube",
+      "status": "healthy",
+      "latencyMs": 142,
+      "errorMessage": null,
+      "triggeredBy": "REPLACE_WITH_CREATOR_UID"
+    }
+  ]
+}

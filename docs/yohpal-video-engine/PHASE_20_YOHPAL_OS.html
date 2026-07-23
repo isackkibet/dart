@@ -1,0 +1,599 @@
+<title>YohPal Platform Phase 20 — Enterprise Operating System</title>
+<style>
+  :root {
+    --gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);--gold-line:rgba(201,162,39,.3);
+    --ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;
+    --paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;
+    --pass:#1b5e20;--pass-bg:#e8f5e9;
+    --pend:#78350f;--pend-bg:#fef3c7;
+    --fail:#b71c1c;--fail-bg:#fce4e4;
+    --info:#0d47a1;--info-bg:#e8eef7;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+    --r:2px;--doc-max:920px;
+  }
+  @media(prefers-color-scheme:dark){:root{
+    --gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);--gold-line:rgba(212,172,48,.25);
+    --ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;
+    --paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;
+    --pass:#4caf50;--pass-bg:#1b2e1c;
+    --pend:#fbbf24;--pend-bg:#1f1600;
+    --fail:#ef5350;--fail-bg:#2d1212;
+    --info:#90caf9;--info-bg:#0d1e33;
+  }}
+  :root[data-theme="light"]{--gold:#c9a227;--gold-2:#a88420;--gold-text:#7a5e0f;--gold-dim:rgba(201,162,39,.10);--gold-line:rgba(201,162,39,.3);--ink:#0d0f0e;--ink-2:#3a3d3b;--ink-3:#6b706d;--paper:#f5f4ef;--paper-2:#eceae3;--paper-3:#dedad0;--pass:#1b5e20;--pass-bg:#e8f5e9;--pend:#78350f;--pend-bg:#fef3c7;--fail:#b71c1c;--fail-bg:#fce4e4;--info:#0d47a1;--info-bg:#e8eef7;}
+  :root[data-theme="dark"]{--gold:#d4ac30;--gold-2:#b8921e;--gold-text:#d4ac30;--gold-dim:rgba(212,172,48,.08);--gold-line:rgba(212,172,48,.25);--ink:#eceae3;--ink-2:#c4c1b8;--ink-3:#8a8780;--paper:#111310;--paper-2:#1c1f1c;--paper-3:#272b27;--pass:#4caf50;--pass-bg:#1b2e1c;--pend:#fbbf24;--pend-bg:#1f1600;--fail:#ef5350;--fail-bg:#2d1212;--info:#90caf9;--info-bg:#0d1e33;}
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif;font-size:13.5px;line-height:1.65;background:var(--paper);color:var(--ink);padding-bottom:5rem;}
+
+  /* Print bar */
+  .pbar{position:sticky;top:0;z-index:100;background:var(--paper-2);border-bottom:1px solid var(--paper-3);padding:.45rem 1.5rem;display:flex;align-items:center;gap:1rem;font-size:11px;color:var(--ink-3);}
+  .pbar .brand{font-weight:700;color:var(--gold-text);letter-spacing:.06em;font-size:12px;}
+  .pbar .spacer{flex:1;}
+  .pbar .badge{font-weight:700;font-size:10px;letter-spacing:.08em;padding:.2rem .65rem;border-radius:var(--r);background:var(--gold-dim);color:var(--gold-text);border:1px solid var(--gold);text-transform:uppercase;}
+  .pbar button{background:var(--gold);color:#fff;border:none;padding:.3rem 1rem;border-radius:var(--r);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;}
+  .pbar button:hover{background:var(--gold-2);}
+
+  .doc{max-width:var(--doc-max);margin:0 auto;padding:2.5rem 1.5rem 0;}
+
+  /* Masthead */
+  .mast{border-top:3px solid var(--gold);border-bottom:3px solid var(--gold);padding:1.1rem 0 1rem;margin-bottom:1.75rem;position:relative;}
+  .mast::after{content:'';position:absolute;bottom:5px;left:0;right:0;height:1px;background:var(--gold);opacity:.3;}
+  .mast .eye{font-size:9.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.3rem;}
+  .mast h1{font-family:Georgia,'Times New Roman',serif;font-size:1.7rem;font-weight:700;line-height:1.15;margin-bottom:.65rem;text-wrap:balance;}
+  .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:.25rem .75rem;font-size:11.5px;color:var(--ink-3);}
+  .meta span{display:flex;gap:.3rem;}
+  .meta strong{color:var(--ink-2);}
+
+  /* Section */
+  .sec{margin-bottom:2rem;}
+  .sh{font-family:Georgia,'Times New Roman',serif;font-size:.95rem;font-weight:700;padding-bottom:.35rem;border-bottom:1px solid var(--gold);margin-bottom:.9rem;display:flex;align-items:center;gap:.55rem;}
+  .sn{background:var(--gold);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:system-ui,sans-serif;}
+
+  /* Gate bar */
+  .gbar{display:flex;border:1px solid var(--paper-3);border-radius:var(--r);overflow:hidden;margin-bottom:1.75rem;}
+  .gcell{flex:1;padding:.65rem .5rem;text-align:center;border-right:1px solid var(--paper-3);}
+  .gcell:last-child{border-right:none;}
+  .gcell .gn{font-size:1.35rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;margin-bottom:.15rem;}
+  .gcell .gl{font-size:9px;text-transform:uppercase;letter-spacing:.07em;font-weight:700;color:var(--ink-3);}
+  .g-pass{background:var(--pass-bg);} .g-pass .gn{color:var(--pass);}
+  .g-pend{background:var(--pend-bg);} .g-pend .gn{color:var(--pend);}
+  .g-info{background:var(--info-bg);} .g-info .gn{color:var(--info);}
+
+  /* ── OS Architecture Tree ── */
+  .os-tree{margin-bottom:1.1rem;}
+  .os-root{display:flex;flex-direction:column;align-items:center;}
+  .os-root-node{background:var(--gold);color:#fff;font-weight:700;font-size:13px;letter-spacing:.06em;padding:.6rem 2rem;border-radius:var(--r);text-align:center;position:relative;}
+  .trunk{width:2px;height:24px;background:var(--gold);margin:0 auto;}
+  .branches{display:flex;justify-content:center;gap:0;position:relative;width:100%;}
+  .branches::before{
+    content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:calc(100% - 80px);height:2px;background:var(--gold-line);
+  }
+  .branch{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;}
+  .branch .btick{width:2px;height:20px;background:var(--gold-line);margin:0 auto;}
+  .branch-node{background:var(--paper-2);border:1.5px solid var(--gold-line);border-radius:var(--r);padding:.45rem .5rem;text-align:center;font-size:11px;font-weight:600;color:var(--ink-2);width:calc(100% - 12px);max-width:120px;}
+  .branch-node.b-gold{background:var(--gold-dim);border-color:var(--gold);color:var(--gold-text);}
+  .branch .sub-tick{width:2px;height:12px;background:var(--gold-line);margin:0 auto;}
+  .branch .subs{display:flex;flex-direction:column;align-items:center;gap:0;width:100%;}
+  .sub-node{font-size:10px;color:var(--ink-3);border:1px solid var(--paper-3);border-radius:var(--r);padding:.2rem .35rem;background:var(--paper);width:calc(100% - 12px);max-width:110px;text-align:center;margin:1px 0;}
+
+  /* Code */
+  .cb{font-family:var(--mono);font-size:11px;background:var(--paper-2);border-left:3px solid var(--gold);padding:.65rem .9rem;border-radius:0 var(--r) var(--r) 0;color:var(--ink-2);line-height:1.7;overflow-x:auto;white-space:pre;margin-bottom:.75rem;}
+  .cb.green{border-left-color:var(--pass);}
+  .cb.blue{border-left-color:var(--info);}
+
+  /* Folder structure */
+  .folder{font-family:var(--mono);font-size:11.5px;background:var(--paper-2);padding:.75rem 1rem;border-radius:var(--r);border:1px solid var(--paper-3);line-height:1.9;overflow-x:auto;white-space:pre;margin-bottom:.75rem;color:var(--ink-2);}
+  .folder .dir{color:var(--gold-text);font-weight:700;}
+  .folder .new{color:var(--pass);font-weight:600;}
+  .folder .abs{color:var(--info);}
+
+  /* Event type grid */
+  .event-grid{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.85rem;}
+  .ev-tag{font-family:var(--mono);font-size:10.5px;padding:.2rem .55rem;border-radius:var(--r);border:1px solid;white-space:nowrap;}
+  .ev-tag.sev-info{background:var(--info-bg);color:var(--info);border-color:var(--info);}
+  .ev-tag.sev-warn{background:var(--pend-bg);color:var(--pend);border-color:var(--pend);}
+  .ev-tag.sev-crit{background:var(--fail-bg);color:var(--fail);border-color:var(--fail);}
+  .ev-tag.sev-ok{background:var(--pass-bg);color:var(--pass);border-color:var(--pass);}
+
+  /* Automation table */
+  .wrap{overflow-x:auto;margin-bottom:.85rem;}
+  .at{width:100%;border-collapse:collapse;}
+  .at th{background:var(--paper-2);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:.4rem .65rem;border:1px solid var(--paper-3);text-align:left;}
+  .at td{padding:.45rem .65rem;border:1px solid var(--paper-3);font-size:12px;color:var(--ink-2);vertical-align:middle;}
+  .at td.trigger{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--ink);}
+  .at td.action{font-weight:600;color:var(--info);}
+  .at td.appr-y{font-weight:700;color:var(--pend);}
+  .at td.appr-n{color:var(--ink-3);}
+  .at tr:nth-child(even) td{background:var(--paper-2);}
+
+  /* Validation matrix */
+  .vmat{width:100%;border-collapse:collapse;margin-bottom:.85rem;}
+  .vmat th{background:var(--paper-2);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:.4rem .65rem;border:1px solid var(--paper-3);text-align:left;}
+  .vmat td{padding:.45rem .65rem;border:1px solid var(--paper-3);font-size:12px;color:var(--ink-2);}
+  .vmat td:first-child{font-weight:600;color:var(--ink);background:var(--paper-2);}
+  .vmat td.req{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);}
+  .chip{display:inline-flex;align-items:center;padding:.1rem .4rem;border-radius:var(--r);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+  .chip.pass{background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass);}
+  .chip.pend{background:var(--pend-bg);color:var(--pend);border:1px solid var(--pend);}
+
+  /* Governance rules */
+  .gov-list{list-style:none;padding:0;margin-bottom:.75rem;}
+  .gov-list li{padding:.4rem 0;border-bottom:1px solid var(--paper-3);font-size:12.5px;color:var(--ink-2);display:flex;gap:.65rem;align-items:baseline;}
+  .gov-list li:last-child{border-bottom:none;}
+  .gov-list li::before{content:'⬛';font-size:8px;color:var(--ink-3);flex-shrink:0;position:relative;top:-2px;}
+
+  /* Executive dashboard grid */
+  .dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.85rem;}
+  .dash-card{border:1px solid var(--paper-3);border-radius:var(--r);overflow:hidden;}
+  .dash-card .dh{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.35rem .6rem;border-bottom:1px solid var(--paper-3);}
+  .dash-card.dc-gold .dh{background:var(--gold-dim);color:var(--gold-text);}
+  .dash-card.dc-info .dh{background:var(--info-bg);color:var(--info);}
+  .dash-card.dc-pass .dh{background:var(--pass-bg);color:var(--pass);}
+  .dash-card ul{list-style:none;padding:.4rem .6rem;margin:0;background:var(--paper-2);}
+  .dash-card ul li{font-size:11px;color:var(--ink-2);padding:.1rem 0;border-bottom:1px solid var(--paper-3);}
+  .dash-card ul li:last-child{border-bottom:none;}
+
+  /* Callout */
+  .callout{padding:.85rem 1.1rem;border-radius:0 var(--r) var(--r) 0;margin-bottom:1.25rem;}
+  .callout.gold{background:var(--gold-dim);border-left:4px solid var(--gold);}
+  .callout h3{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.35rem;}
+  .callout p{font-size:12.5px;color:var(--ink-2);line-height:1.75;}
+
+  /* Phase 21 teaser */
+  .next{border:2px solid var(--gold);border-radius:var(--r);padding:1.25rem 1.5rem;margin-bottom:1.5rem;background:var(--gold-dim);}
+  .next .ne{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);margin-bottom:.3rem;}
+  .next h2{font-family:Georgia,'Times New Roman',serif;font-size:1.05rem;font-weight:700;color:var(--ink);margin-bottom:.85rem;}
+  .del-list{list-style:none;padding:0;margin-bottom:.85rem;}
+  .del-list li{font-size:12px;color:var(--ink-2);padding:.3rem 0;border-bottom:1px solid var(--paper-3);display:grid;grid-template-columns:1.6rem 1fr;gap:.25rem;align-items:baseline;}
+  .del-list li:last-child{border-bottom:none;}
+  .del-list li span.n{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gold-text);}
+  .outcome{background:var(--pass-bg);border-left:4px solid var(--pass);border-radius:0 var(--r) var(--r) 0;padding:.75rem 1rem;}
+  .outcome p{font-size:12.5px;color:var(--ink-2);line-height:1.7;}
+
+  .rule{border:none;border-top:2px solid var(--gold);margin:2rem 0 0;opacity:.4;}
+
+  @media(max-width:720px){
+    .meta{grid-template-columns:1fr 1fr;}
+    .dash-grid{grid-template-columns:1fr 1fr;}
+    .branches{gap:0;flex-wrap:nowrap;}
+    .branch-node{font-size:9px;padding:.35rem .25rem;}
+  }
+  @media print{.pbar{display:none;}body{font-size:12px;}@page{margin:1.5cm;}.sec{break-inside:avoid;}}
+</style>
+
+<div class="pbar">
+  <span class="brand">YohPal Platform</span>
+  <span class="badge">Phase 20 — Enterprise OS</span>
+  <span class="spacer"></span>
+  <button onclick="window.print()">Download PDF</button>
+</div>
+
+<div class="doc">
+
+  <div class="mast">
+    <div class="eye">Platform Engineering — Unified Operations Layer</div>
+    <h1>YohPal Platform Phase 20 — Enterprise Operating System</h1>
+    <div class="meta">
+      <span><strong>Version:</strong> 1.0</span>
+      <span><strong>Date:</strong> 2026-07-09</span>
+      <span><strong>Prerequisite:</strong> Phase 19 Adopted</span>
+      <span><strong>Dart Files:</strong> 9 created</span>
+      <span><strong>Tests:</strong> 11 / 11 passing</span>
+      <span><strong>Analyze:</strong> Clean (0 issues)</span>
+    </div>
+  </div>
+
+  <!-- Evidence gate -->
+  <div class="gbar">
+    <div class="gcell g-pass"><div class="gn">9</div><div class="gl">Model Files</div></div>
+    <div class="gcell g-pass"><div class="gn">11/11</div><div class="gl">Tests Passing</div></div>
+    <div class="gcell g-pass"><div class="gn">✓</div><div class="gl">Analyze Clean</div></div>
+    <div class="gcell g-pend"><div class="gn">Pending</div><div class="gl">Live Dashboard</div></div>
+    <div class="gcell g-pend"><div class="gn">Pending</div><div class="gl">Automation Impl</div></div>
+  </div>
+
+  <!-- 1. Purpose -->
+  <div class="sec">
+    <div class="sh"><span class="sn">1</span>Purpose</div>
+    <p style="font-size:13px;color:var(--ink-2);line-height:1.8;">YohPal OS unifies Mission Control, the Ecosystem Digital Twin, the Enterprise Event Bus, all Shared Platform Services, Release Governance, AI Operations, the Automation Engine, Approval Workflows, and the Executive Command Dashboard into a single enterprise operating model. No YohPal module manages its own operational surface — every module is a tenant of YohPal OS.</p>
+  </div>
+
+  <!-- 2. Architecture diagram -->
+  <div class="sec">
+    <div class="sh"><span class="sn">2</span>YohPal OS Architecture</div>
+    <div class="os-tree">
+      <div class="os-root">
+        <div class="os-root-node">YOHPAL OS</div>
+        <div class="trunk"></div>
+        <div class="branches">
+          <div class="branch">
+            <div class="btick"></div>
+            <div class="branch-node b-gold">Mission Control</div>
+            <div class="sub-tick"></div>
+            <div class="subs">
+              <div class="sub-node">Ecosystem Digital Twin</div>
+              <div class="sub-node">Incident Command</div>
+            </div>
+          </div>
+          <div class="branch">
+            <div class="btick"></div>
+            <div class="branch-node b-gold">Event Bus</div>
+            <div class="sub-tick"></div>
+            <div class="subs">
+              <div class="sub-node">Enterprise Events</div>
+              <div class="sub-node">Module Publishers</div>
+            </div>
+          </div>
+          <div class="branch">
+            <div class="btick"></div>
+            <div class="branch-node">Platform Services</div>
+            <div class="sub-tick"></div>
+            <div class="subs">
+              <div class="sub-node">Identity · Wallet</div>
+              <div class="sub-node">Brain · Search</div>
+              <div class="sub-node">Notifications</div>
+              <div class="sub-node">Analytics · Links</div>
+            </div>
+          </div>
+          <div class="branch">
+            <div class="btick"></div>
+            <div class="branch-node">Automation Engine</div>
+            <div class="sub-tick"></div>
+            <div class="subs">
+              <div class="sub-node">Policy Registry</div>
+              <div class="sub-node">Approval Gates</div>
+            </div>
+          </div>
+          <div class="branch">
+            <div class="btick"></div>
+            <div class="branch-node">Release Governance</div>
+            <div class="sub-tick"></div>
+            <div class="subs">
+              <div class="sub-node">9-Gate Framework</div>
+              <div class="sub-node">Rollback Control</div>
+            </div>
+          </div>
+          <div class="branch">
+            <div class="btick"></div>
+            <div class="branch-node b-gold">Exec Dashboard</div>
+            <div class="sub-tick"></div>
+            <div class="subs">
+              <div class="sub-node">AI Operations</div>
+              <div class="sub-node">Enterprise Analytics</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Folder structure -->
+  <div class="sec">
+    <div class="sh"><span class="sn">3</span>Folder Structure</div>
+    <div class="folder"><span class="dir">lib/platform/os/</span>
+  <span class="dir">events/</span>
+    <span class="new">yohpal_enterprise_event.dart</span>   ← event model + toMap()
+    <span class="new">yohpal_event_bus.dart</span>          ← abstract bus: watchEvents, publish, recent
+    <span class="new">firebase_event_bus.dart</span>        ← Firestore: enterpriseEvents collection
+  <span class="dir">automation/</span>
+    <span class="new">automation_policy.dart</span>         ← AutomationPolicy model
+    <span class="new">yohpal_automation_engine.dart</span>  ← abstract engine: evaluateEvent, registerPolicy
+  <span class="dir">approvals/</span>
+    <span class="new">approval_request.dart</span>          ← ApprovalRequest model
+    <span class="new">yohpal_approval_service.dart</span>   ← abstract: requestApproval, approve, reject
+  <span class="dir">digital_twin/</span>
+    <span class="new">yohpal_os_digital_twin.dart</span>    ← YohPalModuleState + YohPalOSDigitalTwin
+  <span class="new">yohpal_os.dart</span>                   ← abstract YohPalOS: events, automation, approvals
+
+<span class="dir">test/platform/os/</span>
+  <span class="new">yohpal_os_test.dart</span>              ← 11 tests: event, policy, approval, digital twin</div>
+  </div>
+
+  <!-- 4. Event model -->
+  <div class="sec">
+    <div class="sh"><span class="sn">4</span>Enterprise Event Model</div>
+    <div class="cb">class YohPalEnterpriseEvent {
+  final String id;
+  final String module;
+  final String type;       // e.g. 'module.health.changed'
+  final String severity;   // 'info' | 'warning' | 'critical'
+  final Map&lt;String, dynamic&gt; payload;
+  final DateTime createdAt;
+
+  Map&lt;String, dynamic&gt; toMap() =&gt; {
+    'id': id, 'module': module, 'type': type,
+    'severity': severity, 'payload': payload,
+    'createdAt': createdAt.toIso8601String(),
+  };
+}</div>
+    <p style="font-size:12px;color:var(--ink-3);margin-bottom:.5rem;">Every module publishes events to the <code style="font-family:var(--mono);font-size:10.5px;">enterpriseEvents</code> Firestore collection via <code style="font-family:var(--mono);font-size:10.5px;">FirebaseEventBus.publish()</code>. The executive dashboard stream is driven by <code style="font-family:var(--mono);font-size:10.5px;">watchEvents()</code>.</p>
+  </div>
+
+  <!-- 5. Enterprise Event Types -->
+  <div class="sec">
+    <div class="sh"><span class="sn">5</span>Enterprise Event Types</div>
+    <div class="event-grid">
+      <span class="ev-tag sev-info">module.health.changed</span>
+      <span class="ev-tag sev-ok">module.deployment.completed</span>
+      <span class="ev-tag sev-crit">module.deployment.failed</span>
+      <span class="ev-tag sev-crit">wallet.reconciliation.failed</span>
+      <span class="ev-tag sev-crit">wallet.transaction.failed</span>
+      <span class="ev-tag sev-warn">ai.latency.warning</span>
+      <span class="ev-tag sev-crit">ai.task.failed</span>
+      <span class="ev-tag sev-warn">ffmpeg.queue.warning</span>
+      <span class="ev-tag sev-crit">ffmpeg.job.failed</span>
+      <span class="ev-tag sev-crit">security.threat.detected</span>
+      <span class="ev-tag sev-warn">release.rollback.requested</span>
+      <span class="ev-tag sev-ok">release.rollback.completed</span>
+      <span class="ev-tag sev-crit">incident.created</span>
+      <span class="ev-tag sev-ok">incident.resolved</span>
+    </div>
+    <p style="font-size:11px;color:var(--ink-3);">
+      <span class="chip pass">green</span> success &nbsp;
+      <span class="chip" style="background:var(--info-bg);color:var(--info);border:1px solid var(--info);">blue</span> informational &nbsp;
+      <span class="chip pend">amber</span> warning &nbsp;
+      <span class="chip" style="background:var(--fail-bg);color:var(--fail);border:1px solid var(--fail);">red</span> critical
+    </p>
+  </div>
+
+  <!-- 6. Automation Engine -->
+  <div class="sec">
+    <div class="sh"><span class="sn">6</span>Automation Engine</div>
+    <div class="cb">abstract class YohPalAutomationEngine {
+  Future&lt;void&gt; evaluateEvent(YohPalEnterpriseEvent event);
+  Future&lt;void&gt; registerPolicy(AutomationPolicy policy);
+  Future&lt;void&gt; pauseRollout(String module);
+  Future&lt;void&gt; triggerRollback(String module, String releaseId);
+  Future&lt;void&gt; scaleService(String service, int targetInstances);
+}</div>
+    <div class="wrap">
+      <table class="at">
+        <thead>
+          <tr>
+            <th>Trigger Event Type</th>
+            <th>Automated Action</th>
+            <th>Approval Required</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="trigger">crash.rate.exceeded</td>
+            <td class="action">Pause rollout</td>
+            <td class="appr-y">Required</td>
+          </tr>
+          <tr>
+            <td class="trigger">wallet.reconciliation.failed</td>
+            <td class="action">Freeze payouts</td>
+            <td class="appr-y">Required</td>
+          </tr>
+          <tr>
+            <td class="trigger">ai.latency.warning</td>
+            <td class="action">Scale Brain workers</td>
+            <td class="appr-n">Optional</td>
+          </tr>
+          <tr>
+            <td class="trigger">ffmpeg.queue.warning</td>
+            <td class="action">Scale Cloud Run instances</td>
+            <td class="appr-n">Optional</td>
+          </tr>
+          <tr>
+            <td class="trigger">security.threat.detected</td>
+            <td class="action">Disable affected feature</td>
+            <td class="appr-y">Required</td>
+          </tr>
+          <tr>
+            <td class="trigger">firestore.cost.spike</td>
+            <td class="action">Enable cache mode</td>
+            <td class="appr-n">Optional</td>
+          </tr>
+          <tr>
+            <td class="trigger">module.deployment.failed</td>
+            <td class="action">Rollback module</td>
+            <td class="appr-y">Required</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 7. Approval Framework -->
+  <div class="sec">
+    <div class="sh"><span class="sn">7</span>Approval Framework</div>
+    <div class="cb blue">abstract class YohPalApprovalService {
+  Future&lt;String&gt; requestApproval({
+    required String action,
+    required String module,
+    required String requestedBy,
+    required Map&lt;String, dynamic&gt; payload,
+  });
+
+  Future&lt;void&gt; approve({
+    required String approvalId,
+    required String approvedBy,
+  });
+
+  Future&lt;void&gt; reject({
+    required String approvalId,
+    required String rejectedBy,
+    required String reason,
+  });
+}</div>
+
+    <div class="callout gold" style="margin-top:.5rem;">
+      <h3>Governance Rule — No High-Impact Action Without Approval Record</h3>
+      <p>The following actions are classified as high-impact and <strong>must not execute</strong> without a persisted <code style="font-family:var(--mono);font-size:11px;">ApprovalRequest</code> in an approved state: rollback, wallet freeze, payout freeze, user account mass action, AI model switch, production feature disablement, security lockdown. Any automation policy that would trigger one of these must have <code style="font-family:var(--mono);font-size:11px;">requiresApproval: true</code>.</p>
+    </div>
+  </div>
+
+  <!-- 8. Digital Twin (OS layer) -->
+  <div class="sec">
+    <div class="sh"><span class="sn">8</span>OS Digital Twin</div>
+    <p style="font-size:12.5px;color:var(--ink-2);margin-bottom:.65rem;">The OS digital twin is distinct from the Phase 19 mission control twin — it is the OS-layer aggregate consumed by the executive dashboard. Each module publishes a <code style="font-family:var(--mono);font-size:10.5px;">YohPalModuleState</code> document to Firestore; <code style="font-family:var(--mono);font-size:10.5px;">YohPalOSDigitalTwin</code> aggregates them.</p>
+    <div class="cb">class YohPalOSDigitalTwin {
+  final List&lt;YohPalModuleState&gt; modules;
+  final DateTime updatedAt;
+
+  double get ecosystemAvailability {
+    if (modules.isEmpty) return 0;
+    return modules.map((m) =&gt; m.availability).reduce((a,b) =&gt; a+b) / modules.length;
+  }
+
+  bool get hasCriticalIncident =&gt; modules.any((m) =&gt; m.health == 'critical');
+}</div>
+  </div>
+
+  <!-- 9. YohPal OS Core -->
+  <div class="sec">
+    <div class="sh"><span class="sn">9</span>YohPal OS Core Interface</div>
+    <div class="cb">abstract class YohPalOS {
+  YohPalEventBus          get events;
+  YohPalAutomationEngine  get automation;
+  YohPalApprovalService   get approvals;
+
+  Stream&lt;YohPalOSDigitalTwin&gt; watchDigitalTwin();
+  Future&lt;YohPalOSDigitalTwin&gt;  getCurrentState();
+  Future&lt;void&gt; pauseModule(String module);
+  Future&lt;void&gt; resumeModule(String module);
+  Future&lt;void&gt; rollbackModule({required String module, required String releaseId});
+}</div>
+  </div>
+
+  <!-- 10. Test evidence -->
+  <div class="sec">
+    <div class="sh"><span class="sn">10</span>Build &amp; Test Evidence</div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.35rem;">flutter analyze lib/platform/os/</div>
+    <div class="cb green">Analyzing os...
+No issues found! (ran in 2.0s)</div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.35rem;">flutter test test/platform/os/ — 11 tests</div>
+    <div class="cb green">YohPalEnterpriseEvent  · toMap serialises all fields, payload is a map               2 / 2
+AutomationPolicy       · defaults (requiresApproval=true, role=admin, enabled=true),
+                         can override all defaults                                       2 / 2
+ApprovalRequest        · stores all required fields, approvedBy set when provided        2 / 2
+YohPalOSDigitalTwin    · ecosystemAvailability (mean calculation, empty=0),
+                         hasCriticalIncident (true/false/warning-only)                  5 / 5
+All tests passed!</div>
+  </div>
+
+  <!-- 11. Executive Dashboard -->
+  <div class="sec">
+    <div class="sh"><span class="sn">11</span>Executive Command Dashboard</div>
+    <div class="dash-grid">
+      <div class="dash-card dc-gold">
+        <div class="dh">Ecosystem Health</div>
+        <ul>
+          <li>Health score</li>
+          <li>Active incidents</li>
+          <li>Production releases</li>
+          <li>Rollback status</li>
+          <li>Predicted risks</li>
+        </ul>
+      </div>
+      <div class="dash-card dc-info">
+        <div class="dh">Operations</div>
+        <ul>
+          <li>AI health</li>
+          <li>Wallet health</li>
+          <li>Infrastructure health</li>
+          <li>Approval requests</li>
+          <li>User growth</li>
+        </ul>
+      </div>
+      <div class="dash-card dc-pass">
+        <div class="dh">Revenue &amp; Finance</div>
+        <ul>
+          <li>Revenue</li>
+          <li>Transaction success</li>
+          <li>Payout status</li>
+          <li>Fraud alerts</li>
+          <li>Wallet reconciliation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12. Validation checklist -->
+  <div class="sec">
+    <div class="sh"><span class="sn">12</span>Validation Checklist</div>
+    <div class="wrap">
+      <table class="vmat">
+        <thead><tr><th>Area</th><th>Required</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Event Bus</td>
+            <td class="req">Every module publishes events to enterpriseEvents</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Digital Twin</td>
+            <td class="req">Real-time ecosystem state available via watchDigitalTwin()</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Automation</td>
+            <td class="req">7 automation policies registered at startup</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Approvals</td>
+            <td class="req">High-impact actions blocked without approval record</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Mission Control</td>
+            <td class="req">Dashboard shows all 7 modules in real time</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Analytics</td>
+            <td class="req">Enterprise KPIs visible in executive dashboard</td>
+            <td><span class="chip pend">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Rollback</td>
+            <td class="req">Cross-module rollback supported via YohPalOS.rollbackModule()</td>
+            <td><span class="chip pass">Modelled</span></td>
+          </tr>
+          <tr>
+            <td>Governance</td>
+            <td class="req">All automation actions traceable via ApprovalRequest records</td>
+            <td><span class="chip pass">Modelled</span></td>
+          </tr>
+          <tr>
+            <td>OS Models</td>
+            <td class="req">All Dart contracts defined and analyze-clean</td>
+            <td><span class="chip pass">Done</span></td>
+          </tr>
+          <tr>
+            <td>Tests</td>
+            <td class="req">11/11 unit tests passing on pure models</td>
+            <td><span class="chip pass">Done</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Phase 21 teaser -->
+  <div class="next">
+    <div class="ne">Next Smart Move</div>
+    <h2>YohPal Platform Phase 21 — YohPal OS Validation Report</h2>
+    <ul class="del-list">
+      <li><span class="n">01</span>Git branch and commit hash confirming all 9 OS model files</li>
+      <li><span class="n">02</span>Event bus implementation proof — module publishing to <code style="font-family:var(--mono);font-size:10.5px;">enterpriseEvents</code></li>
+      <li><span class="n">03</span>Digital twin proof — real-time state streamed from Firestore</li>
+      <li><span class="n">04</span>Automation policy proof — 7 policies registered, engine responding to events</li>
+      <li><span class="n">05</span>Approval workflow proof — high-impact actions blocked until approved</li>
+      <li><span class="n">06</span>Mission Control dashboard screenshots — all 7 modules visible</li>
+      <li><span class="n">07</span><code style="font-family:var(--mono);font-size:10.5px;">flutter analyze</code> output — full project scope</li>
+      <li><span class="n">08</span><code style="font-family:var(--mono);font-size:10.5px;">flutter test</code> output — all 45 tests (34 prior + 11 Phase 20)</li>
+      <li><span class="n">09</span>YohPal OS Validation Report — signed as management evidence receipt</li>
+    </ul>
+    <div class="outcome">
+      <p><strong>Outcome:</strong> Management receives signed proof that YohPal OS is operational as the unified enterprise operating layer — Mission Control, Event Bus, Digital Twin, Automation, Approvals, Release Governance, AI Operations, and Executive Dashboard all active and traceable.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+</div>

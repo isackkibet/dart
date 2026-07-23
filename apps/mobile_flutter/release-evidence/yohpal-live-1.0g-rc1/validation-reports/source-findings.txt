@@ -1,0 +1,26 @@
+=== RC1 Source-Level Finding Snapshot ===
+Timestamp: 2026-07-11T13:37:31Z
+---
+Running build hooks...Running build hooks...YohPal Live 1.0G-RC1 — source-level finding snapshot
+============================================================
+[CRITICAL] Analytics route crash: pending (blocking)
+[CRITICAL] Crash reporting: pending (blocking)
+[CRITICAL] Password reset: pending (blocking)
+[CRITICAL] Environment configuration: passed
+[CRITICAL] Rewarded-ad fraud exposure: pending (blocking)
+[HIGH] Search navigation: pending (blocking)
+[HIGH] Live Discovery navigation: pending (blocking)
+[HIGH] Feed retry: pending (blocking)
+[HIGH] Accessibility semantics: pending (blocking)
+[HIGH] Live reconnect: pending (blocking)
+[HIGH] Duplicate video stacks: passed
+[HIGH] Friendly auth errors: pending (blocking)
+[HIGH] Input validation: pending (blocking)
+[HIGH] Automated test coverage: pending (blocking)
+[HIGH] AI publish gate: pending (blocking)
+[HIGH] Avatar upload: pending (blocking)
+[HIGH] Chat error surfacing: pending (blocking)
+[HIGH] Logout state clearing: pending (blocking)
+============================================================
+Computed release decision: noGo
+Exit code: 0

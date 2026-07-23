@@ -1,0 +1,11 @@
+=== flutter analyze ===
+Command: flutter analyze --no-pub
+Timestamp: 2026-07-11T13:28:24Z
+---
+Analyzing mobile_flutter...                                     
+
+warning • The value of the field '_lastVideoId' isn't used • lib/features/video_feed/controllers/video_feed_controller.dart:20:11 • unused_field
+warning • Unused import: 'core/observability/yohpal_crash_reporter.dart' • lib/main.dart:11:8 • unused_import
+
+2 issues found. (ran in 8.0s)
+Exit code: 1

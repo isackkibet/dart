@@ -1,0 +1,28 @@
+{
+  "release": "YohPal Mesh Live v1.0.2-R",
+  "status": "REPAIRED_INTEGRATION_CANDIDATE",
+  "static_checks": {
+    "secret_scan_private_key_markers": true,
+    "admin_env_local_removed": true,
+    "mesh_control_in_compose": true,
+    "flutter_permission_handler": true,
+    "flutter_qr_flutter": true,
+    "canonical_mobile_route": true,
+    "firebase_auth_middleware": true,
+    "firestore_repository": true,
+    "sfu_program_adapter": true,
+    "yaml_parse:modules/live-streaming/docker/docker-compose.yml": true,
+    "yaml_parse:.github/workflows/yohpal-mesh-live-v1.0.2.yml": true
+  },
+  "executed": {
+    "secret_scan": "PASS",
+    "clean_npm_ci": "BLOCKED_TIMEOUT_OR_REGISTRY_UNAVAILABLE",
+    "typescript_build": "NOT_VERIFIED_AFTER_DEPENDENCY_INSTALL_BLOCK",
+    "flutter_analyze": "NOT_EXECUTED_FLUTTER_UNAVAILABLE",
+    "docker_runtime": "NOT_EXECUTED_DOCKER_UNAVAILABLE",
+    "physical_device": "NOT_EXECUTED",
+    "turn_fallback": "NOT_EXECUTED",
+    "protected_ci": "NOT_EXECUTED"
+  },
+  "yeco_decision": "PENDING"
+}

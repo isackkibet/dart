@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YohPal Live — Production Readiness Review</title>
+<style>
+  :root {
+    --bg: #FAF7F0;
+    --bg-elevated: #FFFFFF;
+    --surface: #F3EEE1;
+    --surface-2: #ECE4D0;
+    --border: #E2D9C3;
+    --border-strong: #CBBE9C;
+    --text: #211D14;
+    --text-muted: #6B6252;
+    --text-faint: #8C8270;
+    --accent: #93700F;
+    --accent-strong: #6E5309;
+    --accent-soft: rgba(147, 112, 15, 0.10);
+    --link: #6E5309;
+
+    --sev-critical: #B3261E;
+    --sev-critical-bg: rgba(179, 38, 30, 0.09);
+    --sev-critical-border: rgba(179, 38, 30, 0.35);
+    --sev-high: #B4590A;
+    --sev-high-bg: rgba(180, 89, 10, 0.09);
+    --sev-high-border: rgba(180, 89, 10, 0.35);
+    --sev-medium: #8A6D00;
+    --sev-medium-bg: rgba(138, 109, 0, 0.10);
+    --sev-medium-border: rgba(138, 109, 0, 0.35);
+    --sev-low: #2A5C8A;
+    --sev-low-bg: rgba(42, 92, 138, 0.08);
+    --sev-low-border: rgba(42, 92, 138, 0.30);
+    --ok: #2E6B47;
+    --ok-bg: rgba(46, 107, 71, 0.09);
+
+    --shadow: 0 1px 2px rgba(33, 29, 20, 0.06), 0 8px 24px -12px rgba(33, 29, 20, 0.18);
+    --radius: 10px;
+    --serif: Iowan Old Style, Palatino Linotype, Palatino, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SF Mono, Cascadia Code, Consolas, "Liberation Mono", monospace;
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #14120D;
+    --bg-elevated: #1A170F;
+    --surface: #201C13;
+    --surface-2: #292415;
+    --border: #362F1E;
+    --border-strong: #4A4127;
+    --text: #ECE6D6;
+    --text-muted: #A99C80;
+    --text-faint: #83775F;
+    --accent: #D9B33C;
+    --accent-strong: #E8C863;
+    --accent-soft: rgba(217, 179, 60, 0.12);
+    --link: #E8C863;
+
+    --sev-critical: #F0847C;
+    --sev-critical-bg: rgba(240, 132, 124, 0.12);
+    --sev-critical-border: rgba(240, 132, 124, 0.35);
+    --sev-high: #F0AA6A;
+    --sev-high-bg: rgba(240, 170, 106, 0.12);
+    --sev-high-border: rgba(240, 170, 106, 0.35);
+    --sev-medium: #E3C74A;
+    --sev-medium-bg: rgba(227, 199, 74, 0.12);
+    --sev-medium-border: rgba(227, 199, 74, 0.35);
+    --sev-low: #7FB0DE;
+    --sev-low-bg: rgba(127, 176, 222, 0.12);
+    --sev-low-border: rgba(127, 176, 222, 0.30);
+    --ok: #7FBE97;
+    --ok-bg: rgba(127, 190, 151, 0.12);
+
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14120D;
+      --bg-elevated: #1A170F;
+      --surface: #201C13;
+      --surface-2: #292415;
+      --border: #362F1E;
+      --border-strong: #4A4127;
+      --text: #ECE6D6;
+      --text-muted: #A99C80;
+      --text-faint: #83775F;
+      --accent: #D9B33C;
+      --accent-strong: #E8C863;
+      --accent-soft: rgba(217, 179, 60, 0.12);
+      --link: #E8C863;
+
+      --sev-critical: #F0847C;
+      --sev-critical-bg: rgba(240, 132, 124, 0.12);
+      --sev-critical-border: rgba(240, 132, 124, 0.35);
+      --sev-high: #F0AA6A;
+      --sev-high-bg: rgba(240, 170, 106, 0.12);
+      --sev-high-border: rgba(240, 170, 106, 0.35);
+      --sev-medium: #E3C74A;
+      --sev-medium-bg: rgba(227, 199, 74, 0.12);
+      --sev-medium-border: rgba(227, 199, 74, 0.35);
+      --sev-low: #7FB0DE;
+      --sev-low-bg: rgba(127, 176, 222, 0.12);
+      --sev-low-border: rgba(127, 176, 222, 0.30);
+      --ok: #7FBE97;
+      --ok-bg: rgba(127, 190, 151, 0.12);
+
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent-soft); }
+  a { color: var(--link); }
+  a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  code, .mono { font-family: var(--mono); }
+
+  /* ---------- Masthead ---------- */
+  .masthead {
+    border-bottom: 1px solid var(--border);
+    padding: 40px 28px 28px;
+    background:
+      radial-gradient(1100px 320px at 12% -10%, var(--accent-soft), transparent 60%),
+      var(--bg-elevated);
+  }
+  .masthead-inner { max-width: 1180px; margin: 0 auto; }
+  .kicker {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .kicker .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sev-critical); box-shadow: 0 0 0 3px var(--sev-critical-bg); }
+  h1.title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(30px, 4.4vw, 46px);
+    line-height: 1.08;
+    margin: 0 0 10px;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+  .subtitle {
+    font-size: 17px;
+    color: var(--text-muted);
+    max-width: 62ch;
+    margin: 0 0 22px;
+    text-wrap: balance;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    font-size: 13px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .meta-row strong { color: var(--text); font-weight: 600; }
+
+  /* ---------- Layout ---------- */
+  .layout {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 232px minmax(0, 1fr);
+    gap: 48px;
+    padding: 36px 28px 100px;
+    align-items: start;
+  }
+  nav.toc {
+    position: sticky;
+    top: 24px;
+    font-size: 13.5px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding-bottom: 20px;
+  }
+  nav.toc .toc-label {
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-bottom: 10px;
+  }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
+  nav.toc li { counter-increment: toc; }
+  nav.toc a {
+    display: block;
+    padding: 6px 0 6px 22px;
+    position: relative;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    margin-left: -1px;
+  }
+  nav.toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    top: 7px;
+  }
+  nav.toc a:hover { color: var(--text); border-left-color: var(--border-strong); }
+
+  main { min-width: 0; }
+  section { padding-top: 8px; margin-bottom: 56px; scroll-margin-top: 20px; }
+  section:first-of-type { padding-top: 0; }
+
+  .section-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
+  .section-num { font-family: var(--mono); color: var(--accent); font-size: 14px; }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 27px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .section-dek { color: var(--text-muted); font-size: 15px; max-width: 68ch; margin: 10px 0 26px; }
+  h3 { font-size: 18px; font-weight: 650; margin: 30px 0 10px; letter-spacing: -0.005em; }
+  h4 { font-size: 14.5px; font-weight: 650; margin: 18px 0 8px; }
+  p { margin: 0 0 14px; max-width: 74ch; }
+  ul, ol { margin: 0 0 14px; padding-left: 22px; }
+  li { margin-bottom: 6px; max-width: 72ch; }
+  hr.rule { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+  code.chip {
+    display: inline-block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 1px 6px;
+    font-size: 12.5px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  .badge.critical { color: var(--sev-critical); background: var(--sev-critical-bg); border-color: var(--sev-critical-border); }
+  .badge.high { color: var(--sev-high); background: var(--sev-high-bg); border-color: var(--sev-high-border); }
+  .badge.medium { color: var(--sev-medium); background: var(--sev-medium-bg); border-color: var(--sev-medium-border); }
+  .badge.low { color: var(--sev-low); background: var(--sev-low-bg); border-color: var(--sev-low-border); }
+  .badge.ok { color: var(--ok); background: var(--ok-bg); border-color: transparent; }
+
+  .tag {
+    display: inline-flex;
+    font-size: 11px;
+    font-family: var(--mono);
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  /* ---------- Scorecard ---------- */
+  .scorecard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 22px 0 30px;
+  }
+  .stat {
+    background: var(--bg-elevated);
+    padding: 16px 16px 14px;
+  }
+  .stat .n {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .stat.crit .n { color: var(--sev-critical); }
+  .stat.hi .n { color: var(--sev-high); }
+  .stat.med .n { color: var(--sev-medium); }
+  .stat .l { font-size: 11.5px; color: var(--text-muted); margin-top: 6px; }
+
+  /* ---------- Cards ---------- */
+  .card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin: 16px 0;
+    box-shadow: var(--shadow);
+  }
+  .card.callout { background: var(--surface); box-shadow: none; }
+  .card > *:last-child { margin-bottom: 0; }
+
+  .finding {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 14px 0;
+    background: var(--bg-elevated);
+  }
+  .finding.critical { border-left-color: var(--sev-critical); }
+  .finding.high { border-left-color: var(--sev-high); }
+  .finding.medium { border-left-color: var(--sev-medium); }
+  .finding.low { border-left-color: var(--sev-low); }
+  .finding-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+  .finding-title { font-weight: 650; font-size: 14.5px; }
+  .finding p { margin: 6px 0; font-size: 14.5px; }
+  .finding .evidence { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* ---------- Screen entries ---------- */
+  .screen {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elevated);
+    margin: 18px 0;
+    overflow: hidden;
+  }
+  .screen-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .screen-head h4 { margin: 0; font-size: 15.5px; }
+  .screen-path { font-family: var(--mono); font-size: 11.5px; color: var(--text-faint); }
+  .screen-body { padding: 16px 20px; }
+  .screen-body h5 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-faint); margin: 14px 0 6px; font-weight: 650; }
+  .screen-body h5:first-child { margin-top: 0; }
+  .status-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ---------- Tables ---------- */
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); margin: 16px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 560px; }
+  thead th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    background: var(--surface);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--surface); }
+  td.num { font-variant-numeric: tabular-nums; font-family: var(--mono); font-size: 12.5px; }
+
+  /* ---------- Flow steps ---------- */
+  .flow {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elevated);
+    margin: 18px 0;
+  }
+  .flow-head { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .flow-head h4 { margin: 0; font-size: 15px; }
+  .steps { padding: 6px 20px 16px; }
+  .step { display: grid; grid-template-columns: 20px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--border); }
+  .step:last-child { border-bottom: none; }
+  .step .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); margin-top: 6px; }
+  .step.break .dot { background: var(--sev-critical); box-shadow: 0 0 0 3px var(--sev-critical-bg); }
+  .step .stext { font-size: 14px; }
+  .step .stext strong { font-weight: 650; }
+
+  /* ---------- Checklist ---------- */
+  .checklist { display: grid; gap: 8px; }
+  .check-item {
+    display: grid;
+    grid-template-columns: 20px 1fr auto;
+    gap: 10px;
+    align-items: start;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-elevated);
+    font-size: 14px;
+  }
+  .check-item .box {
+    width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border-strong);
+    margin-top: 2px;
+  }
+  .check-item.done .box { background: var(--ok); border-color: var(--ok); position: relative; }
+
+  /* ---------- misc ---------- */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+  blockquote {
+    margin: 16px 0;
+    padding: 4px 0 4px 16px;
+    border-left: 3px solid var(--accent);
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  footer.end {
+    max-width: 1180px; margin: 0 auto; padding: 0 28px 60px;
+    color: var(--text-faint); font-size: 12.5px; border-top: 1px solid var(--border); padding-top: 20px;
+  }
+
+  .dl-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 40;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--bg);
+    background: var(--accent);
+    border: 1px solid var(--accent-strong);
+    padding: 9px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .dl-btn:hover { transform: translateY(-1px); }
+  .dl-btn:active { transform: translateY(0); }
+  .dl-btn svg { width: 14px; height: 14px; flex: none; }
+  .dl-btn .dl-label { white-space: nowrap; }
+  .dl-btn.done { background: var(--ok); border-color: var(--ok); }
+  @media (max-width: 640px) {
+    .dl-btn { top: auto; bottom: 18px; right: 18px; }
+    .dl-btn .dl-label { display: none; }
+    .dl-btn { padding: 12px; border-radius: 50%; }
+  }
+
+  @media (max-width: 940px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { position: static; max-height: none; border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 8px; }
+    nav.toc ol { columns: 2; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+  html { scroll-behavior: smooth; }
+</style>
+
+</head>
+<body>
+<button type="button" class="dl-btn" id="dlBtn" aria-label="Download this report as an HTML file">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M5 21h14"></path></svg>
+  <span class="dl-label">Download report</span>
+</button>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="kicker"><span class="dot"></span> Production Readiness Review — Confidential</div>
+    <h1 class="title">YohPal Live: an engineering, product, and QA audit of the Flutter app</h1>
+    <p class="subtitle">A screen-by-screen and flow-by-flow walk of the <code class="mono">apps/mobile_flutter</code> codebase on <code class="mono">flutter_app</code>, read the way a new user, a returning creator, and an on-call engineer would each read it — followed by the architectural, security, and go-live picture.</p>
+    <div class="meta-row">
+      <span><strong>App</strong> YohPal Live v2 (yohpal_live_v2, 1.0.0+4)</span>
+      <span><strong>Branch</strong> flutter_app</span>
+      <span><strong>Reviewed</strong> 2026-07-09</span>
+      <span><strong>Surface</strong> 260+ Dart source files, 30+ feature modules, 81 DI providers</span>
+      <span><strong>Method</strong> static source review, no device run</span>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="toc">
+    <div class="toc-label">Contents</div>
+    <ol>
+      <li><a href="#exec">Executive summary</a></li>
+      <li><a href="#screens">Screen-by-screen findings</a></li>
+      <li><a href="#flows">User flow analysis</a></li>
+      <li><a href="#uxui">UX / UI findings</a></li>
+      <li><a href="#gaps">Functional gaps</a></li>
+      <li><a href="#technical">Technical &amp; architecture</a></li>
+      <li><a href="#security">Security &amp; reliability</a></li>
+      <li><a href="#performance">Performance &amp; scale</a></li>
+      <li><a href="#readiness">Readiness assessment</a></li>
+      <li><a href="#prioritized">Prioritized issues</a></li>
+      <li><a href="#refactors">Recommended refactors</a></li>
+      <li><a href="#shortterm">Short-term action plan</a></li>
+      <li><a href="#longterm">Long-term architecture</a></li>
+      <li><a href="#checklist">Readiness checklist</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ============ 1. EXEC SUMMARY ============ -->
+    <section id="exec">
+      <div class="section-head"><span class="section-num">01</span><h2>Executive summary</h2></div>
+      <p class="section-dek">YohPal Live is not one product yet — it is nine or ten products (short-video feed, live streaming, wallet, creator monetisation, an ad network, an affiliate program, an AI creator studio, a contacts-growth engine, and a nascent "YCIOS" AI OS) at very different stages of completion, sharing one codebase. The individual engineering is often good — optimistic UI updates on likes, a genuinely well-built splash/auth-gating sequence, real-time Firestore chat and comments. But the product has not been assembled: users cannot log out, one navigation link crashes the app, the flagship "find a live stream" screen has no button that leads to it, and every flow that touches money hands the user to an external browser with no way for the app to tell them whether it worked.</p>
+
+      <div class="scorecard">
+        <div class="stat crit"><div class="n">9</div><div class="l">Critical findings</div></div>
+        <div class="stat hi"><div class="n">13</div><div class="l">High findings</div></div>
+        <div class="stat med"><div class="n">14</div><div class="l">Medium findings</div></div>
+        <div class="stat"><div class="n">17</div><div class="l">Orphaned screens / dead services</div></div>
+        <div class="stat"><div class="n">4</div><div class="l">Test files in the repo</div></div>
+        <div class="stat"><div class="n">0</div><div class="l">Crash reporting SDKs wired</div></div>
+        <div class="stat"><div class="n">81</div><div class="l">Providers in one MultiProvider</div></div>
+      </div>
+
+      <p>Three findings should reset expectations about launch timing on their own: there is no way to sign out of the app (<code class="chip">auth_controller.dart:72</code> is never called from any screen), the Profile tab's Analytics link points at a route string that does not exist in the router and will throw at tap time, and there is no crash reporting of any kind wired into the app — so once it ships, the team will not know what is breaking for real users. None of these are hard fixes; all of them are the kind of gap that only shows up when someone walks the app the way a user would, rather than screen-by-screen in isolation, which is exactly the exercise this review performs.</p>
+
+      <p>The deeper pattern, visible across almost every feature domain audited, is <strong>build-then-forget-to-wire</strong>: a screen, repository, and backend endpoint are built completely, correctly, and then never connected to a tap target. Search has a real debounced, multi-collection backend query and is reachable from nowhere. Live Discovery has a live Firestore stream of active broadcasts and no button anywhere leads to it. Two prior audit documents already checked into this repository (<code class="chip">docs/ACTIVATION_SUMMARY.md</code>, <code class="chip">docs/FEATURE_ACCESSIBILITY_AUDIT.md</code>, dated 2026-06-08) describe this exact same failure mode on an earlier version of the app that has since been fully rebuilt — meaning the team fixed the symptoms once, rebuilt the app, and reintroduced the same disease. That repetition is the single most important finding in this report: the fix is not "wire up these fourteen screens," it's "add a release gate that would have caught this class of bug the first time."</p>
+
+      <p>Money flows are the second major risk cluster. YohPal delegates every payment, top-up, withdrawal, and subscription purchase to an external browser (<code class="chip">yohpal_web_handoff.dart</code>) with no WebView and no in-app SDK, which is a legitimate architecture choice — but the app never listens for the user to come back. The screen built for that purpose, <code class="chip">WalletStatusScreen</code>, is a literal one-line placeholder that nothing links to. Separately, the rewarded-ads "watch an ad, earn a reward" loop is a client-side timer with no real ad SDK behind it, and the Firestore rules let any signed-in user write an arbitrary gift <code class="chip">amount</code> to someone else's live session — both are real paths to being farmed for money the business did not actually receive.</p>
+
+      <p>None of this means the codebase is unsalvageable — the reverse: the core feed, chat, comments, and auth-gating are built with real discipline, which is why the gaps read as oversights rather than as evidence of an inexperienced team. The rest of this report walks every screen and flow in detail, then rolls the findings up into a prioritized punch list and a checklist a release manager can use as a literal go/no-go gate.</p>
+    </section>
+
+    <!-- ============ 2. SCREEN BY SCREEN ============ -->
+    <section id="screens">
+      <div class="section-head"><span class="section-num">02</span><h2>Screen-by-screen findings</h2></div>
+      <p class="section-dek">Organized by the five bottom-navigation hubs a real user actually taps through — <code class="mono">yohpal_main_shell.dart</code> — plus the screens layered behind each one. Every claim below is grounded in a specific file and line.</p>
+
+      <h3>Bottom navigation shell</h3>
+      <p><code class="chip">yohpal_main_shell.dart:19-25</code> defines five tabs — <strong>Discover, Create, Community, Rewards, Profile</strong> — rendered inside an <code class="chip">IndexedStack</code>, so tab state is preserved across switches (good: no reload flicker). This is the entire IA of the app; everything else (chat, live, wallet, search, YCIOS, AI editor, affiliate, ads) hangs off one of these five hub screens or is reached by deep link. A user's whole mental model of "where things live" depends on these five screens being complete and honest, which is why the hub audit below matters more than its five short entries suggest.</p>
+
+      <div class="screen">
+        <div class="screen-head"><h4>Discover — the main feed</h4><span class="screen-path">discover_hub_screen.dart → video_feed_screen.dart</span></div>
+        <div class="screen-body">
+          <p><strong>Purpose:</strong> the app's home screen and primary content surface — a vertical, swipeable video feed, the TikTok/Reels-style entry point the rest of the product is built around.</p>
+          <h5>What a user does</h5>
+          <p>Opens the app, lands here immediately after the splash, swipes up through an endless-feeling feed, taps like/comment/follow/share, occasionally taps a creator's name to visit their profile.</p>
+          <h5>Findings</h5>
+          <div class="status-row">
+            <span class="badge ok">Real backend, not mocked</span>
+            <span class="badge medium">Hard 100-item cap, no pagination</span>
+            <span class="badge medium">No mute control</span>
+            <span class="badge low">No double-tap-to-like</span>
+            <span class="badge high">Error state is a dead end</span>
+          </div>
+          <p style="margin-top:10px">The feed is genuinely wired to Firestore through <code class="chip">VideoFeedController</code>, with real optimistic like/bookmark updates and rollback on failure (<code class="chip">video_interaction_controller.dart:25-73</code>) — the single best-executed interaction pattern found anywhere in the app. But <code class="chip">video_feed_repository.dart:30-50,137-143</code> hard-caps every query at <code class="chip">.limit(100)</code> with no cursor, so a session that scrolls past 100 videos simply runs out of feed. The error state (<code class="chip">video_feed_screen.dart:239-247</code>) prints the raw exception string in red with no retry button and no pull-to-refresh — a transient network blip permanently strands the user on an error screen until they leave the tab and come back. There is no mute/unmute affordance anywhere in the video pipeline (confirmed by grep), unusual for a video-first app and a likely source of "why is this app always loud" complaints. Neither double-tap-to-like nor long-press exist, which will read as broken to anyone arriving with TikTok/Reels muscle memory.</p>
+        </div>
+      </div>
+
+      <div class="screen">
+        <div class="screen-head"><h4>Create hub</h4><span class="screen-path">create_hub_screen.dart</span></div>
+        <div class="screen-body">
+          <p><strong>Purpose:</strong> the creator's launchpad — upload a video, go live, open the AI editor / YCIOS workspace.</p>
+          <h5>Findings</h5>
+          <div class="status-row">
+            <span class="badge ok">All 5 links resolve to a real route</span>
+            <span class="badge medium">2 of 5 cards are mislabeled duplicates</span>
+          </div>
+          <p style="margin-top:10px">Every card does navigate somewhere real — no crashes here. But "Multistream Setup" and "Live Commerce Setup" (<code class="chip">create_hub_screen.dart:43-56</code>) both just push <code class="chip">AppRoutes.goLive</code> again; they are not the dedicated <code class="chip">MultistreamSetupScreen</code> the router already registers (which needs a <code class="chip">liveSessionId</code> argument the hub never supplies). A user tapping "Multistream Setup" expecting a multistream configuration screen gets the ordinary Go Live screen with no explanation — a promise the entry point can't keep on its own.</p>
+        </div>
+      </div>
+
+      <div class="screen">
+        <div class="screen-head"><h4>Community hub</h4><span class="screen-path">community_hub_screen.dart</span></div>
+        <div class="screen-body">
+          <p><strong>Purpose:</strong> Messages, Notifications, Collaboration, Watch Later, Invite Friends.</p>
+          <div class="status-row"><span class="badge ok">All 5 links resolve correctly — no dead ends</span></div>
+          <p style="margin-top:10px">The cleanest of the five hubs. Every route constant used here matches a registered route in <code class="chip">router.dart</code>, verified individually. No loading/empty/error states are needed here since it's static navigation, and none are missing.</p>
+        </div>
+      </div>
+
+      <div class="screen">
+        <div class="screen-head"><h4>Rewards hub</h4><span class="screen-path">rewards_hub_screen.dart</span></div>
+        <div class="screen-body">
+          <div class="status-row">
+            <span class="badge ok">Wallet, Earnings, Coupons, Ads Arena, Leaderboard all resolve</span>
+            <span class="badge low">"Gift History" is a fake link</span>
+          </div>
+          <p style="margin-top:10px">The screen is upfront about the money model — a disclaimer states "all money movement is handled securely via YohPal Web" (<code class="chip">rewards_hub_screen.dart:25-31</code>), which is honest UX given the external-handoff architecture described in <a href="#gaps">§5</a>. The one blemish: "Gift History" (<code class="chip">rewards_hub_screen.dart:71-82</code>) does not navigate anywhere — its <code class="chip">onTap</code> shows a SnackBar reading "Gift history — launching soon," presented with the exact same visual weight as every working card next to it.</p>
+        </div>
+      </div>
+
+      <div class="screen">
+        <div class="screen-head"><h4>Profile hub</h4><span class="screen-path">profile_hub_screen.dart</span></div>
+        <div class="screen-body">
+          <div class="status-row">
+            <span class="badge critical">"Analytics" link crashes the app</span>
+            <span class="badge low">"Creator Marketplace" is a fake link</span>
+            <span class="badge low">"Settings" is a fake link</span>
+            <span class="badge medium">No sign-out anywhere on this screen</span>
+          </div>
+          <p style="margin-top:10px">This screen reads <code class="chip">FirebaseAuth.instance.currentUser</code> directly with no controller (<code class="chip">profile_hub_screen.dart:15</code>) — acceptable only because <code class="chip">AuthGate</code> already guarantees a resolved session by the time this widget builds. The critical bug: the "Analytics" tile pushes the hardcoded string <code class="chip">'/creator-analytics'</code> (<code class="chip">profile_hub_screen.dart:100</code>), but the actual registered route is <code class="chip">CreatorAnalyticsScreen.routeName</code>, whose real value is <code class="chip">/creator-profile/analytics</code> (<code class="chip">creator_analytics_screen.dart:13</code>). <code class="chip">app.dart:508-527</code> sets a flat <code class="chip">routes</code> map with no <code class="chip">onUnknownRoute</code> fallback, so tapping Analytics throws <em>"Could not find a generator for route '/creator-analytics'"</em> at runtime — a full crash, not a display glitch, on one of the five primary destinations in the app's main navigation. "Creator Marketplace" and "Settings" are both SnackBar stubs ("launching soon" / "coming soon"); Settings at least dims its icon to <code class="chip">alpha: 0.6</code> as a visual tell (<code class="chip">profile_hub_screen.dart:161</code>) — Marketplace gives no such signal. Most importantly: there is no sign-out control anywhere on this screen, or anywhere in the app (see <a href="#flows">§3, Logout</a>).</p>
+        </div>
+      </div>
+
+      <h3>Screens that exist and work, but that no user can ever reach</h3>
+      <p>The following are fully built, in several cases backed by real, correct Firestore queries — and completely unreachable from the live navigation graph. Each was confirmed by grepping the entire <code class="mono">lib/</code> tree for every call site of its route constant.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Screen</th><th>Path</th><th>Backend</th><th>Why it's orphaned</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Search</strong></td><td class="mono">search/screens/search_screen.dart</td><td>Real — 350ms debounce, parallel query across 4 collections</td><td>Route registered (<code class="chip">router.dart:42</code>); zero <code class="chip">Icons.search</code> or route references anywhere in any hub or shell</td></tr>
+            <tr><td><strong>Live Discovery</strong></td><td class="mono">live_streaming/screens/live_discovery_screen.dart</td><td>Real — <code class="chip">watchPublicLiveSessions</code></td><td><code class="chip">AppRoutes.live</code> defined but never referenced by any <code class="chip">pushNamed</code> call in the app</td></tr>
+            <tr><td>Wallet Status</td><td class="mono">wallet_web/screens/wallet_status_screen.dart</td><td>None — placeholder text only</td><td>Not registered in the router at all; would-be payment-return screen never built out</td></tr>
+            <tr><td>Timeline Overlay</td><td class="mono">commerce/screens/timeline_overlay_screen.dart</td><td>Unaudited</td><td>Registered route, constant defined, never pushed from anywhere</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Dead code (built, wired into nothing, not even a stub UI)</h3>
+      <p>Beyond orphaned screens, the audit found dead services and widgets that add maintenance surface with zero user-facing effect: <code class="chip">WalletLauncherService</code> (empty no-op), <code class="chip">MonetisationService</code> (empty class), <code class="chip">ChatSdkAdapter</code> (3-line stub — chat is actually plain Firestore), <code class="chip">MessageBubble</code> widget (chat bubbles are built inline instead), <code class="chip">TranscodingService.triggerTranscoding</code> and <code class="chip">video_upload_repository.markQueuedForTranscoding</code> (transcoding is actually server-triggered), <code class="chip">AnalyticsService</code> (defined, never instantiated), and an entire duplicate video-engine stack under <code class="chip">lib/core/video/</code> and <code class="chip">lib/core/video_feed/</code> (852 lines, zero external imports) sitting alongside the video pipeline that's actually live under <code class="chip">lib/features/video_feed/</code> and <code class="chip">lib/features/video_playback/</code>. This is covered further as an architectural finding in <a href="#technical">§6</a>.</p>
+    </section>
+
+    <!-- ============ 3. FLOWS ============ -->
+    <section id="flows">
+      <div class="section-head"><span class="section-num">03</span><h2>User flow analysis</h2></div>
+      <p class="section-dek">End-to-end walks — happy path, then where it breaks — for the journeys that matter most before launch.</p>
+
+      <div class="flow">
+        <div class="flow-head"><h4>New user: signup → first session</h4><span class="badge high">High risk</span></div>
+        <div class="steps">
+          <div class="step"><div class="dot"></div><div class="stext">User opens <code class="chip">signup_screen.dart</code>, enters display name, email, password into plain <code class="chip">TextField</code>s — no <code class="chip">Form</code>, no validators of any kind, no confirm-password field, no Terms of Service or Privacy Policy link anywhere on the screen.</div></div>
+          <div class="step break"><div class="dot"></div><div class="stext"><strong>Break:</strong> an empty field or malformed email is sent straight to Firebase, which throws a raw exception surfaced verbatim (see error-message finding below) rather than being caught client-side before the network call.</div></div>
+          <div class="step"><div class="dot"></div><div class="stext">On success, <code class="chip">auth_repository.dart:37-76</code> creates the Firebase Auth user, sets <code class="chip">displayName</code>, and writes both a <code class="chip">users/{uid}</code> and a <code class="chip">creatorProfiles/{uid}</code> document.</div></div>
+          <div class="step break"><div class="dot"></div><div class="stext"><strong>Break:</strong> if the Firestore profile write fails after the Auth account already succeeded (long input, transient network drop), the result is an orphaned Auth user with no profile document and no retry path — that account is now broken in a way the user can't self-diagnose or fix.</div></div>
+          <div class="step break"><div class="dot"></div><div class="stext"><strong>Break:</strong> there is no email verification step and no "complete your profile" step. The user lands directly in the main feed with no onboarding — no interest picker, no notification-permission priming, no first-follow suggestions. First impression is identical for a brand-new user and a five-year veteran.</div></div>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="flow-head"><h4>Returning user: login</h4><span class="badge high">High risk</span></div>
+        <div class="steps">
+          <div class="step"><div class="dot"></div><div class="stext">User enters email/password on <code class="chip">login_screen.dart</code>. No SSO (Google/Apple) exists anywhere in the codebase. No "Forgot password" link exists.</div></div>
+          <div class="step break"><div class="dot"></div><div class="stext"><strong>Break:</strong> a wrong password or non-existent account returns <code class="chip">'[${e.code}] ${e.message}'</code> straight from Firebase (<code class="chip">auth_repository.dart:31</code>) — the user sees literal text like <code class="chip">[firebase_auth/invalid-credential] The supplied auth credential is malformed or has expired.</code> This is the only feedback they get; there's no friendlier fallback.</div></div>
+          <div class="step"><div class="dot"></div><div class="stext">Submit button is correctly disabled while <code class="chip">auth.loading</code> is true (no double-submit), though the "loading" state is a text swap to "Signing in…" rather than a spinner.</div></div>
+          <div class="step break"><div class="dot"></div><div class="stext"><strong>Dead end:</strong> a user who has genuinely forgotten their password has no self-service way back into their account — no reset flow exists anywhere in the app.</div></div>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="flow-head"><h4>Cold start: session restore</h4><span class="badge ok">Works well</span></div>
+        <div class="steps">
+          <div class="step"><div class="dot"></div><div class="stext"><code class="chip">yohpal_bootstrap.dart</code> shows a branded splash and blocks reveal of the app until <code class="chip">AuthController.authReady</code> flips true (set only after the first real <code class="chip">authStateChanges()</code> event, <code class="chip">auth_controller.dart:12-22</code>) — bounded by a 4s fallback timeout and a 2s minimum splash floor.</div></div>
+          <div class="step"><div class="dot"></div><div class="stext">This is a deliberately correct design: a returning, already-logged-in user is never shown a flash of the login screen while Firebase resolves the persisted session — the splash simply holds until the answer is known.</div></div>
+          <div class="step break"><div class="dot"></div><div class="stext"><strong>Edge case:</strong> if auth resolution genuinely takes longer than the 4-second fallback (very slow network), the timeout fires anyway and <code class="chip">AuthGate</code> renders on whatever <code class="chip">auth.user</code> currently is — which could still be <code class="chip">null</code>, flashing <code class="chip">LoginScreen</code> to a legitimately logged-in user.</div></div>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="flow-head"><h4>Logout</h4><span class="badge critical">Broken — no entry point</span></div>
+        <div class="steps">
+          <div class="step break"><div class="dot"></div><div class="stext"><strong>Break:</strong> <code class="chip">AuthController.logout()</code> is fully implemented (<code class="chip">auth_controller.dart:72</code>) but has zero call sites anywhere in the UI — confirmed by grepping every screen in <code class="chip">lib/features/profile</code> and <code class="chip">lib/features/navigation</code> plus the whole <code class="mono">lib/</code> tree. There is no button, menu item, or gesture in the shipped app that signs a user out.</div></div>
+          <div class="step break"><div class="dot"></div><div class="stext"><strong>Compounding issue:</strong> even once wired up, <code class="chip">logout()</code> only calls <code class="chip">repository.signOut()</code> — it does not clear the video feed controller, wallet balance, or notification token state, so a second account signing in on the same device would inherit visible traces of the previous session until those streams naturally re-subscribe.</div></div>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="flow-head"><h4>Upload a video</h4><span class="badge medium">Works, with real gaps</span></div>
+        <div class="steps">
+          <div class="step"><div class="dot"></div><div class="stext">Create hub → Upload → <code class="chip">UploadScreen</code> opens the gallery picker via <code class="chip">image_picker</code>. The hub card's own copy promises "Record or upload" (<code class="chip">create_hub_screen.dart:26</code>) but there is no camera-capture option in the actual screen — only gallery selection.</div></div>
+          <div class="step"><div class="dot"></div><div class="stext">Validation checks file extension and a 250MB size cap (<code class="chip">video_upload_controller.dart:35-44</code>) — no duration check. Upload progress is real, driven by Firebase Storage's <code class="chip">UploadTask.snapshotEvents</code>.</div></div>
+          <div class="step break"><div class="dot"></div><div class="stext"><strong>Gap:</strong> no pre-flight connectivity check (<code class="chip">connectivity_plus</code> is a listed dependency that is never imported in the upload flow), no cancel button for an in-progress upload despite the underlying task supporting <code class="chip">.cancel()</code>, no retry button on failure, and no handling at all for the app being backgrounded mid-upload.</div></div>
+          <div class="step"><div class="dot"></div><div class="stext">On success, the video is immediately <code class="chip">status: upload_pending</code> / <code class="chip">visibility: public</code> and a server-side Storage trigger transcodes it — real, not mocked.</div></div>
+          <div class="step break"><div class="dot"></div><div class="stext"><strong>Gap:</strong> the optional "Enhance with AI before publishing" step writes an <code class="chip">aiPublishStatus</code> field that is never read anywhere else in the codebase — the checklist is cosmetic. A video is publicly visible whether or not the creator ever visits the AI editor at all, which contradicts what the checklist implies it's gating.</div></div>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="flow-head"><h4>Top up wallet / withdraw / subscribe (money flows)</h4><span class="badge critical">Broken feedback loop</span></div>
+        <div class="steps">
+          <div class="step"><div class="dot"></div><div class="stext">User taps Wallet, Request Payout, or Subscribe. Each of these calls <code class="chip">YohPalWebHandoff</code>, which opens <code class="chip">wallet.yohpal.com</code>, <code class="chip">ads.yohpal.com</code>, or <code class="chip">subscriptions.yohpal.com</code> in the device's external browser via <code class="chip">url_launcher</code> — there is no in-app WebView and no payment SDK anywhere in the app (<code class="chip">webview_flutter</code> and <code class="chip">in_app_purchase</code> are not even pubspec dependencies).</div></div>
+          <div class="step break"><div class="dot"></div><div class="stext"><strong>Break:</strong> "Request Payout" (<code class="chip">creator_earnings_screen.dart:55-61</code>) and subscription-plan actions (<code class="chip">creator_subscription_screen.dart:69-76,109-116</code>) call the handoff with no <code class="chip">await</code>, no try/catch, no loading state, and no confirmation dialog — if the browser fails to launch, the failure is silently swallowed and the user sees nothing happen.</div></div>
+          <div class="step break"><div class="dot"></div><div class="stext"><strong>Break:</strong> the user completes payment in the browser and returns to the app. Nothing detects this. The screen built for exactly this purpose, <code class="chip">WalletStatusScreen</code>, is a one-line placeholder (<code class="chip">Center(child: Text('WalletStatusScreen module'))</code>) that isn't even registered in the router. The wallet balance will eventually update because it's a live Firestore stream, but the user gets no explicit "payment received" confirmation and no explicit failure message if it didn't go through.</div></div>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="flow-head"><h4>Go live → get discovered → get watched</h4><span class="badge critical">Structurally broken</span></div>
+        <div class="steps">
+          <div class="step"><div class="dot"></div><div class="stext">Creator taps Go Live, enters a title (or leaves it blank — defaults to "YohPal Live Stream"), grants camera/mic access via LiveKit's own native OS prompt (no in-app rationale UI despite <code class="chip">permission_handler</code> being a dependency), and starts broadcasting for real via LiveKit.</div></div>
+          <div class="step break"><div class="dot"></div><div class="stext"><strong>Break:</strong> the stream is now live in Firestore and technically joinable — but <code class="chip">LiveDiscoveryScreen</code>, the only screen in the app that lists active sessions, is unreachable from any tab or button (see §2). A viewer has no way to find this stream unless they already have a direct link. The core "go live" journey has no discovery half.</div></div>
+          <div class="step break"><div class="dot"></div><div class="stext"><strong>Break:</strong> neither host nor viewer client subscribes to LiveKit's <code class="chip">RoomEvent</code>/connection-state stream after the initial <code class="chip">connect()</code> call (confirmed absent by grep). A network drop mid-stream on either side simply hangs — no reconnect attempt, no timeout, no "connection lost" banner. The user's only recourse is to back out and rejoin manually.</div></div>
+          <div class="step break"><div class="dot"></div><div class="stext"><strong>Break:</strong> if a viewer does join, gifting has no client-side balance check at all — the Firestore write sets an arbitrary <code class="chip">amount</code> chosen entirely by the client (see <a href="#security">§7</a>). Live commerce checkout ("Pay Now") is, again, an external web handoff with no in-app confirmation.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 4. UX/UI ============ -->
+    <section id="uxui">
+      <div class="section-head"><span class="section-num">04</span><h2>UX / UI findings</h2></div>
+      <p class="section-dek">Cutting across screens rather than within one.</p>
+
+      <h3>Feedback states are inconsistent by feature, not by design system</h3>
+      <p>Some surfaces have exemplary loading/empty/error handling — comments (<code class="chip">comments_bottom_sheet.dart:64-81</code>) show a spinner, a warm empty state ("No comments yet — be the first!"), and a distinct error state; search shows debounced loading, no-results, and error states per-tab. Others show none of this discipline — the main feed's error state is raw exception text with no retry (§2), and both "Request Payout" and "Subscribe on Web" fire real network/browser actions with zero loading indicator of any kind. There is no shared empty-state or error-state component; each screen re-invents its own, which is why the quality varies so widely from one to the next.</p>
+
+      <h3>"Coming soon" is indistinguishable from "works"</h3>
+      <p>Gift History, Creator Marketplace, and Settings all render as ordinary, fully-opaque list tiles identical in weight to working destinations — only Settings dims its icon. A user cannot visually predict which taps will do something and which will produce a SnackBar apology. At minimum these need a consistent "Coming soon" affordance (dimmed row, trailing badge, or removal from the menu entirely until built).</p>
+
+      <h3>Accessibility is absent from the primary surface</h3>
+      <p>Zero uses of Flutter's <code class="chip">Semantics</code> widget exist anywhere in the video feed, playback, or engagement-rail code (grep confirmed). The engagement rail's like/comment/share/follow buttons are icon-only <code class="chip">CircleAvatar</code> + <code class="chip">InkWell</code> combinations with a separate, unmerged <code class="chip">Text</code> label underneath (<code class="chip">video_engagement_rail_widget.dart:404-412</code>) — a screen reader encounters an unlabeled tappable circle followed by disconnected text, not a single accessible control. There is no video content description for VoiceOver/TalkBack anywhere. For an app whose entire home screen is this feed, this is not a peripheral accessibility gap — it makes the core product unusable with a screen reader.</p>
+
+      <h3>Gesture vocabulary doesn't match the genre</h3>
+      <p>Single tap toggles play/pause, which works, but double-tap-to-like and long-press (both near-universal in this exact product category) are absent everywhere. Users arriving with TikTok/Reels/Shorts habits will double-tap out of instinct and get nothing.</p>
+
+      <h3>Copy makes promises the code doesn't keep</h3>
+      <p>Two concrete examples beyond the "Record or upload" mismatch already noted: <code class="chip">gift_creator_screen.dart</code> shows a SnackBar claiming "Sending [tier] gift…" when the tapped tier is never actually passed to the web handoff URL (<code class="chip">gift_creator_screen.dart:135</code>) — the specific gift the user picked is silently dropped. And the contacts feature's "AI Invite Ranker" (<code class="chip">ai_invite_ranker.dart:3-27</code>) is a deterministic point system (+15 for a non-empty name, +20 for a <code class="chip">+254</code> prefix, +20 for keywords like "mom"/"manager") with no model and no randomness — calling it AI is a labeling choice worth revisiting before a user-facing or marketing claim is built on it.</p>
+    </section>
+
+    <!-- ============ 5. FUNCTIONAL GAPS ============ -->
+    <section id="gaps">
+      <div class="section-head"><span class="section-num">05</span><h2>Functional gaps</h2></div>
+      <p class="section-dek">What's missing outright, grouped by why it's missing.</p>
+
+      <h3>Account lifecycle — effectively half-built</h3>
+      <ul>
+        <li>No password reset / forgot-password flow anywhere in the app.</li>
+        <li>No account deletion or data-export self-service (relevant for app-store and regional privacy compliance).</li>
+        <li>No email verification step after signup.</li>
+        <li>No sign-out control anywhere in the shipped UI.</li>
+        <li>No token-refresh or session-revocation handling — only <code class="chip">authStateChanges()</code> is observed, never <code class="chip">idTokenChanges()</code>.</li>
+      </ul>
+
+      <h3>Payments — real display, no confirmation loop</h3>
+      <ul>
+        <li>No WebView or payment SDK; every monetary action is an external browser handoff.</li>
+        <li>No return/reconciliation screen — <code class="chip">WalletStatusScreen</code> is an unbuilt, unrouted placeholder.</li>
+        <li>No loading/error handling around the handoff calls themselves in earnings, subscriptions, or gifting screens.</li>
+        <li>Rewarded-ads reward crediting has no real ad SDK behind it — a client-side timer stands in for actually serving and verifying an ad impression.</li>
+      </ul>
+
+      <h3>Discovery — built, unreachable</h3>
+      <ul>
+        <li>Search: fully functional, zero navigation entry point.</li>
+        <li>Live Discovery: fully functional, zero navigation entry point.</li>
+        <li>Video polls exist and work inside the regular feed and via notification deep links, but were never wired into live streams — despite being an obvious live-engagement feature, it doesn't appear there.</li>
+      </ul>
+
+      <h3>Creator tooling — partially built</h3>
+      <ul>
+        <li>Avatar upload is not implemented — <code class="chip">edit_creator_profile_screen.dart:84</code> is a raw URL text field with an in-UI admission: "Temporary — Storage upload comes in a future phase."</li>
+        <li>AI Editor's Translation feature is built (<code class="chip">ai_translation_service.dart</code>) but never wired into the controller or exposed as a button.</li>
+        <li>The AI publish checklist doesn't gate anything — see the upload flow in §3.</li>
+        <li>Creator Analytics shows three static numbers with no trend lines or charts, despite the screen's name implying more.</li>
+      </ul>
+
+      <h3>Messaging — text-only, half-built presence features</h3>
+      <ul>
+        <li>Typing indicators: the repository method (<code class="chip">setTyping</code>) exists but is never called or displayed by any screen.</li>
+        <li>No read receipts beyond a conversation-level unread counter.</li>
+        <li>No media/image messages — text only.</li>
+        <li>No pagination beyond a hard 100-message cap.</li>
+        <li>Message send failures are not caught in the UI (<code class="chip">chat_room_screen.dart</code> send path has no try/catch) — a failed send just silently vanishes.</li>
+      </ul>
+    </section>
+
+    <!-- ============ 6. TECHNICAL ============ -->
+    <section id="technical">
+      <div class="section-head"><span class="section-num">06</span><h2>Technical &amp; architectural review</h2></div>
+
+      <h3>State management: one flat, unscoped provider tree</h3>
+      <p><code class="chip">lib/app/app.dart</code> registers <strong>81</strong> <code class="chip">Provider</code>/<code class="chip">ChangeNotifierProvider</code> entries in a single top-level <code class="chip">MultiProvider</code> (lines 101-497). Provider's <code class="chip">create</code> is lazy by default, so this doesn't force 81 objects into memory at boot, but it does mean every feature in the app is visible to every other feature with no module boundary — there's no scoping by hub, by auth state, or by feature flag. This will keep working today; it will not scale gracefully past its current size, and it already makes <code class="chip">app.dart</code> a 533-line file that has to be touched for any new feature's wiring.</p>
+
+      <h3>Four competing video-pipeline implementations</h3>
+      <p>The single most important architectural cleanup in this codebase. Tracing the live path (<code class="chip">yohpal_main_shell.dart</code> → <code class="chip">DiscoverHubScreen</code> → <code class="chip">VideoFeedScreen</code>) shows the actually-used stack is <code class="chip">lib/features/video_feed/</code> + <code class="chip">lib/features/video_playback/</code> + <code class="chip">lib/features/engagement/</code>. Sitting unused alongside it:</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Dead / duplicate module</th><th>Size</th><th>Overlaps with</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">lib/core/video/*</td><td class="num">~450 lines</td><td>video controller, player pool, preload manager</td></tr>
+            <tr><td class="mono">lib/core/video_feed/*</td><td class="num">~400 lines</td><td>smart player pool, network-aware delivery, quality selector</td></tr>
+            <tr><td class="mono">video_feed/repositories/video_repository.dart</td><td class="num">—</td><td>duplicate of the live <code class="mono">video_feed_repository.dart</code></td></tr>
+            <tr><td class="mono">feed/repositories/video_feed_repository.dart</td><td class="num">—</td><td>same name, different package, unused</td></tr>
+            <tr><td class="mono">video_feed/services/{offline_video_cache_service, video_prefetch_service, video_ranking_service, private_engagement_service}.dart</td><td class="num">—</td><td>uninstantiated anywhere</td></tr>
+            <tr><td class="mono">video_feed/widgets/video_engagement_rail.dart</td><td class="num">—</td><td>superseded by <code class="mono">engagement/widgets/video_engagement_rail_widget.dart</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>This pattern — phase-tagged files (test names like <code class="chip">phase_1o_ultra_low_latency_feed_test.dart</code> confirm iterative "phase" development) left in place after their replacement shipped — is exactly what produces a codebase that's expensive to onboard into and easy to regress by editing the wrong copy of a file that looks live but isn't.</p>
+
+      <h3>Error handling has no single convention</h3>
+      <p><code class="chip">lib/core/result/app_result.dart</code> defines an <code class="chip">AppResult&lt;T&gt;</code> success/failure wrapper, but it's used in exactly one place outside its own file: <code class="chip">auth_repository.dart</code>. Every other controller — wallet, live streaming, ads, comments, engagement — catches exceptions locally and stringifies them into an ad hoc <code class="chip">error</code> field on its own <code class="chip">ChangeNotifier</code>. Nine silent <code class="chip">catch (_) {}</code> blocks were found across creator-profile, video-upload, context-intelligence, and video-feed repositories/controllers — most are low-stakes cache/prefs writes, but the swallow inside the video-feed-item mapper could silently drop a malformed video document from the feed with zero telemetry to notice it happened.</p>
+
+      <h3>No crash reporting, no global error boundary</h3>
+      <p><code class="chip">lib/main.dart</code> has no <code class="chip">runZonedGuarded</code>, no <code class="chip">FlutterError.onError</code> override, and no <code class="chip">PlatformDispatcher.instance.onError</code> hook. Neither Crashlytics nor Sentry (nor any equivalent) appears in <code class="chip">pubspec.yaml</code>, despite the app already depending on the wider Firebase suite that Crashlytics ships alongside. This is the single highest-leverage technical fix available: it is roughly a day of work and it is the only way the team will know what's breaking after launch.</p>
+
+      <h3>Test coverage</h3>
+      <p>Four test files exist in the entire repository: a default <code class="chip">widget_test.dart</code> plus three phase-specific tests (<code class="chip">phase_1o_ultra_low_latency_feed_test.dart</code>, <code class="chip">phase_1p_predictive_experience_test.dart</code>, <code class="chip">phase_1r_context_intelligence_test.dart</code>). There are no repository tests, no controller tests, and no widget tests for the video feed, wallet, checkout, or auth screens — the exact surfaces where a regression is costliest.</p>
+
+      <h3>Observability</h3>
+      <p><code class="chip">AnalyticsService</code> (<code class="chip">core/analytics/analytics_service.dart</code>) is fully implemented and completely unused — never instantiated anywhere. In its place, five or six different call sites write to five or six different repositories (<code class="chip">PlaybackDiagnosticsRepository</code>, <code class="chip">StartupDiagnosticsRepository</code>, an ad hoc <code class="chip">analyticsRepository</code> inside context-intelligence) with no shared event taxonomy. There is no confirmed tracking of the events that matter most to the business — signup completion, purchase/gift/subscription events, or video-watch completion — because there's no single place that would show whether they're tracked at all.</p>
+
+      <h3>Dependency risk</h3>
+      <p><code class="chip">pubspec.yaml:33</code> pins <code class="chip">livekit_client: ">=2.3.0 &lt;2.3.2"</code> — a single-patch-version window on the package that powers the entire live-streaming feature. Any yank or deprecation of that narrow range breaks CI and blocks picking up LiveKit bugfixes with no fallback version to move to.</p>
+    </section>
+
+    <!-- ============ 7. SECURITY ============ -->
+    <section id="security">
+      <div class="section-head"><span class="section-num">07</span><h2>Security &amp; reliability review</h2></div>
+
+      <h3>Secrets and environment configuration</h3>
+      <p>There is no environment abstraction anywhere in the app — no <code class="chip">--dart-define</code>, no <code class="chip">.env</code>, no build flavors. Production infrastructure URLs are hardcoded directly in source and shipped in every build:</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Value</th><th>Location</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">https://us-central1-yohlab.cloudfunctions.net</td><td class="mono">app.dart:192, 259, 320</td></tr>
+            <tr><td class="mono">wss://yohpal-live-ln8xib3c.livekit.cloud</td><td class="mono">app.dart:266</td></tr>
+            <tr><td class="mono">wallet / ads / subscriptions .yohpal.com</td><td class="mono">yohpal_web_handoff.dart:4-6</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>A dev build and a store build hit the identical backend by construction. Rotating any of this infrastructure requires a full app-store release rather than a config change, and the URLs (and by extension the shape of the backend) are visible to anyone who decompiles the shipped APK/IPA.</p>
+
+      <h3>Firestore rules: mostly sound, with real gaps</h3>
+      <p>The rules file (<code class="chip">firestore/rules/firestore.rules</code>, 545 lines) correctly locks wallet balances, wallet ledgers, and creator earnings to read-only from the client, with proper ownership checks (<code class="chip">isOwner</code>/<code class="chip">isAdmin</code> helpers) on most collections. Four specific gaps stand out:</p>
+      <div class="finding critical">
+        <div class="finding-head"><span class="finding-title">Live-session gifts: client sets its own monetary amount</span><span class="badge critical">Critical</span></div>
+        <p>The <code class="chip">gifts</code> subcollection allows any signed-in user to create a document with an arbitrary <code class="chip">amount</code>, constrained only to <code class="chip">senderUserId == self</code> and <code class="chip">amount &gt; 0</code> — nothing checks it against the sender's actual wallet balance. If any backend revenue-crediting logic trusts this document at all rather than independently re-validating against a real balance debit, this is a direct path to crediting creators for money that was never actually paid.</p>
+        <div class="evidence"><code class="chip">firestore.rules ~99-104</code></div>
+      </div>
+      <div class="finding high">
+        <div class="finding-head"><span class="finding-title">Any signed-in user can edit another user's live session counters</span><span class="badge high">High</span></div>
+        <p>The <code class="chip">liveSessions</code> update rule allows any authenticated user — not just the session owner — to modify <code class="chip">giftTotal</code>/<code class="chip">viewerCount</code>/<code class="chip">updatedAt</code> as long as those are the only fields changed.</p>
+        <div class="evidence"><code class="chip">firestore.rules 76-84</code></div>
+      </div>
+      <div class="finding medium">
+        <div class="finding-head"><span class="finding-title">Video view/like counters writable by any signed-in user</span><span class="badge medium">Medium</span></div>
+        <p><code class="chip">videoStats/{videoId}</code> allows <code class="chip">create, update: if request.auth != null</code> with no ownership or field-diff restriction — any account can arbitrarily overwrite another video's stats.</p>
+        <div class="evidence"><code class="chip">firestore.rules ~180</code></div>
+      </div>
+      <div class="finding medium">
+        <div class="finding-head"><span class="finding-title">Referral events writable by anyone, including unauthenticated clients</span><span class="badge medium">Medium</span></div>
+        <p><code class="chip">referralEvents</code> allows <code class="chip">create: if true</code> — no auth check at all, opening the growth/referral system to spam or fraud with zero barrier to entry.</p>
+        <div class="evidence"><code class="chip">firestore.rules ~275</code></div>
+      </div>
+
+      <h3>Rewarded ads: no real ad SDK, spoofable reward loop</h3>
+      <p>There is no ad-network SDK anywhere in the app — no AdMob, no <code class="chip">google_mobile_ads</code> dependency. The "watch an ad, earn a reward" flow is a plain client-side <code class="chip">Timer.periodic</code> that counts up while a static image renders (<code class="chip">rewarded_ads_controller.dart:36-62</code>), and reward crediting is triggered purely by the client writing a <code class="chip">rewardedAdEvents</code> document with no ad-completion attestation of any kind. Anyone who reverse engineers this write can credit themselves rewards without ever loading an ad — a direct monetary exposure if these rewards convert to real value.</p>
+
+      <h3>No crash/error visibility in production</h3>
+      <p>Repeated from §6 because it's a reliability finding as much as a technical one: without Crashlytics/Sentry and without a global error boundary, the team will have no signal on production crash rate, ANRs, or unhandled exceptions after launch. This should be treated as a security-adjacent gap, not just a nice-to-have — silent failures in the payment-handoff and live-streaming code paths described above will be invisible without it.</p>
+
+      <h3>Race conditions and memory</h3>
+      <div class="finding medium">
+        <div class="finding-head"><span class="finding-title">Video controller leak on fast scroll</span><span class="badge medium">Medium</span></div>
+        <p><code class="chip">ZeroWaitPlaybackController</code>'s dispose sweep (<code class="chip">_disposeFarAway</code>) iterates the <code class="chip">_videoData</code> map to find controllers to dispose. If a user scrolls fast past a video whose controller is still mid-initialization (tracked only in <code class="chip">_initFutures</code>, not yet in <code class="chip">_controllers</code>), the sweep deletes its <code class="chip">_videoData</code> entry with nothing to dispose. When initialization later completes, the controller is inserted into <code class="chip">_controllers</code> with no matching <code class="chip">_videoData</code> entry — permanently invisible to future dispose sweeps, and never cleaned up for the rest of the session. On a long scrolling session this accumulates real memory.</p>
+        <div class="evidence"><code class="chip">zero_wait_playback_controller.dart:96-120, 150-168</code></div>
+      </div>
+      <div class="finding low">
+        <div class="finding-head"><span class="finding-title">Player pool doesn't rotate — same instance handed out repeatedly</span><span class="badge low">Low</span></div>
+        <p><code class="chip">YohPalPlayerPool.acquire()</code> returns <code class="chip">_pool.first</code> once the pool is at capacity instead of an LRU rotation — a functional bug, though this specific pool is in the dead <code class="chip">lib/core/video</code> module (§6) and not the live playback path.</p>
+        <div class="evidence"><code class="chip">yohpal_player_pool.dart:9-16</code></div>
+      </div>
+    </section>
+
+    <!-- ============ 8. PERFORMANCE ============ -->
+    <section id="performance">
+      <div class="section-head"><span class="section-num">08</span><h2>Performance &amp; scalability review</h2></div>
+      <ul>
+        <li><strong>Feed pagination:</strong> every feed query is hard-capped at <code class="chip">.limit(100)</code> with no cursor (<code class="chip">video_feed_repository.dart:30-50,137-143</code>) — fine at today's content volume, a hard wall once the catalog grows past 100 items per feed type.</li>
+        <li><strong>Eager feed subscription at app boot:</strong> <code class="chip">VideoFeedController</code> is created and immediately calls <code class="chip">startSuggestedFeed()</code> at the provider-tree root (<code class="chip">app.dart:122-126</code>), so its Firestore listener stays open for the whole app lifetime even if the user never opens the Discover tab — a small always-on cost multiplied across every session.</li>
+        <li><strong>Splash-time warmup is a genuine performance win:</strong> <code class="chip">FeedStartupWarmupService</code> pre-warms the first video controller during the branded splash (<code class="chip">yohpal_bootstrap.dart</code>), so first-frame time on Discover is better than a naive cold start — worth calling out as something to keep and extend, not just a list of problems.</li>
+        <li><strong>Duplicate video pipelines increase app size and cognitive load for no runtime benefit</strong> — the ~850 lines of dead code in <code class="chip">lib/core/video</code> and <code class="chip">lib/core/video_feed</code> ship in the binary and slow down anyone reading the playback path to understand or fix a bug (§6).</li>
+        <li><strong>No connectivity pre-check before large uploads:</strong> <code class="chip">connectivity_plus</code> is a listed dependency, never imported in the upload flow — a multi-hundred-MB video upload is attempted blind on whatever connection is currently available.</li>
+        <li><strong>No HTTP timeout on the AI job-request call</strong> (<code class="chip">ai_creator_api_service.dart:14</code>) — a hung network call spins the AI Editor's loading state indefinitely with no client-side escape hatch.</li>
+        <li><strong>No reconnect/backoff logic for LiveKit</strong> — confirmed absent in §3/§7 — means a flaky connection during a live stream degrades to a permanently stuck UI rather than a graceful retry, which is as much a scalability/reliability concern under real-world mobile network conditions as it is a UX one.</li>
+      </ul>
+    </section>
+
+    <!-- ============ 9. READINESS ASSESSMENT ============ -->
+    <section id="readiness">
+      <div class="section-head"><span class="section-num">09</span><h2>Production readiness assessment</h2></div>
+      <p><strong>Verdict: not ready for a general-availability launch with real users and real money.</strong> The core content-consumption loop (feed, likes, comments, follow) is genuinely solid and close to shippable on its own. Everything layered around it — account lifecycle, payments, live discovery, crash visibility — has at least one launch-blocking gap. The risk is concentrated, not diffuse: fix the nine critical items in §10 and the picture changes from "not ready" to "ready for a limited/invite beta with monitoring," which is a realistic near-term target rather than a rebuild.</p>
+      <div class="two-col">
+        <div class="card">
+          <h4 style="margin-top:0">What's ready today</h4>
+          <ul>
+            <li>Video feed core loop, optimistic like/bookmark/follow</li>
+            <li>Splash → auth-gating sequence (no login-screen flash)</li>
+            <li>Real-time chat and comments (minus a few polish gaps)</li>
+            <li>Firestore security model for the highest-value collections (wallet balances, earnings)</li>
+            <li>Search and Live Discovery backends (once wired to navigation)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4 style="margin-top:0">What blocks launch today</h4>
+          <ul>
+            <li>No logout, no password reset, no crash reporting</li>
+            <li>A crashing link in the primary navigation</li>
+            <li>No payment confirmation loop for any money flow</li>
+            <li>Spoofable rewarded-ad reward crediting</li>
+            <li>Client-controlled gift amounts in Firestore rules</li>
+            <li>No live-stream discovery entry point</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 10. PRIORITIZED ISSUES ============ -->
+    <section id="prioritized">
+      <div class="section-head"><span class="section-num">10</span><h2>Prioritized issues</h2></div>
+      <p class="section-dek">Every finding from this report, ranked. Critical = must fix before any real-user launch. High = must fix before a wide launch. Medium = fix in the first post-launch cycle. Low = backlog.</p>
+
+      <h3><span class="badge critical">Critical</span></h3>
+      <ol>
+        <li>No sign-out control exists anywhere in the shipped UI (<code class="chip">auth_controller.dart:72</code> unused).</li>
+        <li>Profile → Analytics pushes a hardcoded route string that doesn't match the registered route and crashes on tap (<code class="chip">profile_hub_screen.dart:100</code>).</li>
+        <li>No crash reporting (Crashlytics/Sentry) and no global error boundary anywhere in <code class="chip">main.dart</code>.</li>
+        <li>No password reset / account recovery flow.</li>
+        <li>Rewarded-ads reward crediting is a client-side timer with no real ad SDK or completion attestation — spoofable for monetary reward.</li>
+        <li>Firestore <code class="chip">gifts</code> subcollection lets any signed-in user set an arbitrary monetary <code class="chip">amount</code> with no balance validation.</li>
+        <li>Every payment/top-up/withdrawal/subscription flow has zero reconciliation UX — <code class="chip">WalletStatusScreen</code>, the intended return screen, is an unbuilt, unrouted placeholder.</li>
+        <li>Production infrastructure URLs and endpoints are hardcoded in shipped source with no environment split.</li>
+        <li><code class="chip">videoStats</code> and <code class="chip">referralEvents</code> Firestore rules allow unrestricted or unauthenticated writes (counter manipulation, referral fraud).</li>
+      </ol>
+
+      <h3><span class="badge high">High</span></h3>
+      <ol>
+        <li>Signup/login have no client-side input validation, no ToS/Privacy link, no email verification.</li>
+        <li>Login and signup show raw Firebase exception strings directly to users.</li>
+        <li>Live streaming has no reconnect/timeout handling — a network drop hangs the session indefinitely for host and viewer.</li>
+        <li><code class="chip">Search</code> is fully functional and has zero navigation entry point anywhere in the app.</li>
+        <li><code class="chip">LiveDiscoveryScreen</code> is fully functional and has zero navigation entry point — viewers cannot find any live stream.</li>
+        <li>Feed error state has no retry mechanism — a network hiccup is a dead end until the user leaves the tab.</li>
+        <li>The AI publish checklist doesn't gate publishing — videos go public immediately regardless of its state, contradicting its purpose.</li>
+        <li>Zero accessibility semantics across the primary feed and engagement-rail surface.</li>
+        <li>Only 4 test files in the entire repository; no coverage on auth, wallet, checkout, or feed.</li>
+        <li>Four overlapping/duplicate video-pipeline implementations create real regression risk for anyone editing the "wrong" copy.</li>
+        <li>Avatar upload is unimplemented (raw URL text field) on the core creator-profile-completion flow.</li>
+        <li>Chat message send failures are not caught — a failed send silently disappears with no user feedback.</li>
+        <li>Logout, even once wired up, would not clear feed/wallet/notification state between accounts on a shared device.</li>
+      </ol>
+
+      <h3><span class="badge medium">Medium</span></h3>
+      <ol>
+        <li>No mute/unmute control anywhere in the video feed.</li>
+        <li>No double-tap-to-like or long-press gestures on video content.</li>
+        <li>Feed is hard-capped at 100 items with no pagination cursor.</li>
+        <li>Notification handling while backgrounded/terminated is a bare stub with no local-notifications fallback for data-only payloads.</li>
+        <li>Typing indicators are backend-only; never surfaced in any chat UI.</li>
+        <li>Chat has no message pagination beyond 100 and no media/image messages.</li>
+        <li>Video upload has no camera-capture option despite UI copy promising one, and no cancel/retry/connectivity pre-check.</li>
+        <li>"AI Invite Ranker" is a hardcoded heuristic, not AI — a labeling/honesty issue if referenced in marketing.</li>
+        <li>Gift-sending drops the user's actual gift/tier selection before handing off to the web checkout.</li>
+        <li>Create hub's "Multistream Setup" and "Live Commerce Setup" cards are mislabeled duplicates of Go Live.</li>
+        <li><code class="chip">livekit_client</code> is pinned to a single-patch-version range, a fragile dependency constraint on a core feature.</li>
+        <li>Analytics/telemetry is scattered across multiple ad hoc repositories with no shared event taxonomy; the dedicated <code class="chip">AnalyticsService</code> is unused.</li>
+        <li><code class="chip">liveSessions</code> Firestore rule lets any signed-in user edit another session's counters.</li>
+        <li>Video controller leak on fast-scroll past a mid-initialization controller (§7).</li>
+      </ol>
+
+      <h3><span class="badge low">Low</span></h3>
+      <ol>
+        <li>Creator Analytics screen shows only three static numbers, no trends or charts.</li>
+        <li>"Coming soon" stubs (Gift History, Creator Marketplace, Settings) are visually indistinguishable from working entries.</li>
+        <li>Dead code: <code class="chip">ChatSdkAdapter</code>, <code class="chip">MessageBubble</code>, <code class="chip">MonetisationService</code>, <code class="chip">WalletLauncherService</code>, <code class="chip">TranscodingService.triggerTranscoding</code>, unwired <code class="chip">ai_translation_service.dart</code>.</li>
+        <li>No confirm-password field on signup.</li>
+      </ol>
+    </section>
+
+    <!-- ============ 11. REFACTORS ============ -->
+    <section id="refactors">
+      <div class="section-head"><span class="section-num">11</span><h2>Recommended refactors</h2></div>
+      <ul>
+        <li><strong>Consolidate the video pipeline to one implementation.</strong> Delete <code class="chip">lib/core/video/*</code> and <code class="chip">lib/core/video_feed/*</code> outright after confirming zero references (this report already did that check), along with the duplicate repositories and unused services listed in §6. This is the single highest-value cleanup in the codebase — it's pure deletion, not a rewrite.</li>
+        <li><strong>Introduce a real environment layer.</strong> Move every hardcoded URL in §7 into <code class="chip">--dart-define</code>-backed config with dev/staging/prod flavors, so infrastructure can rotate without an app-store release.</li>
+        <li><strong>Standardize on <code class="chip">AppResult&lt;T&gt;</code> (or replace it with a typed alternative like <code class="chip">Either</code>/sealed-class result) and require every repository to return it.</strong> This is what makes the ad hoc <code class="chip">catch (_) {}</code> blocks in §6 fixable systematically instead of one at a time.</li>
+        <li><strong>Split the 81-provider <code class="chip">MultiProvider</code> into feature-scoped provider trees</strong>, injected at the hub/route level rather than the app root, so unrelated features stop sharing one global object graph and <code class="chip">app.dart</code> stops being the file every feature has to touch.</li>
+        <li><strong>Build one shared loading/empty/error state component</strong> and require every screen to use it, closing the consistency gap documented in §4.</li>
+        <li><strong>Build a real <code class="chip">WalletStatusScreen</code> / payment-return flow</strong> — app-link or deep-link back from the web checkout, with explicit success/failure UI, and route it properly.</li>
+      </ul>
+    </section>
+
+    <!-- ============ 12. SHORT TERM ============ -->
+    <section id="shortterm">
+      <div class="section-head"><span class="section-num">12</span><h2>Short-term action plan</h2></div>
+      <p class="section-dek">Roughly two sprints, ordered by dependency, not just severity.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Week</th><th>Work</th><th>Why first</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td>Wire Crashlytics/Sentry + global error boundary in <code class="mono">main.dart</code></td><td>Every other fix needs visibility into whether it actually worked in production</td></tr>
+            <tr><td class="num">1</td><td>Fix the Profile → Analytics route string; add sign-out button; audit every hardcoded route string against <code class="mono">router.dart</code></td><td>Both are one-line-scale fixes with outsized user-facing impact</td></tr>
+            <tr><td class="num">1</td><td>Add password reset flow; map Firebase Auth error codes to friendly copy</td><td>Blocks a real fraction of returning users today</td></tr>
+            <tr><td class="num">1-2</td><td>Wire Search and Live Discovery into the navigation (both backends already work)</td><td>Highest ratio of user value to engineering effort in this entire report</td></tr>
+            <tr><td class="num">2</td><td>Lock down the <code class="mono">gifts</code>, <code class="mono">videoStats</code>, and <code class="mono">referralEvents</code> Firestore rules; add server-side gift-amount validation against wallet balance</td><td>Direct monetary/fraud exposure</td></tr>
+            <tr><td class="num">2</td><td>Build the real <code class="mono">WalletStatusScreen</code> reconciliation flow</td><td>Every money flow in the app currently ends in silence</td></tr>
+            <tr><td class="num">2</td><td>Add retry to the feed error state; add a LiveKit connection-state listener with a basic reconnect/timeout banner</td><td>Turns two hard dead-ends into recoverable states</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 13. LONG TERM ============ -->
+    <section id="longterm">
+      <div class="section-head"><span class="section-num">13</span><h2>Long-term architecture recommendations</h2></div>
+      <ul>
+        <li><strong>Ship a release gate that checks navigation-graph reachability</strong> — a script that walks every registered route and every route constant referenced by <code class="chip">pushNamed</code> calls and fails CI if a route exists on one side but not the other. This is the concrete fix for the "build-then-forget-to-wire" pattern this report found repeating across two separate rebuilds of this app.</li>
+        <li><strong>Decide, deliberately, how much surface area this app should have before the next feature is started.</strong> Nine to ten product verticals (feed, live, wallet, monetisation, ads, affiliate, AI editor, YCIOS, contacts-growth) are each partially built. Finishing five completely will do more for launch readiness and user trust than adding a sixth vertical at the current depth.</li>
+        <li><strong>Invest in a real automated test suite</strong> starting with the money-touching and auth-touching code paths, before further feature work — four test files across this surface area is a structural risk, not a stylistic gap.</li>
+        <li><strong>Consider bringing payments in-app</strong> (WebView-embedded checkout at minimum, native SDK longer-term) rather than a bare external-browser handoff — the current architecture is workable for a beta but caps how good the payment UX can ever get without a reconciliation loop, which itself is nontrivial to build well against an external browser.</li>
+        <li><strong>Adopt one error-handling contract app-wide</strong> and enforce it via lint/review rather than convention, so the next feature doesn't reintroduce the nine-way-inconsistent pattern found in §6.</li>
+      </ul>
+    </section>
+
+    <!-- ============ 14. CHECKLIST ============ -->
+    <section id="checklist">
+      <div class="section-head"><span class="section-num">14</span><h2>Production readiness checklist</h2></div>
+      <p class="section-dek">Use as a literal go/no-go gate for the first real-user launch.</p>
+      <div class="checklist">
+        <div class="check-item"><div class="box"></div><div>User can sign out of the app from at least one reachable screen</div><span class="badge critical">Critical</span></div>
+        <div class="check-item"><div class="box"></div><div>Every route pushed by name in the app resolves to a registered route (automated check, not manual)</div><span class="badge critical">Critical</span></div>
+        <div class="check-item"><div class="box"></div><div>Crash reporting is wired and verified to receive a test crash from a release build</div><span class="badge critical">Critical</span></div>
+        <div class="check-item"><div class="box"></div><div>Password reset flow exists and has been tested end-to-end</div><span class="badge critical">Critical</span></div>
+        <div class="check-item"><div class="box"></div><div>Rewarded-ad reward crediting is backed by a real ad SDK with server-side completion verification</div><span class="badge critical">Critical</span></div>
+        <div class="check-item"><div class="box"></div><div>Firestore rules for <code class="mono">gifts</code>, <code class="mono">videoStats</code>, and <code class="mono">referralEvents</code> are re-scoped and reviewed by someone other than the author</div><span class="badge critical">Critical</span></div>
+        <div class="check-item"><div class="box"></div><div>At least one working confirmation/reconciliation screen exists for wallet top-up and payout</div><span class="badge critical">Critical</span></div>
+        <div class="check-item"><div class="box"></div><div>Production backend URLs are environment-configurable, not hardcoded in source</div><span class="badge critical">Critical</span></div>
+        <div class="check-item"><div class="box"></div><div>Search and Live Discovery are reachable from the main navigation</div><span class="badge high">High</span></div>
+        <div class="check-item"><div class="box"></div><div>Signup and login validate input client-side and never show a raw Firebase error string</div><span class="badge high">High</span></div>
+        <div class="check-item"><div class="box"></div><div>Live streaming detects and surfaces a connection drop instead of hanging silently</div><span class="badge high">High</span></div>
+        <div class="check-item"><div class="box"></div><div>Feed error state offers a retry action</div><span class="badge high">High</span></div>
+        <div class="check-item"><div class="box"></div><div>Core screens (feed, wallet, checkout, auth) have automated test coverage</div><span class="badge high">High</span></div>
+        <div class="check-item"><div class="box"></div><div>Feed, engagement rail, and video content have screen-reader-accessible labels</div><span class="badge high">High</span></div>
+        <div class="check-item"><div class="box"></div><div>Duplicate video-pipeline modules are deleted from the codebase</div><span class="badge medium">Medium</span></div>
+        <div class="check-item"><div class="box"></div><div>Every "coming soon" entry point is visually distinguishable from a working one</div><span class="badge medium">Medium</span></div>
+        <div class="check-item"><div class="box"></div><div>Mute control and double-tap-to-like are present on video playback</div><span class="badge medium">Medium</span></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer class="end">
+  Production readiness review of YohPal Live (apps/mobile_flutter, branch flutter_app) — static source audit, 2026-07-09. Every citation in this report references a specific file and line in the reviewed repository at the time of writing; re-verify line numbers against the current <code class="mono">HEAD</code> before treating them as exact after further commits.
+</footer>
+
+<script>
+  (function () {
+    var btn = document.getElementById('dlBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      try {
+        var doc = document.documentElement.cloneNode(true);
+        var dlBtnClone = doc.querySelector('#dlBtn');
+        if (dlBtnClone) dlBtnClone.remove();
+        var scriptClone = doc.querySelector('script');
+        if (scriptClone) scriptClone.remove();
+        var html = '<!DOCTYPE html>\n' + doc.outerHTML;
+        var blob = new Blob([html], { type: 'text/html' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'yohpal-production-readiness-review.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        var label = btn.querySelector('.dl-label');
+        var original = label ? label.textContent : '';
+        btn.classList.add('done');
+        if (label) label.textContent = 'Downloaded';
+        setTimeout(function () {
+          btn.classList.remove('done');
+          if (label) label.textContent = original;
+        }, 1800);
+      } catch (err) {
+        window.print();
+      }
+    });
+  })();
+</script>
+</body>
+</html>

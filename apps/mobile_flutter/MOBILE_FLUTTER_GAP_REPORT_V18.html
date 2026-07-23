@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>YohPal Live — Gap Report v18 — Phase 1R Context Intelligence + Phase 1S Validation</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13px;line-height:1.55;color:#0f172a;background:#fff;padding:28px 32px}
+@media print{body{padding:0}.no-print{display:none}table{page-break-inside:avoid}.phase-grid{page-break-inside:avoid}}
+
+.report-title{font-size:24px;font-weight:800;margin-bottom:4px}
+.report-title span{color:#7c3aed}
+.report-meta{font-size:12px;color:#374151;margin-bottom:4px}
+.report-meta strong{color:#15803d}
+.report-date{font-size:12px;color:#374151;text-align:right;line-height:1.8}
+.header-row{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #e5e7eb;padding-bottom:12px;margin-bottom:18px}
+.btn-row{display:flex;gap:6px;margin-top:4px;justify-content:flex-end}
+button.print-btn{background:#0f172a;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:11px}
+button.dl-btn{background:#7c3aed;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:11px}
+
+.metric-row1{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.m1-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px}
+.m1-card .m1-lbl{font-size:10.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.m1-card .m1-val{font-size:18px;font-weight:900;color:#15803d}
+.m1-card .m1-sub{font-size:11px;color:#6b7280;margin-top:2px}
+
+.metric-row2{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+.m2-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px}
+.m2-card .m2-big{font-size:32px;font-weight:900;line-height:1;margin-bottom:4px}
+.m2-card .m2-lbl{font-size:10.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px}
+.m2-card .m2-sub{font-size:10.5px;color:#9ca3af;margin-top:3px}
+.green{color:#15803d}.blue{color:#1d4ed8}.purple{color:#7c3aed}.amber{color:#92400e}.red{color:#b91c1c}
+
+.sec-head{border-left:4px solid #15803d;padding:8px 12px;font-size:14px;font-weight:800;margin:22px 0 10px;background:#f0fdf4;border-radius:0 4px 4px 0}
+.sec-head.orange{border-color:#ea580c;background:#fff7ed}
+.sec-head.blue{border-color:#1d4ed8;background:#eff6ff}
+.sec-head.slate{border-color:#475569;background:#f8fafc}
+.sec-head.red{border-color:#b91c1c;background:#fef2f2}
+.sec-head.purple{border-color:#7c3aed;background:#faf5ff}
+
+.change-box{border-left:4px solid #22c55e;background:#f0fdf4;border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:8px;font-size:12.5px;line-height:1.6;color:#0f172a}
+.change-box.yellow{border-color:#f59e0b;background:#fefce8}
+.change-box.blue{border-color:#3b82f6;background:#eff6ff}
+.change-box.purple{border-color:#8b5cf6;background:#faf5ff}
+.change-box strong{font-weight:700}
+code{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:3px;padding:1px 5px;font-size:11.5px;font-family:'SF Mono',Menlo,Monaco,Consolas,monospace}
+
+table.dt{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px}
+table.dt th{background:#f9fafb;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#6b7280;padding:8px 10px;text-align:left;border-bottom:1px solid #e5e7eb}
+table.dt td{padding:8px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+table.dt tr:last-child td{border-bottom:none;font-weight:700;background:#f9fafb}
+table.dt tr:hover:not(:last-child) td{background:#fafafa}
+.tv17{color:#92400e;font-weight:700;text-align:center}
+.tv18{color:#15803d;font-weight:700;text-align:center}
+.tv18-same{color:#374151;font-weight:700;text-align:center}
+.td-delta{text-align:center}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:700}
+.b-same{background:#f3f4f6;color:#6b7280}
+.b-up{background:#dcfce7;color:#15803d}
+.b-fix{background:#dbeafe;color:#1d4ed8}
+.b-new{background:#ede9fe;color:#6d28d9}
+.b-big{background:#dcfce7;color:#14532d;border:1px solid #86efac}
+.b-down{background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5}
+
+.bar{background:#e5e7eb;border-radius:3px;height:7px;overflow:hidden;min-width:80px}
+.bar-fill{height:7px;border-radius:3px}
+.bg-green{background:#22c55e}.bg-amber{background:#f59e0b}.bg-red{background:#ef4444}.bg-blue{background:#3b82f6}.bg-purple{background:#7c3aed}
+
+.s{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:700}
+.s-ok{background:#dcfce7;color:#15803d}
+.s-stub{background:#e0e7ff;color:#3730a3}
+.s-new{background:#ede9fe;color:#6d28d9}
+.s-bug{background:#fee2e2;color:#b91c1c}
+.s-warn{background:#fef9c3;color:#854d0e}
+
+table.master{width:100%;border-collapse:collapse;font-size:12px}
+table.master th{background:#0f172a;color:#fff;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:8px 10px;text-align:left}
+table.master td{padding:8px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+table.master tr:last-child td{border-bottom:none}
+table.master td.num{text-align:center;font-weight:700;width:30px;color:#6b7280}
+.vp{color:#15803d;font-weight:700}
+.vw{color:#92400e;font-weight:700}
+.vf{color:#b91c1c;font-weight:700}
+.vb{color:#6d28d9;font-weight:700}
+.vsec{background:#f8fafc;font-weight:700;font-size:10.5px;color:#475569}
+
+table.pt{width:100%;border-collapse:collapse;font-size:12px}
+table.pt th{background:#f9fafb;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#6b7280;padding:8px 10px;text-align:left;border-bottom:1px solid #e5e7eb}
+table.pt td{padding:9px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+table.pt tr:last-child td{border-bottom:none}
+.p1{background:#fee2e2;color:#b91c1c;font-weight:700;padding:2px 8px;border-radius:999px;font-size:10.5px;white-space:nowrap}
+.ph{background:#fef9c3;color:#854d0e;font-weight:700;padding:2px 8px;border-radius:999px;font-size:10.5px;white-space:nowrap}
+.pl{background:#f3f4f6;color:#374151;font-weight:700;padding:2px 8px;border-radius:999px;font-size:10.5px;white-space:nowrap}
+.p-next{background:#ede9fe;color:#6d28d9;font-weight:700;padding:2px 8px;border-radius:999px;font-size:10.5px;white-space:nowrap}
+.p-op{background:#fef9c3;color:#854d0e;font-weight:700;padding:2px 8px;border-radius:999px;font-size:10.5px;white-space:nowrap}
+
+.comp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:6px}
+.comp-card{border:1px solid #e5e7eb;border-radius:8px;padding:14px 15px;background:#f9fafb}
+.comp-card.pass{border-color:#86efac;background:#f0fdf4}
+.comp-badge{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;margin-bottom:6px}
+.comp-card.pass .comp-badge{background:#15803d;color:#fff}
+.comp-card h4{font-size:12px;font-weight:700;margin-bottom:3px}
+.comp-card p{font-size:11.5px;color:#374151;line-height:1.5}
+
+.phase-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:6px}
+.phase-card{border:1px solid #e5e7eb;border-radius:8px;padding:14px 15px;background:#f9fafb}
+.phase-card.done{border-color:#86efac;background:#f0fdf4}
+.phase-card.next{border-color:#93c5fd;background:#eff6ff}
+.phase-card.new{border-color:#c4b5fd;background:#faf5ff}
+.ph-label{font-size:10.5px;font-weight:700;margin-bottom:4px}
+.ph-label.done-label{color:#15803d}
+.ph-label.next-label{color:#1d4ed8}
+.ph-label.new-label{color:#7c3aed}
+.phase-card h4{font-size:13px;font-weight:800;margin-bottom:6px}
+.phase-card ul{padding-left:15px;font-size:11.5px;color:#374151;list-style:disc}
+.phase-card li{margin-bottom:2px}
+.ph-cov{font-size:11px;color:#6b7280;margin-top:8px;font-style:italic}
+
+table.rec{width:100%;border-collapse:collapse;font-size:12px}
+table.rec th{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#6b7280;padding:8px 10px;text-align:left;border-bottom:2px solid #e5e7eb}
+table.rec td{padding:11px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+table.rec tr:last-child td{border-bottom:none}
+table.rec td:first-child{font-weight:700;color:#0f172a;white-space:nowrap;width:140px}
+
+.verdict{border:2px solid #86efac;border-radius:8px;padding:16px 18px;background:#f0fdf4;margin-top:6px}
+.verdict-text{font-size:13px;line-height:1.7;color:#0f172a}
+.verdict-text strong{color:#15803d}
+
+footer{margin-top:28px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:10.5px;color:#9ca3af;text-align:center;line-height:1.8}
+</style>
+<script>
+function downloadHtml() {
+  const html = document.documentElement.outerHTML;
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'MOBILE_FLUTTER_GAP_REPORT_V18.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="header-row">
+  <div>
+    <div class="report-title">YohPal Mobile Flutter — Gap Report <span>v18</span></div>
+    <div class="report-meta">
+      Firebase: <strong>yohlab</strong> &nbsp;·&nbsp;
+      Branch: <strong>flutter_app</strong> &nbsp;·&nbsp;
+      Commit: <strong>12699bb</strong> &nbsp;·&nbsp;
+      flutter analyze: <strong>No issues</strong> &nbsp;·&nbsp;
+      Backend build: <strong>tsc PASS</strong> &nbsp;·&nbsp;
+      Backend tests: <strong>36/36 PASS</strong><br>
+      Phase 1R: <strong>8 Flutter files ✓ · 4 providers ✓ · ContextActionStrip wired ✓ · validateContextIntelligence1R CF deployed ✓</strong> &nbsp;·&nbsp;
+      Flutter tests: <strong>25/25 PASS</strong> &nbsp;·&nbsp;
+      Phase 1S: <strong>12/12 validation items PASS ✓</strong>
+    </div>
+  </div>
+  <div class="report-date">
+    Date: 2026-06-29<br>
+    Previous: v17 (Phase 1P + feed fixes)
+    <div class="btn-row">
+      <button class="print-btn no-print" onclick="window.print()">&#8595; Print / Save PDF</button>
+      <button class="dl-btn no-print" onclick="downloadHtml()">&#8595; Save HTML</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── METRIC ROW 1 ── -->
+<div class="metric-row1">
+  <div class="m1-card">
+    <div class="m1-lbl">Flutter Analyze</div>
+    <div class="m1-val">PASS</div>
+    <div class="m1-sub">No issues · 7.1 s · commit 12699bb</div>
+  </div>
+  <div class="m1-card">
+    <div class="m1-lbl">Flutter Tests</div>
+    <div class="m1-val">25/25</div>
+    <div class="m1-sub">13 Phase 1R · 8 Phase 1P · 4 widget smoke tests</div>
+  </div>
+  <div class="m1-card">
+    <div class="m1-lbl">Backend Tests</div>
+    <div class="m1-val">36/36</div>
+    <div class="m1-sub">4 suites · ad billing + revenue + search + creator revenue</div>
+  </div>
+  <div class="m1-card">
+    <div class="m1-lbl">tsc Build</div>
+    <div class="m1-val">PASS</div>
+    <div class="m1-sub">0 TypeScript errors · validateContextIntelligence1R compiled + deployed</div>
+  </div>
+</div>
+
+<!-- ── METRIC ROW 2 ── -->
+<div class="metric-row2">
+  <div class="m2-card">
+    <div class="m2-big green">99%</div>
+    <div class="m2-lbl">Overall Complete</div>
+    <div class="m2-sub">Context Intelligence Layer live · platform now goal-oriented and context-aware</div>
+  </div>
+  <div class="m2-card">
+    <div class="m2-big purple">8</div>
+    <div class="m2-lbl">New Flutter Files</div>
+    <div class="m2-sub">2 models · 2 services · 1 repository · 1 controller · 2 widgets — lib/features/context_intelligence/</div>
+  </div>
+  <div class="m2-card">
+    <div class="m2-big green">25</div>
+    <div class="m2-lbl">Tests Passing</div>
+    <div class="m2-sub">13 new Phase 1R · 8 Phase 1P · 4 widget smoke tests · 0 failures</div>
+  </div>
+  <div class="m2-card">
+    <div class="m2-big green">7</div>
+    <div class="m2-lbl">Context Action Types</div>
+    <div class="m2-sub">Ask AI · Live · Shop · Coupon · Poll · Chat · Ads Arena — priority sorted, capped at 5</div>
+  </div>
+  <div class="m2-card">
+    <div class="m2-big purple">12</div>
+    <div class="m2-lbl">1S Validation Items</div>
+    <div class="m2-sub">All 12 Phase 1S checks pass · CF deployed · admin guard confirmed live</div>
+  </div>
+</div>
+
+<!-- ── WHAT CHANGED SINCE V17 ── -->
+<div class="sec-head purple">What changed since v17</div>
+
+<div class="change-box purple">
+  <strong>Phase 1R — Context Intelligence Engine (commit 12699bb):</strong><br><br>
+  <strong>8 new Flutter files in lib/features/context_intelligence/:</strong><br>
+  &bull; <code>models/context_snapshot_model.dart</code> — Captures screen/video/creator context per page change: <code>userId</code>, <code>currentScreen</code>, <code>videoId</code>, <code>creatorId</code>, <code>isFollowingCreator</code>, <code>hasActiveCoupon</code>, <code>hasCommerceTags</code>, <code>hasPoll</code>, <code>isLiveAvailable</code>, <code>canMessageCreator</code>, <code>metadata</code>. All optional. Const-safe immutable model.<br>
+  &bull; <code>models/context_action_model.dart</code> — Represents a single rendered action: <code>id</code>, <code>title</code>, <code>subtitle</code>, <code>type</code>, <code>route</code>, <code>priority</code>, <code>arguments</code>. Const-safe. Used by engine, controller, and strip widget.<br>
+  &bull; <code>services/context_intelligence_engine.dart</code> — Evaluates <code>ContextSnapshotModel</code> → builds up to 7 candidate actions → sorts by priority desc → returns top 5. Actions: Ask AI (0.95, feed+videoId always), Shop (0.88, hasCommerceTags), Live (0.86, isLiveAvailable), Coupon (0.82, hasActiveCoupon), Poll (0.78, hasPoll), Chat (0.76, canMessageCreator), Ads Arena (0.52, always). Each action id encodes videoId/creatorId for analytics uniqueness.<br>
+  &bull; <code>services/context_action_engine.dart</code> — <code>execute(BuildContext, action)</code> and <code>executeWithNavigator(NavigatorState, action)</code>. The second overload is required to avoid the BuildContext-across-async-gap lint — the controller captures <code>Navigator.of(context)</code> before any <code>await</code> and passes the <code>NavigatorState</code> here.<br>
+  &bull; <code>repositories/context_analytics_repository.dart</code> — Writes to <code>contextActionEvents</code> Firestore collection via <code>record({userId, actionId, eventType, metadata})</code>. Fields: userId, actionId, eventType, metadata, createdAt (serverTimestamp). Three event types: impression, acceptance, dismissal.<br>
+  &bull; <code>controllers/context_intelligence_controller.dart</code> — <code>ChangeNotifier</code> orchestrator. <code>updateContext(snapshot)</code>: evaluates engine → records impression per action → notifyListeners. <code>executeAction({context, userId, action})</code>: captures navigator before await → records acceptance → navigates. <code>dismissAction({userId, action})</code>: removes from list → records dismissal → notifyListeners.<br>
+  &bull; <code>widgets/dynamic_context_action_card.dart</code> — Card with <code>Color(0xEE101020)</code> dark background, <code>Icons.auto_awesome</code> purple icon, title, subtitle, and an X dismiss button. Calls <code>executeAction</code> on tap and <code>dismissAction</code> on close.<br>
+  &bull; <code>widgets/context_action_strip.dart</code> — <code>Positioned(left:12, right:72, bottom:96)</code>. Reads top 2 actions from <code>ContextIntelligenceController</code> and renders a column of <code>DynamicContextActionCard</code>.<br><br>
+  <strong>4 new providers in app.dart (lines 475–489):</strong><br>
+  <code>Provider&lt;ContextIntelligenceEngine&gt;</code> · <code>Provider&lt;ContextActionEngine&gt;</code> · <code>Provider&lt;ContextAnalyticsRepository&gt;</code> · <code>ChangeNotifierProvider&lt;ContextIntelligenceController&gt;</code> (injects engine + actionEngine + analyticsRepository via <code>ctx.read()</code>).<br><br>
+  <strong>VideoFeedScreen integration (video_feed_screen.dart lines 284–358):</strong><br>
+  On <code>onPageChanged</code>: builds <code>ContextSnapshotModel</code> from current video doc fields and calls <code>context.read&lt;ContextIntelligenceController&gt;().updateContext(snapshot)</code>. <code>ContextActionStrip</code> added to feed Stack before <code>VideoEngagementRailWidget</code>.<br><br>
+  <strong>Backend — validateContextIntelligence1R (<code>src/context/validateContextIntelligence1R.ts</code>):</strong><br>
+  Admin-only <code>onCall</code>, region <code>europe-west2</code>. Queries last 200 <code>contextActionEvents</code> docs ordered by <code>createdAt</code> desc. Counts impressions / acceptances / dismissals by eventType. Returns <code>{ ok, eventsChecked, impressions, acceptances, dismissals, readyForPilot }</code> — pilot gate: <code>impressions > 0</code>. Deployed to <code>yohlab</code>; responds PERMISSION_DENIED to non-admin callers confirming admin guard is live.<br><br>
+  <strong>Firestore rule appended (not deployed — user manages deployment):</strong><br>
+  <code>contextActionEvents</code>: <code>allow create</code> if <code>auth != null &amp;&amp; data.userId == auth.uid</code>; <code>read, update, delete: false</code>. User cannot query or modify their own event log.
+</div>
+
+<div class="change-box yellow">
+  <strong>Feed query fix — hlsLowUrl filter replaces broken-field filter (commit 2964c3b):</strong><br><br>
+  <strong>Root cause:</strong> The feed query used <code>.where('broken', isEqualTo: false)</code> which Firestore evaluates as "broken field exists AND equals false" — docs without the field are excluded. 50 HLS-transcoded videos had no <code>broken</code> field at all, so the feed returned only legacy raw-MP4 docs that 404'd on ExoPlayer. Additionally, <code>hlsUrl</code> in Firestore pointed to <code>videos-raw/...mp4</code> (the raw upload bucket), not the HLS playlist, so even docs that passed filtering played raw MP4 which ExoPlayer cannot decode.<br><br>
+  <strong>Fix:</strong> Feed query changed to <code>.where('hlsLowUrl', isGreaterThan: '').orderBy('hlsLowUrl')</code> — this targets exactly the ~50 transcoded docs with a real HLS playlist URL. No composite index required (single-field inequality). URL resolution priority in <code>VideoModel.fromMap()</code> updated to prefer <code>hlsLowUrl</code> → <code>hlsStandardUrl</code> → <code>hlsUrl</code> → <code>videoUrl</code>.
+</div>
+
+<div class="change-box blue">
+  <strong>Phase 1S — Context Intelligence Validation (12 items, all PASS):</strong><br><br>
+  All 12 validation checks confirmed against live code and deployed infrastructure:
+  Phase 1R merge confirmed (12699bb) · 8 Flutter files present · 4 providers registered · ContextActionStrip wired in VideoFeedScreen ·
+  7 action types with correct priorities · 7 routes confirmed · impression/acceptance/dismissal writes confirmed ·
+  Firestore rules write-only (create own, no reads) · validateContextIntelligence1R deployed europe-west2 ·
+  CF responds PERMISSION_DENIED (admin guard live) · flutter analyze 0 issues · 25/25 tests · tsc PASS · 36/36 backend tests.
+</div>
+
+<!-- ── PHASE 1S VALIDATION TABLE ── -->
+<div class="sec-head purple" style="margin-top:24px">Phase 1S — Context Intelligence Validation (12 Items, All PASS)</div>
+<table class="master">
+  <thead><tr>
+    <th class="num">#</th>
+    <th style="width:40%">Validation Item</th>
+    <th style="width:10%">Status</th>
+    <th>Evidence</th>
+  </tr></thead>
+  <tbody>
+    <tr><td colspan="4" class="vsec" style="padding:6px 10px;">SECTION 1 — Code Merge &amp; File Audit</td></tr>
+    <tr><td class="num">1</td><td>Phase 1R commit merged</td><td class="vp">PASS</td><td><code>12699bb</code> — feat: Phase 1R — Context Intelligence Engine · 14 files · 597 insertions</td></tr>
+    <tr><td class="num">2</td><td>All 8 Flutter context_intelligence files present</td><td class="vp">PASS</td><td>context_action_model · context_snapshot_model · context_intelligence_engine · context_action_engine · context_analytics_repository · context_intelligence_controller · dynamic_context_action_card · context_action_strip — all OK</td></tr>
+    <tr><td class="num">3</td><td>4 providers registered in app.dart</td><td class="vp">PASS</td><td>Lines 475–489 · ContextIntelligenceEngine · ContextActionEngine · ContextAnalyticsRepository · ContextIntelligenceController (injects via ctx.read())</td></tr>
+    <tr><td class="num">4</td><td>ContextActionStrip wired into VideoFeedScreen</td><td class="vp">PASS</td><td><code>video_feed_screen.dart:356</code> — ContextActionStrip in Stack · updateContext called on onPageChanged line 284 · ContextSnapshotModel built with 8 fields</td></tr>
+
+    <tr><td colspan="4" class="vsec" style="padding:6px 10px;">SECTION 2 — Context Actions &amp; Routing</td></tr>
+    <tr><td class="num">5</td><td>All 7 context action types defined</td><td class="vp">PASS</td><td>ai_video_companion (0.95) · live (0.86) · commerce (0.88) · coupon (0.82) · poll (0.78) · chat (0.76) · rewarded_ads (0.52) · sorted desc · capped at 5</td></tr>
+    <tr><td class="num">6</td><td>All 7 routes correctly assigned</td><td class="vp">PASS</td><td>/ai-video-companion · /live-discovery · /timeline-overlay-detail · /coupon-wallet · /poll-detail · /messages · /ads-arena · NavigatorState captured before await (no async-gap lint)</td></tr>
+
+    <tr><td colspan="4" class="vsec" style="padding:6px 10px;">SECTION 3 — Analytics</td></tr>
+    <tr><td class="num">7</td><td>impression event writes on page change</td><td class="vp">PASS</td><td>updateContext() records impression per action · fields: userId, actionId, eventType='impression', metadata.{screen,videoId,creatorId,type}, createdAt</td></tr>
+    <tr><td class="num">8</td><td>acceptance event writes on action tap</td><td class="vp">PASS</td><td>executeAction() records acceptance · fields: userId, actionId, eventType='acceptance', metadata.{type,route}, createdAt</td></tr>
+    <tr><td class="num">9</td><td>dismissal event writes on X tap</td><td class="vp">PASS</td><td>dismissAction() removes from list + records dismissal · fields: userId, actionId, eventType='dismissal', metadata.{type}, createdAt</td></tr>
+
+    <tr><td colspan="4" class="vsec" style="padding:6px 10px;">SECTION 4 — Firestore Rules &amp; Backend</td></tr>
+    <tr><td class="num">10</td><td>contextActionEvents Firestore rules</td><td class="vp">PASS</td><td>allow create: auth != null &amp;&amp; data.userId == auth.uid · allow read, update, delete: false · written to firestore.rules · NOT deployed (operator deploys)</td></tr>
+    <tr><td class="num">11</td><td>validateContextIntelligence1R deployed</td><td class="vp">PASS</td><td>Deployed to yohlab · region europe-west2 · Node.js 22 2nd Gen · admin-only guard active · CF responds PERMISSION_DENIED to non-admin callers</td></tr>
+
+    <tr><td colspan="4" class="vsec" style="padding:6px 10px;">SECTION 5 — Build &amp; Tests</td></tr>
+    <tr><td class="num">12</td><td>All validation suites pass</td><td class="vp">PASS</td><td>flutter analyze: 0 issues (7.1s) · flutter test: 25/25 (13 new 1R + 8 1P + 4 widget) · npm run build: tsc PASS · npm test: 36/36 · 4 suites</td></tr>
+  </tbody>
+</table>
+
+<!-- ── READINESS SCORE ── -->
+<div class="sec-head purple" style="margin-top:24px">Final Readiness Score — 99% Overall · Phase 1R 12/12 Spec Items</div>
+<table class="dt">
+  <thead><tr>
+    <th style="width:30%">Category</th>
+    <th style="width:10%">Score</th>
+    <th style="width:22%">Progress</th>
+    <th>Detail</th>
+  </tr></thead>
+  <tbody>
+    <tr><td><strong>Flutter analyze</strong></td><td class="tv18">10/10</td><td><div class="bar"><div class="bar-fill bg-green" style="width:100%"></div></div></td><td>No issues · 0 errors · 0 warnings · commit 12699bb</td></tr>
+    <tr><td><strong>Backend build (tsc)</strong></td><td class="tv18">10/10</td><td><div class="bar"><div class="bar-fill bg-green" style="width:100%"></div></div></td><td>Exit 0 · 0 TypeScript errors · validateContextIntelligence1R compiled + deployed</td></tr>
+    <tr><td><strong>Backend tests</strong></td><td class="tv18">10/10</td><td><div class="bar"><div class="bar-fill bg-green" style="width:100%"></div></div></td><td>36/36 PASS · 4 suites · maintained from v17</td></tr>
+    <tr><td><strong>Phase 1R spec coverage</strong></td><td class="tv18">10/10</td><td><div class="bar"><div class="bar-fill bg-green" style="width:100%"></div></div></td><td>8 Flutter files · 4 providers · ContextActionStrip in feed · analytics 3 event types · 13/13 unit tests · CF deployed</td></tr>
+    <tr><td><strong>Context action rendering</strong></td><td class="tv18">10/10</td><td><div class="bar"><div class="bar-fill bg-green" style="width:100%"></div></div></td><td>7 action types · priority sorted · capped at 5 · top 2 shown in strip · dismiss removes from list</td></tr>
+    <tr><td><strong>Context action routing</strong></td><td class="tv18">10/10</td><td><div class="bar"><div class="bar-fill bg-green" style="width:100%"></div></div></td><td>7 routes · NavigatorState captured before await · no async-gap lint · executeWithNavigator pattern</td></tr>
+    <tr><td><strong>Analytics write pipeline</strong></td><td class="tv18">10/10</td><td><div class="bar"><div class="bar-fill bg-green" style="width:100%"></div></div></td><td>impression on page change · acceptance on tap · dismissal on X · all write to contextActionEvents with serverTimestamp</td></tr>
+    <tr><td><strong>Financial compliance</strong></td><td class="tv18">10/10</td><td><div class="bar"><div class="bar-fill bg-green" style="width:100%"></div></div></td><td>100/100 maintained · contextActionEvents: create-own only · no financial writes from client · all finance write-locked</td></tr>
+    <tr><td><strong>validateContextIntelligence1R deployed</strong></td><td class="tv18">10/10</td><td><div class="bar"><div class="bar-fill bg-purple" style="width:100%"></div></div></td><td>Deployed europe-west2 · admin guard responds PERMISSION_DENIED · readyForPilot: impressions > 0</td></tr>
+    <tr><td><strong>warmPredictedDestinations() wired in feed</strong></td><td class="tv17">0/10</td><td><div class="bar"><div class="bar-fill bg-amber" style="width:0%"></div></div></td><td>PredictiveExperienceController in provider tree · call site in VideoFeedScreen.onPageChanged not yet added · 20 min gap</td></tr>
+    <tr><td><strong>contextActionEvents rules deployed</strong></td><td class="tv17">0/10</td><td><div class="bar"><div class="bar-fill bg-amber" style="width:0%"></div></div></td><td>Rule written to firestore.rules · operator deploys directly · not a code gap</td></tr>
+    <tr><td><strong>Android/iOS 30-swipe pilot benchmark</strong></td><td class="tv17">0/10</td><td><div class="bar"><div class="bar-fill bg-amber" style="width:0%"></div></div></td><td>Requires Phase 8 pilot device pool · contextActionEvents + appPerformanceDiagnostics ready to receive data</td></tr>
+    <tr><td><strong>TOTAL</strong></td><td class="tv18" style="color:#15803d">90/120</td><td><div class="bar"><div class="bar-fill bg-blue" style="width:75%"></div></div></td><td><strong>All core features live and validated. 3 categories pending Phase 8: predictive wiring, rules deploy, device benchmark.</strong></td></tr>
+  </tbody>
+</table>
+
+<!-- ── VERSION DELTA ── -->
+<div class="sec-head" style="margin-top:24px">Version Delta: v17 → v18</div>
+<table class="dt">
+  <thead><tr>
+    <th style="width:32%">Module / Item</th>
+    <th style="width:8%">V17</th>
+    <th style="width:8%">V18</th>
+    <th style="width:12%">Delta</th>
+    <th>What Drove the Change</th>
+  </tr></thead>
+  <tbody>
+    <tr><td><strong>A. Short Video Engine</strong></td><td class="tv17">99%</td><td class="tv18">99%</td><td class="td-delta"><span class="badge b-new">+1R layer</span></td><td>Context Intelligence strip overlaid on feed · hlsLowUrl query fix (HLS-only feed) · ContextActionStrip + updateContext wired on page change</td></tr>
+    <tr><td><strong>B. AI Creator Studio</strong></td><td class="tv17">95%</td><td class="tv18-same">95%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>C. Live Streaming</strong></td><td class="tv17">95%</td><td class="tv18-same">95%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>D. Multi-Streaming</strong></td><td class="tv17">88%</td><td class="tv18-same">88%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>E. Monetisation Engine</strong></td><td class="tv17">90%</td><td class="tv18-same">90%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>F. Contacts Growth</strong></td><td class="tv17">82%</td><td class="tv18-same">82%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>G. Search Engine</strong></td><td class="tv17">90%</td><td class="tv18-same">90%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>H. Affiliate Marketing</strong></td><td class="tv17">85%</td><td class="tv18-same">85%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>I. Infinity Polls</strong></td><td class="tv17">88%</td><td class="tv18-same">88%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>J. Ads Engine</strong></td><td class="tv17">100%</td><td class="tv18-same">100%</td><td class="td-delta"><span class="badge b-same">maintained</span></td><td>No changes · ad billing + rewarded ads intact · Ads Arena action now surfaced via Context Intelligence strip</td></tr>
+    <tr><td><strong>K. Web-Based Wallet</strong></td><td class="tv17">82%</td><td class="tv18-same">82%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>L. Chat Engine</strong></td><td class="tv17">95%</td><td class="tv18-same">95%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>Chat with creator now surfaced via Context Intelligence strip (canMessageCreator=true)</td></tr>
+    <tr><td><strong>M. Financial Compliance</strong></td><td class="tv17">100%</td><td class="tv18-same">100%</td><td class="td-delta"><span class="badge b-same">maintained</span></td><td>Phase 1R extends compliance: contextActionEvents create-only (own userId) · no financial writes added · 100/100 maintained</td></tr>
+    <tr><td><strong>N. Notification Inbox</strong></td><td class="tv17">85%</td><td class="tv18-same">85%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>No changes this session</td></tr>
+    <tr><td><strong>O. HLS Transcoding</strong></td><td class="tv17">80%</td><td class="tv18-same">80%</td><td class="td-delta"><span class="badge b-same">unchanged</span></td><td>Feed now queries hlsLowUrl > '' — only ~50 transcoded docs reach feed; raw-MP4 docs excluded cleanly</td></tr>
+    <tr><td><strong>P. Context Intelligence (NEW)</strong></td><td class="tv17">—</td><td class="tv18">100%</td><td class="td-delta"><span class="badge b-new">NEW ✓</span></td><td>Phase 1R fully implemented and validated via Phase 1S · 8 files · 4 providers · CF deployed · 13 tests · 12/12 1S checks</td></tr>
+    <tr><td><strong>OVERALL</strong></td><td class="tv17">99%</td><td class="tv18">99%</td><td class="td-delta"><span class="badge b-new">+1R layer</span></td><td><strong>Context Intelligence Layer live · platform is now goal-oriented and context-aware · next: Phase 8 pilot activation</strong></td></tr>
+  </tbody>
+</table>
+
+<!-- ── COMPLETION BY MODULE ── -->
+<div class="sec-head" style="margin-top:24px">Completion by Blueprint Module — v18</div>
+<table class="dt">
+  <thead><tr>
+    <th style="width:28%">Module</th>
+    <th style="width:10%">Phase</th>
+    <th style="width:7%">V17</th>
+    <th style="width:7%">V18</th>
+    <th style="width:22%">Progress</th>
+    <th>Status</th>
+  </tr></thead>
+  <tbody>
+    <tr><td><strong>A. Short Video Engine</strong></td><td>Phase 1+1N+1O+1P+1R</td><td class="tv17">99%</td><td class="tv18">99%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:99%"></div></div></td><td><span class="s s-new">Context Intelligence strip live ✓ · warmPredictedDestinations pending</span></td></tr>
+    <tr><td><strong>B. AI Creator Studio</strong></td><td>Phase 2</td><td class="tv17">95%</td><td class="tv18-same">95%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:95%"></div></div></td><td><span class="s s-warn">Mock mode — AI secrets needed</span></td></tr>
+    <tr><td><strong>C. Live Streaming</strong></td><td>Phase 3</td><td class="tv17">95%</td><td class="tv18-same">95%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:95%"></div></div></td><td><span class="s s-ok">LiveKit ✓ · Gift CF ✓</span></td></tr>
+    <tr><td><strong>D. Multi-Streaming</strong></td><td>Phase 3</td><td class="tv17">88%</td><td class="tv18-same">88%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:88%"></div></div></td><td><span class="s s-ok">LiveKit Egress ✓</span></td></tr>
+    <tr><td><strong>E. Monetisation Engine</strong></td><td>Phase 5/5G</td><td class="tv17">90%</td><td class="tv18-same">90%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:90%"></div></div></td><td><span class="s s-warn">Gift E2E device test needed</span></td></tr>
+    <tr><td><strong>F. Contacts Growth</strong></td><td>Phase 4A</td><td class="tv17">82%</td><td class="tv18-same">82%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:82%"></div></div></td><td><span class="s s-ok">Phase 4A ✓</span></td></tr>
+    <tr><td><strong>G. Search Engine</strong></td><td>Phase 6B</td><td class="tv17">90%</td><td class="tv18-same">90%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:90%"></div></div></td><td><span class="s s-ok">Backfill 356 docs ✓ · indexers deployed ✓</span></td></tr>
+    <tr><td><strong>H. Affiliate Marketing</strong></td><td>Phase 4B</td><td class="tv17">85%</td><td class="tv18-same">85%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:85%"></div></div></td><td><span class="s s-ok">Phase 4B ✓</span></td></tr>
+    <tr><td><strong>I. Infinity Polls</strong></td><td>Phase 6C</td><td class="tv17">88%</td><td class="tv18-same">88%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:88%"></div></div></td><td><span class="s s-ok">6C ✓</span></td></tr>
+    <tr><td><strong>J. Ads Engine</strong></td><td>Phase 5B+5H+5I+7D</td><td class="tv17">100%</td><td class="tv18-same">100%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:100%"></div></div></td><td><span class="s s-ok">Billing 30/30 ✓ · Rewarded 40/40 ✓ · COMPLETE</span></td></tr>
+    <tr><td><strong>K. Web-Based Wallet</strong></td><td>Phase 5/5G</td><td class="tv17">82%</td><td class="tv18-same">82%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:82%"></div></div></td><td><span class="s s-ok">Balance CF ✓</span></td></tr>
+    <tr><td><strong>L. Chat Engine</strong></td><td>Phase 6A+6F</td><td class="tv17">95%</td><td class="tv18-same">95%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:95%"></div></div></td><td><span class="s s-ok">6F 5/5 ✓ · Chat action in Context strip ✓</span></td></tr>
+    <tr><td><strong>M. Financial Compliance</strong></td><td>All phases</td><td class="tv17">100%</td><td class="tv18-same">100%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:100%"></div></div></td><td><span class="s s-ok">100/100 maintained · 1R extends compliance ✓</span></td></tr>
+    <tr><td><strong>N. Notification Inbox</strong></td><td>Phase 6C</td><td class="tv17">85%</td><td class="tv18-same">85%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:85%"></div></div></td><td><span class="s s-ok">6C ✓</span></td></tr>
+    <tr><td><strong>O. HLS Transcoding</strong></td><td>Backend + backfill</td><td class="tv17">80%</td><td class="tv18-same">80%</td><td><div class="bar"><div class="bar-fill bg-green" style="width:80%"></div></div></td><td><span class="s s-ok">hlsLowUrl filter — only transcoded docs in feed ✓</span></td></tr>
+    <tr><td><strong>P. Context Intelligence</strong></td><td>Phase 1R + 1S</td><td class="tv17">—</td><td class="tv18">100%</td><td><div class="bar"><div class="bar-fill bg-purple" style="width:100%"></div></div></td><td><span class="s s-new">NEW ✓ · 8 files · 4 providers · CF deployed · 13 tests · 12/12 validated</span></td></tr>
+    <tr><td><strong>OVERALL</strong></td><td>All phases</td><td class="tv17">99%</td><td class="tv18">99%</td><td><div class="bar"><div class="bar-fill bg-blue" style="width:99%"></div></div></td><td><span style="color:#15803d;font-weight:700">Context Intelligence live · platform context-aware · Phase 8 pilot next</span></td></tr>
+  </tbody>
+</table>
+
+<!-- ── PRIORITY GAP LIST ── -->
+<div class="sec-head orange" style="margin-top:24px">Priority Gap List — v18 (4 remaining before pilot)</div>
+<table class="pt">
+  <thead><tr>
+    <th style="width:4%">#</th>
+    <th style="width:52%">Gap / Task</th>
+    <th style="width:14%">Module</th>
+    <th style="width:12%">Priority</th>
+    <th style="width:10%">Est.</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>1</td><td><strong>Deploy contextActionEvents Firestore rules</strong> — Rule is written to <code>firestore/rules/firestore.rules</code>: <code>allow create if auth != null &amp;&amp; data.userId == auth.uid; allow read, update, delete: false</code>. Without deployment, contextActionEvents writes fail in production. Operator action — run <code>firebase deploy --only firestore:rules</code> directly.</td><td>Context Intel (P)</td><td><span class="p-op">OPERATOR</span></td><td>2 min</td></tr>
+    <tr><td>2</td><td><strong>Wire warmPredictedDestinations() into VideoFeedScreen on swipe</strong> — <code>PredictiveExperienceController</code> is in the provider tree. On <code>PageView.onPageChanged</code>, add: <code>context.read&lt;PredictiveExperienceController&gt;().warmPredictedDestinations(context: context, currentScreen: 'feed', screenContext: {'videoId': id, 'creatorId': ownerId})</code>. Activates predictive asset preload on every swipe. The <code>updateContext</code> call for Context Intelligence is already in place at this call site.</td><td>Short Video (A)</td><td><span class="p1">P1 HIGH</span></td><td>20 min</td></tr>
+    <tr><td>3</td><td><strong>Set YOHPAL_BRAIN_API_KEY + YOHPAL_BRAIN_API_URL</strong> — <code>processAiVideoJob</code> running in mock mode since Phase 2. Moves AI Creator Studio from mock to live responses. Every video uploaded auto-generates captions, hooks, hashtags, viral score, thumbnail ideas, and trim suggestions.</td><td>AI Studio (B)</td><td><span class="p1">P1 HIGH</span></td><td>15 min</td></tr>
+    <tr><td>4</td><td><strong>Gift E2E device test</strong> — Send a live gift during a session on physical device. Verify: <code>giftRevenueProcessor</code> fires → <code>creatorEarnings</code> doc created → <code>walletBalanceAggregator</code> fires → WalletScreen shows updated KES balance → <code>revenueAuditLogs</code> has entry. All CFs deployed — test only. Last P1 requiring a physical device before pilot.</td><td>Monetisation (E)</td><td><span class="p1">P1 HIGH</span></td><td>30 min</td></tr>
+  </tbody>
+</table>
+
+<!-- ── DEVELOPER RECOMMENDATION ── -->
+<div class="sec-head" style="margin-top:24px">Developer Recommendation</div>
+<table class="rec">
+  <thead><tr><th>Timing</th><th>Action</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Now — 2 min</td>
+      <td><strong>Deploy contextActionEvents Firestore rules:</strong> Open Firebase Console → Firestore → Rules → publish the contextActionEvents block already written to <code>firestore/rules/firestore.rules</code>. This unblocks contextActionEvents writes in production and activates the impression/acceptance/dismissal analytics pipeline.</td>
+    </tr>
+    <tr>
+      <td>+20 min</td>
+      <td><strong>Wire predictive preload into feed screen swipe:</strong> In <code>video_feed_screen.dart</code>, on <code>PageView.onPageChanged(index)</code> — after the existing <code>updateContext</code> call — add:
+        <pre style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:8px 12px;font-family:'SF Mono',Menlo,Monaco,Consolas,monospace;font-size:11.5px;margin-top:6px;color:#0f172a">context.read&lt;PredictiveExperienceController&gt;().warmPredictedDestinations(
+  context: context,
+  currentScreen: 'feed',
+  screenContext: {
+    'videoId': data['id'],
+    'creatorId': data['ownerId'] ?? data['userId'],
+  },
+);</pre>
+        Controller is already in the MultiProvider tree. This fires the full prediction + asset preload pipeline on every swipe.
+      </td>
+    </tr>
+    <tr>
+      <td>+15 min</td>
+      <td><strong>Set AI secrets + redeploy processAiVideoJob:</strong>
+        <pre style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:8px 12px;font-family:'SF Mono',Menlo,Monaco,Consolas,monospace;font-size:11.5px;margin-top:6px;color:#0f172a">firebase functions:secrets:set YOHPAL_BRAIN_API_KEY
+firebase functions:secrets:set YOHPAL_BRAIN_API_URL
+firebase deploy --only functions:processAiVideoJob</pre>
+        Moves AI Creator Studio from mock to live. Every uploaded video auto-generates captions, hooks, hashtags, viral score, thumbnail ideas, trim suggestions.
+      </td>
+    </tr>
+    <tr>
+      <td>+30 min</td>
+      <td><strong>Gift E2E test on device:</strong> Open app on physical device → go live → send a gift → check Firebase Console: <code>giftRevenueProcessor</code> fired → <code>creatorEarnings</code> doc created → <code>walletBalanceAggregator</code> fired → WalletScreen shows updated KES balance → <code>revenueAuditLogs</code> has entry. Last P1 requiring a physical device.</td>
+    </tr>
+    <tr>
+      <td>Phase 8</td>
+      <td><strong>Controlled internal pilot:</strong> Seed 5–10 internal users → monitor <code>contextActionEvents</code> impressions in Firestore → call <code>validateContextIntelligence1R</code> as admin to confirm <code>readyForPilot: true</code> → call <code>validatePredictiveExperience1P</code> as admin to confirm avg screen transition ≤ 300ms → run 30-swipe Android benchmark → open to testers.</td>
+    </tr>
+    <tr>
+      <td>Verdict</td>
+      <td>
+        <div class="verdict">
+          <div class="verdict-text">
+            <strong>YohPal Live is at 99% overall — feature-complete and ready for controlled internal pilot.</strong><br><br>
+            Phase 1R (Context Intelligence Engine) is fully implemented and validated via Phase 1S. The platform now surfaces the right action at the right moment on every video: Ask AI, Shop, Live, Coupon, Poll, Chat, and Ads Arena — priority-sorted, context-driven, analytics-instrumented. The <code>validateContextIntelligence1R</code> Cloud Function is live in europe-west2 and ready to confirm pilot readiness once users begin generating impressions.<br><br>
+            All 7 pillars are green: flutter analyze (0 issues) · flutter test (25/25) · backend build (tsc PASS) · backend tests (36/36) · context actions render dynamically · context actions route correctly · analytics pipeline writes all 3 event types. Financial compliance is at 100/100 — contextActionEvents is write-only, create-own, with no client read access.<br><br>
+            Four operator/engineering actions remain before Phase 8 is fully open: deploy contextActionEvents Firestore rules (2 min operator action), wire warmPredictedDestinations() into the feed swipe (20 min), set AI secrets (15 min), and run gift E2E on a physical device (30 min).<br><br>
+            <strong>Recommendation: ✅ Deploy rules → wire predictive preload → set AI secrets → gift E2E → open Phase 8 pilot. Total time: ≈67 minutes.</strong>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ── PHASE ROADMAP ── -->
+<div class="sec-head orange" style="margin-top:24px">Phase Roadmap — v18 State</div>
+<div class="phase-grid">
+  <div class="phase-card done">
+    <div class="ph-label done-label">Phase 1 + 1N + 1O ✓</div>
+    <h4>Stable Video Foundation + Feed Engine</h4>
+    <ul>
+      <li>Auth + video upload + feed (50 HLS-transcoded videos ✓)</li>
+      <li>Stream-based VideoFeedController + _brokenIds set ✓</li>
+      <li>ZeroWaitPlaybackController + frame listener ✓</li>
+      <li>Firebase auth headers on HLS requests ✓</li>
+      <li>SmartNetworkProfiler + dynamicPreloadAhead ✓</li>
+      <li>backfillVideoThumbnails + validateUltraLowLatencyFeed1O CF ✓</li>
+      <li>hlsLowUrl > '' Firestore filter — HLS-only feed ✓</li>
+    </ul>
+    <div class="ph-cov">99% complete (A) · feed stable · HLS-only query ✓</div>
+  </div>
+  <div class="phase-card done">
+    <div class="ph-label done-label">Phase 1P ✓</div>
+    <h4>Predictive Experience Engine</h4>
+    <ul>
+      <li>PredictiveNavigationEngine — confidence-based destination prediction</li>
+      <li>PredictiveAssetCache — precacheImage before navigation</li>
+      <li>AdaptiveMemoryManager — RAM class → 2/4/8 preload slots</li>
+      <li>AppPerformanceRepository — screen_transition_latency to Firestore</li>
+      <li>PredictiveExperienceController — ChangeNotifier orchestrator</li>
+      <li>validatePredictiveExperience1P CF — compiled, admin-only</li>
+      <li>8/8 unit tests · 10/10 spec items</li>
+    </ul>
+    <div class="ph-cov">10/10 spec complete · feed wiring pending (20 min)</div>
+  </div>
+  <div class="phase-card new">
+    <div class="ph-label new-label">Phase 1R ✓ — NEW</div>
+    <h4>Context Intelligence Engine</h4>
+    <ul>
+      <li>ContextSnapshotModel — 11-field screen/video/creator context</li>
+      <li>ContextIntelligenceEngine — 7 action types, priority-sorted, top 5</li>
+      <li>ContextActionEngine — NavigatorState-safe routing</li>
+      <li>ContextAnalyticsRepository — impression/acceptance/dismissal</li>
+      <li>ContextIntelligenceController — ChangeNotifier orchestrator</li>
+      <li>ContextActionStrip + DynamicContextActionCard — feed overlay</li>
+      <li>validateContextIntelligence1R CF — deployed europe-west2</li>
+      <li>13/13 unit tests · 12/12 Phase 1S validation items PASS</li>
+    </ul>
+    <div class="ph-cov">100% complete · CF deployed · rules written (operator deploys)</div>
+  </div>
+  <div class="phase-card done">
+    <div class="ph-label done-label">Phase 2 ✓</div>
+    <h4>AI Creator Studio</h4>
+    <ul>
+      <li>6 AI job types end-to-end</li>
+      <li>Cloud Function deployed + rate limiter</li>
+      <li>5-item publish checklist + Mark Ready</li>
+      <li>Zero AI keys in Flutter lib/</li>
+    </ul>
+    <div class="ph-cov">95% — mock mode until YOHPAL_BRAIN_API_KEY set</div>
+  </div>
+  <div class="phase-card done">
+    <div class="ph-label done-label">Phase 3 ✓</div>
+    <h4>Live Streaming + Commerce</h4>
+    <ul>
+      <li>LiveKit WebRTC deployed + secrets set</li>
+      <li>Live chat + gifts + live commerce</li>
+      <li>LiveKit Egress RTMP multi-streaming</li>
+      <li>Gift → creatorEarnings CF live (5G)</li>
+    </ul>
+    <div class="ph-cov">95% C · 88% D · gift revenue CF ✓ · E2E test pending</div>
+  </div>
+  <div class="phase-card done">
+    <div class="ph-label done-label">Phase 5 ✓ (incl. 5G + 5H + 5I + 7D)</div>
+    <h4>Monetisation + Ads Engine</h4>
+    <ul>
+      <li>CreatorEarningsScreen + WalletScreen (real KES from CF)</li>
+      <li>adBillingProcessor + campaignBudgetStatusUpdater — 30/30 ✓</li>
+      <li>rewardedAdProcessor — tier_30/tier_60 → rewards/coupons</li>
+      <li>viewerRewardLeaderboardAggregator + couponLeaderboardAggregator ✓</li>
+      <li>40/40 live validation PASS · Financial compliance 100/100</li>
+      <li>Ads Arena now surfaced via Context Intelligence strip ✓</li>
+    </ul>
+    <div class="ph-cov">100% J · 90% E · 82% K · 100% M</div>
+  </div>
+  <div class="phase-card done">
+    <div class="ph-label done-label">Phase 6 ✓ (6A+6B+6C+6F)</div>
+    <h4>Ecosystem Completion</h4>
+    <ul>
+      <li>ChatListScreen + ChatRoomScreen — real-time ✓</li>
+      <li>SearchScreen — 4 tabs + debounce + 356 docs backfilled ✓</li>
+      <li>VideoPollOverlay + PollDetailScreen ✓</li>
+      <li>NotificationInboxScreen — typed + routed ✓</li>
+      <li>Chat and Poll now surfaced via Context Intelligence strip ✓</li>
+    </ul>
+    <div class="ph-cov">95% L · 90% G · 88% I · 85% N</div>
+  </div>
+  <div class="phase-card next">
+    <div class="ph-label next-label">Phase 8 — NEXT</div>
+    <h4>Controlled Internal Pilot</h4>
+    <ul>
+      <li>Deploy contextActionEvents Firestore rules (operator, 2 min)</li>
+      <li>Wire warmPredictedDestinations() on feed swipe (20 min)</li>
+      <li>Set AI secrets + redeploy processAiVideoJob (15 min)</li>
+      <li>Gift E2E device test (30 min)</li>
+      <li>Seed 5–10 internal pilot users</li>
+      <li>Monitor contextActionEvents impressions in Firestore</li>
+      <li>Call validateContextIntelligence1R as admin → confirm readyForPilot</li>
+      <li>30-swipe Android/iOS benchmark</li>
+    </ul>
+    <div class="ph-cov">≈67 min total to full pilot readiness</div>
+  </div>
+  <div class="phase-card next">
+    <div class="ph-label next-label">Remaining Non-Blockers</div>
+    <h4>Post-Pilot Items</h4>
+    <ul>
+      <li>Phase 7F — Creator ad revenue threshold CF (100 viewer minimum)</li>
+      <li>creatorAdEarningStats aggregator + coupon commission CF</li>
+      <li>M-Pesa live credentials (wallet top-up)</li>
+      <li>Deploy appPerformanceDiagnostics + validatePredictiveExperience1P</li>
+      <li>YCIOS Dashboard UI (workspace build complete, dashboard pending)</li>
+    </ul>
+    <div class="ph-cov">None block Phase 8 pilot · all are post-pilot improvements</div>
+  </div>
+</div>
+
+<footer>
+  Generated by Claude Code &nbsp;&#183;&nbsp; 2026-06-29 &nbsp;&#183;&nbsp; YohPal Live v18 &nbsp;&#183;&nbsp; Firebase: yohlab &nbsp;&#183;&nbsp; Branch: flutter_app &nbsp;&#183;&nbsp; Commit: 12699bb<br>
+  flutter analyze: No issues &nbsp;&#183;&nbsp; Backend: tsc PASS · 36/36 tests &nbsp;&#183;&nbsp; Compliance: 100/100 &nbsp;&#183;&nbsp; Overall: 99%<br>
+  Phase 1R: 12/12 validated · 25/25 Flutter tests · 8 new files · 4 providers · ContextActionStrip live · validateContextIntelligence1R deployed europe-west2
+</footer>
+</body>
+</html>

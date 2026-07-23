@@ -1,0 +1,213 @@
+--- PAGE 1 ---
+Daniel Macharia <danielmacharia43@gmail.com>
+YOHPAL LIVE STREAMING PHASE LS-1 — Client Stabilization Sprint
+Daniel Macharia <danielmacharia43@gmail.com> Mon, 6 Jul at 19:35
+To: <daniel@ics.ac.ke>
+Below is the LS-1 Client Stabilization Code Patch Pack, built from the live-streaming audit showing 4 blocking issues still open and the
+module not ready for integration/testing.
+YOHPAL LIVE STREAMING PHASE LS-1 — Client Stabilization Sprint
+1. Create
+modules/live-streaming/flutter/pubspec.yaml
+name: yohpal_live_streaming
+description: YohPal Live Streaming Flutter client module.
+version: 1.0.0
+publish_to: "none"
+environment:
+sdk: ">=3.4.0 <4.0.0"
+flutter: ">=3.22.0"
+dependencies:
+flutter:
+sdk: flutter
+flutter_webrtc: ^0.12.12+hotfix.1
+web_socket_channel: ^3.0.1
+json_annotation: ^4.9.0
+collection: ^1.18.0
+meta: ^1.15.0
+dev_dependencies:
+flutter_test:
+sdk: flutter
+flutter_lints: ^5.0.0
+2. Fix Peer Factory recursion
+flutter/lib/src/rtc/yohpal_peer_factory.dart
+import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+class YohPalPeerFactory {
+static Future<rtc.RTCPeerConnection> buildPeerConnection({
+Map<String, dynamic>? configuration,
+}) {
+return rtc.createPeerConnection(
+configuration ??
+{
+'iceServers': [
+{'urls': 'stun:stun.l.google.com:19302'},
+],
+'sdpSemantics': 'unified-plan',
+},
+);
+}
+}
+Update callers:
+final peerConnection = await YohPalPeerFactory.buildPeerConnection();
+3. Add DTLS client fingerprint extraction helper
+flutter/lib/src/rtc/yohpal_dtls_helper.dart
+class YohPalDtlsHelper {
+static Map<String, dynamic> extractDtlsParametersFromSdp(String sdp) {
+final fingerprintLine = sdp
+
+--- PAGE 2 ---
+.split('\n')
+.map((line) => line.trim())
+.firstWhere(
+(line) => line.startsWith('a=fingerprint:'),
+orElse: () => '',
+);
+if (fingerprintLine.isEmpty) {
+throw StateError('Client DTLS fingerprint not found in SDP.');
+}
+final parts = fingerprintLine.replaceFirst('a=fingerprint:', '').split(' ');
+if (parts.length < 2) {
+throw StateError('Invalid DTLS fingerprint line: $fingerprintLine');
+}
+return {
+'role': 'auto',
+'fingerprints': [
+{
+'algorithm': parts[0],
+'value': parts.sublist(1).join(' '),
+}
+],
+};
+}
+}
+4. Fix broadcaster DTLS connect flow
+In
+yohpal_broadcaster_controller.dart
+Replace echoing server DTLS params with:
+import '../rtc/yohpal_dtls_helper.dart';
+final offer = await _peerConnection!.createOffer();
+await _peerConnection!.setLocalDescription(offer);
+final clientDtlsParameters =
+YohPalDtlsHelper.extractDtlsParametersFromSdp(offer.sdp ?? '');
+await _signalingClient.request('connectTransport', {
+'transportId': transport.id,
+'dtlsParameters': clientDtlsParameters,
+});
+5. Fix viewer DTLS connect flow
+In
+yohpal_viewer_controller.dart
+Use the same pattern:
+import '../rtc/yohpal_dtls_helper.dart';
+final offer = await _peerConnection!.createOffer();
+await _peerConnection!.setLocalDescription(offer);
+final clientDtlsParameters =
+YohPalDtlsHelper.extractDtlsParametersFromSdp(offer.sdp ?? '');
+await _signalingClient.request('connectTransport', {
+'transportId': transport.id,
+'dtlsParameters': clientDtlsParameters,
+});
+6. Add signaling timeout
+flutter/lib/src/signaling/yohpal_signaling_client.dart
+Future<Map<String, dynamic>> request(
+String method,
+Map<String, dynamic> params, {
+Duration timeout = const Duration(seconds: 10),
+
+--- PAGE 3 ---
+}) {
+final id = _nextRequestId++;
+final completer = Completer<Map<String, dynamic>>();
+_pending[id] = completer;
+_channel.sink.add(jsonEncode({
+'id': id,
+'method': method,
+'params': params,
+}));
+return completer.future.timeout(
+timeout,
+onTimeout: () {
+_pending.remove(id);
+throw TimeoutException(
+'Signaling request timed out: $method',
+timeout,
+);
+},
+);
+}
+7. Replace deprecated
+withOpacity
+Replace all:
+color.withOpacity(0.2)
+with:
+color.withValues(alpha: 0.2)
+Affected files from the audit:
+yohpal_live_theme.dart
+yohpal_status_pill.dart
+yohpal_streaming_home_screen.dart
+yohpal_error_panel.dart
+yohpal_live_action_button.dart
+8. Wire remote media attacher
+In viewer consume flow
+import '../rtc/yohpal_remote_media_attacher.dart';
+final remoteRenderer = RTCVideoRenderer();
+await remoteRenderer.initialize();
+_peerConnection!.onTrack = (RTCTrackEvent event) async {
+if (event.track.kind == 'video') {
+await YohPalRemoteMediaAttacher.attachTrack(
+renderer: remoteRenderer,
+track: event.track,
+streams: event.streams,
+);
+}
+};
+Expected utility signature:
+class YohPalRemoteMediaAttacher {
+static Future<void> attachTrack({
+required RTCVideoRenderer renderer,
+required MediaStreamTrack track,
+required List<MediaStream> streams,
+}) async {
+if (streams.isNotEmpty) {
+renderer.srcObject = streams.first;
+return;
+}
+final stream = await createLocalMediaStream('remote-stream');
+await stream.addTrack(track);
+renderer.srcObject = stream;
+}
+}
+
+--- PAGE 4 ---
+9. Certification Commands
+cd modules/live-streaming/flutter
+flutter pub get
+flutter analyze
+flutter test
+Then run:
+cd ../server/mediasoup
+npm test
+10. Required Validation
+Test Required Result
+Standalone Flutter module build PASS
+Peer connection creation No recursion
+DTLS handshake PASS
+Broadcaster media publish PASS
+Viewer media receive PASS
+Signaling timeout Request fails gracefully after 10s
+Android stream PASS
+iPhone stream PASS
+30-minute stream PASS
+Multi-viewer test PASS
+Next Smart Move
+Execute: YOHPAL LIVE STREAMING PHASE LS-2 — STREAMING VALIDATION REPORT
+Developers must return:
+1. Git branch
+2. Commit hash
+3. flutter pub get output
+4. flutter analyze output
+5. flutter test output
+6. DTLS handshake proof
+7. Broadcaster-to-viewer media flow proof
+8. Android streaming proof
+9. iPhone streaming proof
+10. 30-minute stream stability result
+Outcome:
+Management receives evidence that the Live Streaming client is no longer blocking integration into YohPal Live.

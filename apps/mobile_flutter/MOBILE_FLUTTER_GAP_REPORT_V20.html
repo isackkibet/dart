@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YOHPAL · Gap Report V20</title>
+
+<style>
+/* ── Screen tokens ───────────────────────────────── */
+:root {
+  --bg:            #080C18;
+  --surface:       #0F1525;
+  --surface-2:     #172035;
+  --surface-3:     #1E2B44;
+  --brand:         #6C3FF7;
+  --brand-dim:     rgba(108,63,247,0.12);
+  --brand-border:  rgba(108,63,247,0.28);
+  --text:          #C8D5EE;
+  --text-muted:    #5A6A88;
+  --border:        rgba(255,255,255,0.055);
+  --border-s2:     rgba(255,255,255,0.09);
+  --patched:       #27AE60;
+  --patched-bg:    rgba(39,174,96,0.09);
+  --patched-bdr:   rgba(39,174,96,0.25);
+  --pending:       #F5A623;
+  --pending-bg:    rgba(245,166,35,0.09);
+  --pending-bdr:   rgba(245,166,35,0.22);
+  --critical:      #E74C3C;
+  --high:          #F39C12;
+  --mono: 'SF Mono','Cascadia Code',Menlo,monospace;
+}
+
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page { max-width: 980px; margin: 0 auto; padding: 0 28px 96px; }
+
+/* ── Header ─────────────────────────────────────── */
+.report-header {
+  padding: 52px 0 36px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+
+.doc-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--brand); margin-bottom: 16px;
+}
+.doc-eyebrow::before {
+  content: '';
+  display: block; width: 24px; height: 2px;
+  background: var(--brand);
+}
+
+.report-title {
+  font-size: clamp(28px, 5vw, 46px);
+  font-weight: 800; letter-spacing: -0.035em;
+  line-height: 1.06; color: #E0EBFF;
+  text-wrap: balance; margin-bottom: 6px;
+}
+.report-version {
+  font-size: clamp(28px, 5vw, 46px);
+  font-weight: 800; letter-spacing: -0.035em;
+  color: var(--brand);
+}
+
+.report-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; }
+
+.header-meta { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.meta-item { display: flex; flex-direction: column; gap: 2px; }
+.meta-label { font-size: 9.5px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: var(--text-muted); }
+.meta-value { font-size: 12.5px; color: var(--text); font-variant-numeric: tabular-nums; }
+.meta-divider { width: 1px; height: 26px; background: var(--border-s2); flex-shrink: 0; }
+
+.pdf-btn {
+  margin-left: auto;
+  background: var(--brand); color: #fff;
+  border: none; border-radius: 6px;
+  padding: 9px 18px;
+  font-size: 12.5px; font-weight: 600;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+  transition: opacity 0.15s;
+}
+.pdf-btn:hover { opacity: 0.82; }
+.pdf-btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+
+/* ── Scorecard ───────────────────────────────────── */
+.scorecard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 1px; background: var(--border-s2);
+  border: 1px solid var(--border-s2);
+  border-radius: 8px; overflow: hidden;
+  margin-bottom: 48px;
+}
+.score-cell {
+  background: var(--surface);
+  padding: 20px 22px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.score-num {
+  font-size: 30px; font-weight: 800;
+  line-height: 1; letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.score-num.c-patched  { color: var(--patched); }
+.score-num.c-pending  { color: var(--pending); }
+.score-num.c-critical { color: var(--critical); }
+.score-num.c-muted    { color: var(--text-muted); }
+.score-label { font-size: 10.5px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+
+/* ── Section ─────────────────────────────────────── */
+.section { margin-bottom: 44px; }
+.section-header {
+  display: flex; align-items: baseline; gap: 12px;
+  margin-bottom: 14px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.section-label {
+  font-size: 10px; font-weight: 800;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--brand);
+}
+.section-title {
+  font-size: 15.5px; font-weight: 700;
+  color: #DDE8FF; letter-spacing: -0.01em;
+}
+
+/* ── Delta table ─────────────────────────────────── */
+.table-wrap { overflow-x: auto; border-radius: 7px; border: 1px solid var(--border-s2); }
+table { width: 100%; border-collapse: collapse; min-width: 600px; }
+thead th {
+  background: var(--surface-2);
+  padding: 9px 14px;
+  font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.11em; text-transform: uppercase;
+  color: var(--text-muted); text-align: left;
+  border-bottom: 1px solid var(--border-s2);
+}
+tbody tr { border-bottom: 1px solid var(--border); }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,0.018); }
+td { padding: 12px 14px; font-size: 13px; vertical-align: top; line-height: 1.5; }
+
+.row-critical td:first-child { border-left: 3px solid var(--critical); }
+.row-high     td:first-child { border-left: 3px solid var(--high); }
+.row-design   td:first-child { border-left: 3px solid var(--text-muted); }
+td:first-child { padding-left: 11px; }
+
+.sev { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.sev-critical { color: var(--critical); }
+.sev-high     { color: var(--high); }
+.sev-design   { color: var(--text-muted); }
+
+.finding-name { font-weight: 600; color: var(--text); display: block; margin-bottom: 2px; }
+.finding-desc { font-size: 12px; color: var(--text-muted); }
+
+/* Status pills */
+.pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 4px;
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  white-space: nowrap;
+}
+.pill-missing  { background: rgba(231,76,60,0.1); color: var(--critical); border: 1px solid rgba(231,76,60,0.22); }
+.pill-missing::before { content: '✕'; font-size: 8px; }
+.pill-patched  { background: var(--patched-bg); color: var(--patched); border: 1px solid var(--patched-bdr); }
+.pill-patched::before { content: '✓'; font-size: 9px; }
+.pill-pending  { background: var(--pending-bg); color: var(--pending); border: 1px solid var(--pending-bdr); }
+.pill-pending::before { content: '○'; font-size: 8px; }
+.pill-design   { background: rgba(90,106,136,0.15); color: var(--text-muted); border: 1px solid rgba(90,106,136,0.25); }
+
+/* Gates */
+.gates { display: flex; flex-direction: column; gap: 10px; }
+.gate-row {
+  display: flex; align-items: flex-start; gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border-s2);
+  border-radius: 7px; padding: 14px 16px;
+}
+.gate-num { font-size: 11px; font-weight: 800; color: var(--brand); min-width: 18px; flex-shrink: 0; font-variant-numeric: tabular-nums; padding-top: 1px; }
+.gate-body { display: flex; flex-direction: column; gap: 2px; }
+.gate-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.gate-detail { font-size: 12px; color: var(--text-muted); }
+.gate-detail code { font-family: var(--mono); font-size: 11px; background: var(--surface-3); border-radius: 3px; padding: 1px 5px; color: #A8C2EE; }
+
+/* Verdict */
+.verdict { border: 1px solid var(--border-s2); border-radius: 8px; overflow: hidden; margin-top: 48px; }
+.verdict-bar { background: var(--patched-bg); border-bottom: 1px solid var(--patched-bdr); padding: 14px 20px; display: flex; align-items: center; gap: 11px; }
+.verdict-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--patched); flex-shrink: 0; box-shadow: 0 0 7px rgba(39,174,96,0.5); }
+.verdict-text { font-size: 12px; font-weight: 800; color: var(--patched); letter-spacing: 0.06em; text-transform: uppercase; }
+.verdict-body { background: var(--surface); padding: 18px 20px; font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+.verdict-body strong { color: var(--text); font-weight: 600; }
+
+/* ── Print / PDF ─────────────────────────────────── */
+@media print {
+  :root {
+    --bg: #fff; --surface: #f8f9fc; --surface-2: #eef1f7; --surface-3: #e4e8f2;
+    --brand: #4a28c4; --text: #0d1629; --text-muted: #4a5878;
+    --border: rgba(0,0,0,0.1); --border-s2: rgba(0,0,0,0.13);
+    --patched: #1a8a4a; --patched-bg: rgba(26,138,74,0.07); --patched-bdr: rgba(26,138,74,0.25);
+    --pending: #b07010; --pending-bg: rgba(176,112,16,0.07); --pending-bdr: rgba(176,112,16,0.25);
+    --critical: #c0392b; --high: #c47208;
+  }
+  body { font-size: 12px; }
+  .page { padding: 0 0 40px; max-width: 100%; }
+  .pdf-btn { display: none !important; }
+  .report-header { padding: 24px 0 20px; }
+  .scorecard, .section, .gate-row, .verdict { break-inside: avoid; }
+  tbody tr:hover { background: transparent; }
+  .pill, .score-cell, .verdict-bar, .gate-row, .doc-eyebrow::before,
+  thead th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  thead th { background: var(--surface-2) !important; }
+}
+
+@media (max-width: 600px) {
+  .header-meta { gap: 14px; }
+  .pdf-btn { margin-left: 0; width: 100%; justify-content: center; }
+  .scorecard { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="report-header">
+    <div class="doc-eyebrow">Mobile Flutter · Gap Report</div>
+    <h1 class="report-title">YOHPAL Gap Report&nbsp;<span class="report-version">V20</span></h1>
+    <p class="report-subtitle">Post Phase 9B — updated finding status after Final Stabilization Patch Pack</p>
+    <div class="header-meta">
+      <div class="meta-item">
+        <span class="meta-label">Date</span>
+        <span class="meta-value">2026-07-03</span>
+      </div>
+      <div class="meta-divider"></div>
+      <div class="meta-item">
+        <span class="meta-label">Previous Baseline</span>
+        <span class="meta-value">Gap Report V19</span>
+      </div>
+      <div class="meta-divider"></div>
+      <div class="meta-item">
+        <span class="meta-label">Changes Since V19</span>
+        <span class="meta-value">Phase 9B patches applied</span>
+      </div>
+      <div class="meta-divider"></div>
+      <div class="meta-item">
+        <span class="meta-label">Code Blockers</span>
+        <span class="meta-value">0 Critical · 0 High</span>
+      </div>
+      <button class="pdf-btn" onclick="window.print()">&#8659;&nbsp; Download PDF</button>
+    </div>
+  </header>
+
+  <div class="scorecard">
+    <div class="score-cell"><span class="score-num c-patched">5</span><span class="score-label">Findings Patched</span></div>
+    <div class="score-cell"><span class="score-num c-critical">0</span><span class="score-label">Critical Open</span></div>
+    <div class="score-cell"><span class="score-num c-muted">0</span><span class="score-label">High Open</span></div>
+    <div class="score-cell"><span class="score-num c-pending">1</span><span class="score-label">Pending (secrets)</span></div>
+    <div class="score-cell"><span class="score-num c-pending">5</span><span class="score-label">Gates Remaining</span></div>
+  </div>
+
+  <section class="section">
+    <div class="section-header">
+      <span class="section-label">Findings</span>
+      <h2 class="section-title">V19 &rarr; V20 Status Delta</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:90px">Severity</th>
+            <th style="width:36%">Finding</th>
+            <th style="width:115px">V19 Status</th>
+            <th>V20 Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-critical">
+            <td><span class="sev sev-critical">Critical</span></td>
+            <td>
+              <span class="finding-name">Zero-Wait adaptive playback missing</span>
+              <span class="finding-desc">warmVideoAdaptive, preloadAroundAdaptive, SmartNetworkProfiler, AdaptiveVideoUrlResolver — all absent</span>
+            </td>
+            <td><span class="pill pill-missing">Missing</span></td>
+            <td><span class="pill pill-patched">Patched</span> &mdash; P1 applied; awaiting device benchmark</td>
+          </tr>
+          <tr class="row-critical">
+            <td><span class="sev sev-critical">Critical</span></td>
+            <td>
+              <span class="finding-name">_preloadAround() fetching auth token on every swipe</span>
+              <span class="finding-desc">Acquired Firebase ID token per swipe; used non-adaptive URL-list approach</span>
+            </td>
+            <td><span class="pill pill-missing">Missing</span></td>
+            <td><span class="pill pill-patched">Patched</span> &mdash; P2 applied; token fetch removed; adaptive index-based preload active</td>
+          </tr>
+          <tr class="row-high">
+            <td><span class="sev sev-high">High</span></td>
+            <td>
+              <span class="finding-name">Follow button state never toggles</span>
+              <span class="finding-desc">currentlyFollowing hardcoded false; no stream on watchIsFollowing()</span>
+            </td>
+            <td><span class="pill pill-missing">Missing</span></td>
+            <td><span class="pill pill-patched">Patched</span> &mdash; P3 applied; StreamBuilder on FollowRepository.watchIsFollowing() wired</td>
+          </tr>
+          <tr class="row-high">
+            <td><span class="sev sev-high">High</span></td>
+            <td>
+              <span class="finding-name">Following feed always empty</span>
+              <span class="finding-desc">followingFeed() queried followerIds arrayContains on video docs &mdash; field never written</span>
+            </td>
+            <td><span class="pill pill-missing">Missing</span></td>
+            <td><span class="pill pill-patched">Patched</span> &mdash; P4 applied; two-step /follows/ collection query with real-time stream</td>
+          </tr>
+          <tr class="row-high">
+            <td><span class="sev sev-high">High</span></td>
+            <td>
+              <span class="finding-name">YCIOS workspace PERMISSION_DENIED</span>
+              <span class="finding-desc">watchProjectAssets() missing creatorId filter; Firestore rule requires ownership check</span>
+            </td>
+            <td><span class="pill pill-missing">Missing</span></td>
+            <td><span class="pill pill-patched">Patched</span> &mdash; P5 + P6 applied; creatorId filter added; index updated; deploy pending</td>
+          </tr>
+          <tr class="row-design">
+            <td><span class="sev sev-design">By Design</span></td>
+            <td>
+              <span class="finding-name">AI Studio Mark Ready button locked</span>
+              <span class="finding-desc">YOHPAL_BRAIN_API_KEY and YOHPAL_BRAIN_API_URL not configured in Firebase Secret Manager</span>
+            </td>
+            <td><span class="pill pill-design">By Design</span></td>
+            <td><span class="pill pill-pending">Pending</span> &mdash; secrets must be configured; all 5 AI tasks must complete before button unlocks</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <span class="section-label">Gates</span>
+      <h2 class="section-title">What Still Blocks Production</h2>
+    </div>
+    <div class="gates">
+      <div class="gate-row">
+        <span class="gate-num">1</span>
+        <div class="gate-body">
+          <span class="gate-title">Deploy Firestore index</span>
+          <span class="gate-detail">Run <code>firebase deploy --only firestore:indexes</code> to activate the new <code>yciosAssets</code> composite index (creatorId + projectId + createdAt). Without this the YCIOS fix in P5 will still throw an index-missing error at runtime.</span>
+        </div>
+      </div>
+      <div class="gate-row">
+        <span class="gate-num">2</span>
+        <div class="gate-body">
+          <span class="gate-title">Device benchmarks &mdash; Android &amp; iPhone</span>
+          <span class="gate-detail">50-swipe test on each platform confirming no black frames, no startup jank, and adaptive quality switching observable in device logs. Screenshots required for Phase 9C sign-off.</span>
+        </div>
+      </div>
+      <div class="gate-row">
+        <span class="gate-num">3</span>
+        <div class="gate-body">
+          <span class="gate-title">Configure AI Studio secrets</span>
+          <span class="gate-detail">Add <code>YOHPAL_BRAIN_API_KEY</code> and <code>YOHPAL_BRAIN_API_URL</code> to Firebase Secret Manager. Re-deploy Cloud Functions. Verify all five AI tasks (Captions, Hooks, Hashtags, Viral Score, Thumbnail) return real output and the Mark Ready button unlocks.</span>
+        </div>
+      </div>
+      <div class="gate-row">
+        <span class="gate-num">4</span>
+        <div class="gate-body">
+          <span class="gate-title">Build certification</span>
+          <span class="gate-detail">Zero issues from <code>flutter analyze</code>, passing <code>flutter test</code>, clean <code>npm run build</code> and <code>npm test</code> on the backend. Output must be attached to the Phase 9C report before sign-off.</span>
+        </div>
+      </div>
+      <div class="gate-row">
+        <span class="gate-num">5</span>
+        <div class="gate-body">
+          <span class="gate-title">Phase 9C multi-lead sign-off</span>
+          <span class="gate-detail">Flutter Lead, Backend Lead, Firebase Lead, QA Lead, DevOps Lead, Product Owner, and Executive Sponsor must all sign the Phase 9C Validation Report before controlled production rollout is approved.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="verdict">
+    <div class="verdict-bar">
+      <div class="verdict-dot"></div>
+      <span class="verdict-text">V20 Verdict &mdash; Code Clean &middot; Infrastructure Pending</span>
+    </div>
+    <div class="verdict-body">
+      All <strong>2 Critical</strong> and <strong>3 High</strong> findings from Gap Report V19 are resolved at the code level as of 2026-07-03. The local codebase contains no outstanding code-level blockers. The remaining gates are entirely operational: one Firestore index deployment, device benchmarks, AI Studio secrets configuration, build certification, and the Phase 9C multi-lead sign-off. None of these require further code changes. <strong>Controlled production rollout may proceed once all five gates are closed.</strong>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
